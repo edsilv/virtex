@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>relic: test</title>
+
+    <script src="js/jquery.js"></script>
+
+    <style>
+        body {
+            font-family: Monospace;
+            color: #fff;
+            margin: 0px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading {
+            position: absolute;
+            width: 200px;
+            height: 10px;
+            border: 1px solid grey;
+        }
+
+        .loading .bar {
+            height: 10px;
+            background-color: #fff;
+        }
+
+        canvas {
+            background: #252424;
+            background: -moz-radial-gradient(center, ellipse cover,  #252424 0%, #171717 85%);
+            background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#252424), color-stop(85%,#171717));
+            background: -webkit-radial-gradient(center, ellipse cover,  #252424 0%,#171717 85%);
+            background: -o-radial-gradient(center, ellipse cover,  #252424 0%,#171717 85%);
+            background: -ms-radial-gradient(center, ellipse cover,  #252424 0%,#171717 85%);
+            background: radial-gradient(ellipse at center,  #252424 0%,#171717 85%);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <div class="loading">
+        <div class="bar"></div>
+    </div>
+
+    <script src="js/three.min.js"></script>
+    <script src="js/stats.min.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="scene.js"></script>
+
+</body>
+</html>
