@@ -1,8 +1,8 @@
-var container, stats;
+var $container, $loading, stats;
 
-var camera, scene, renderer;
+var showStats = true;
 
-var group, text;
+var camera, scene, renderer, group, viewportHalfX, viewportHalfY;
 
 var targetRotationX = 0;
 var targetRotationOnMouseDownX = 0;
@@ -15,9 +15,6 @@ var mouseXOnMouseDown = 0;
 
 var mouseY = 0;
 var mouseYOnMouseDown = 0;
-
-var windowHalfX = window.innerWidth / 2;
-var windowHalfY = window.innerHeight / 2;
 
 var scale = 1;
 var zoomSpeed = 1;
@@ -47,9 +44,9 @@ var objects = {
         shininess: 1,
         shading: THREE.SmoothShading
     },
-    nellis2: {
-        model: 'models/nellis2.json',
-        texture: 'images/nellis2.jpg',
+    ecorche: {
+        model: 'models/ecorche.json',
+        texture: 'images/ecorche.jpg',
         cameraX: 0,
         cameraY: 0,
         cameraZ: 4.5,
@@ -69,22 +66,26 @@ var objects = {
     }
 };
 
-var currentObject = objects.nellis2;
+var currentObject = objects.ecorche;
 
 init();
-animate();
+resize();
+draw();
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+    //if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+    $container = $('#container');
+    $loading = $('#loading');
+
+    camera = new THREE.PerspectiveCamera(45, $container.width() / $container.height(), 0.1, 10000);
 
     camera.position.x = currentObject.cameraX;
     camera.position.y = currentObject.cameraY;
     camera.position.z = currentObject.cameraZ;
 
     scene = new THREE.Scene();
-
-    //scene.fog = new THREE.FogExp2(0xefd1b5, 0.05);
 
     var light1 = new THREE.DirectionalLight(currentObject.directionalLight1Color, currentObject.directionalLight1Intensity);
     light1.position.set(1, 1, 1);
@@ -94,21 +95,22 @@ function init() {
     light2.position.set(-1, -1, -1);
     scene.add(light2);
 
-    var light3 = new THREE.AmbientLight(currentObject.ambientLightColor);
-    scene.add(light3);
+    var ambientLight = new THREE.AmbientLight(currentObject.ambientLightColor);
+    scene.add(ambientLight);
 
     group = new THREE.Object3D();
 
     renderer = Detector.webgl? new THREE.WebGLRenderer({ antialias: true, alpha: true }): new THREE.CanvasRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize($container.width(), $container.height());
 
-    container = document.getElementById('container');
-    container.appendChild(renderer.domElement);
+    $container.append(renderer.domElement);
 
-    stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    container.appendChild(stats.domElement);
+    if (showStats) {
+        stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.top = '0px';
+        $container.append(stats.domElement);
+    }
 
     document.addEventListener('mousedown', onDocumentMouseDown, false);
     document.addEventListener('touchstart', onDocumentTouchStart, false);
@@ -116,7 +118,11 @@ function init() {
     document.addEventListener('mousewheel', onMouseWheel, false);
     document.addEventListener('DOMMouseScroll', onMouseWheel, false); // firefox
 
-    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('resize', resize, false);
+
+    THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
+        console.log(item, loaded, total);
+    };
 
     var texture = THREE.ImageUtils.loadTexture(currentObject.texture, {}, function(){
             textureLoaded(texture);
@@ -148,14 +154,22 @@ function modelLoaded(geometry) {
     group.rotateZ(currentObject.rotateZ);
 }
 
-function onWindowResize() {
-    windowHalfX = window.innerWidth / 2;
-    windowHalfY = window.innerHeight / 2;
+function resize() {
+    $container.width(800);
+    $container.height(600);
 
-    camera.aspect = window.innerWidth / window.innerHeight;
+    viewportHalfX = $container.width() / 2;
+    viewportHalfY = $container.height() / 2;
+
+    camera.aspect = $container.width() / $container.height();
     camera.updateProjectionMatrix();
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize($container.width(), $container.height());
+
+    $loading.css({
+        left: (viewportHalfX) - ($loading.width() / 2),
+        top: (viewportHalfY) - ($loading.height() / 2)
+    });
 }
 
 function onDocumentMouseDown(event) {
@@ -165,16 +179,16 @@ function onDocumentMouseDown(event) {
     document.addEventListener('mouseup', onDocumentMouseUp, false);
     document.addEventListener('mouseout', onDocumentMouseOut, false);
 
-    mouseXOnMouseDown = event.clientX - windowHalfX;
+    mouseXOnMouseDown = event.clientX - viewportHalfX;
     targetRotationOnMouseDownX = targetRotationX;
 
-    mouseYOnMouseDown = event.clientY - windowHalfY;
+    mouseYOnMouseDown = event.clientY - viewportHalfY;
     targetRotationOnMouseDownY = targetRotationY;
 }
 
 function onDocumentMouseMove(event) {
-    mouseX = event.clientX - windowHalfX;
-    mouseY = event.clientY - windowHalfY;
+    mouseX = event.clientX - viewportHalfX;
+    mouseY = event.clientY - viewportHalfY;
 
     targetRotationY = targetRotationOnMouseDownY + (mouseY - mouseYOnMouseDown) * 0.02;
     targetRotationX = targetRotationOnMouseDownX + (mouseX - mouseXOnMouseDown) * 0.02;
@@ -198,10 +212,10 @@ function onDocumentTouchStart(event) {
 
         event.preventDefault();
 
-        mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
+        mouseXOnMouseDown = event.touches[0].pageX - viewportHalfX;
         targetRotationOnMouseDownX = targetRotationX;
 
-        mouseYOnMouseDown = event.touches[0].pageY - windowHalfY;
+        mouseYOnMouseDown = event.touches[0].pageY - viewportHalfY;
         targetRotationOnMouseDownY = targetRotationY;
     }
 }
@@ -216,10 +230,10 @@ function onDocumentTouchMove(event) {
         case 1: // one-fingered touch: rotate
             event.preventDefault();
 
-            mouseX = event.touches[0].pageX - windowHalfX;
+            mouseX = event.touches[0].pageX - viewportHalfX;
             targetRotationX = targetRotationOnMouseDownX + (mouseX - mouseXOnMouseDown) * 0.05;
 
-            mouseY = event.touches[0].pageY - windowHalfY;
+            mouseY = event.touches[0].pageY - viewportHalfY;
             targetRotationY = targetRotationOnMouseDownY + (mouseY - mouseYOnMouseDown) * 0.05;
 
             break;
@@ -342,8 +356,8 @@ function getZoomScale() {
     return Math.pow(0.95, zoomSpeed);
 }
 
-function animate() {
-    requestAnimationFrame(animate);
+function draw() {
+    requestAnimationFrame(draw);
     render();
     stats.update();
 }
