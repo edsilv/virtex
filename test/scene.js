@@ -1,72 +1,43 @@
-var $container, $loading, stats;
+var showStats = false;
 
-var showStats = true;
-
-var camera, scene, renderer, group, viewportHalfX, viewportHalfY;
+var $element, $viewport, $loading, stats, camera, scene, renderer, lightGroup, modelGroup, viewportHalfX, viewportHalfY;
 
 var targetRotationX = 0;
 var targetRotationOnMouseDownX = 0;
-
 var targetRotationY = 0;
 var targetRotationOnMouseDownY = 0;
-
 var mouseX = 0;
 var mouseXOnMouseDown = 0;
-
 var mouseY = 0;
 var mouseYOnMouseDown = 0;
 
 var scale = 1;
 var zoomSpeed = 1;
 var dollyStart = new THREE.Vector2();
+var width = 800;
+var height = 600;
 
 //var pan = new THREE.Vector3();
 //var panStart = new THREE.Vector2();
 
 var objects = {
-    thekiss: {
-        model: 'models/kiss.json',
-        texture: 'images/kiss.png',
-        cameraX: 0,
-        cameraY: 0,
-        cameraZ: 4.5,
-        translateX: 0,
-        translateY: 0,
-        translateZ: 0,
-        rotateX: 0,
-        rotateY: 0,
-        rotateZ: 0,
-        ambientLightColor: 0xc2c1be,
-        directionalLight1Color: 0xc2c1be,
-        directionalLight1Intensity: 0.65,
-        directionalLight2Color: 0x002958,
-        directionalLight2Intensity: 0.4,
-        shininess: 1,
-        shading: THREE.SmoothShading
-    },
-    ecorche: {
-        model: 'models/ecorche.json',
-        texture: 'images/ecorche.jpg',
-        cameraX: 0,
-        cameraY: 0,
-        cameraZ: 4.5,
-        translateX: 0,
-        translateY: 0,
-        translateZ: 0,
-        rotateX: 0,
-        rotateY: 0,
-        rotateZ: 0,
-        ambientLightColor: 0xc2c1be,
-        directionalLight1Color: 0xc2c1be,
-        directionalLight1Intensity: 0.65,
-        directionalLight2Color: 0x002958,
-        directionalLight2Intensity: 0.4,
-        shininess: 1,
-        shading: THREE.SmoothShading
-    }
+    kiss: 'models/kiss.json',
+    ecorche: 'objects/ecorche.json'
 };
 
 var currentObject = objects.ecorche;
+var ambientLightColor = 0xc2c1be;
+var cameraZ = 4.5;
+var directionalLight1Color = 0xffffff;
+var directionalLight1Intensity = 1;
+var directionalLight2Color = 0x002958;
+var directionalLight2Intensity = 0.5;
+var fadeSpeed = 1750;
+var far = 10000;
+var fov = 45;
+var near = 0.1;
+var shading = THREE.SmoothShading;
+var shininess = 1;
 
 init();
 resize();
@@ -74,42 +45,51 @@ draw();
 
 function init() {
 
-    //if (!Detector.webgl) Detector.addGetWebGLMessage();
+    if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-    $container = $('#container');
-    $loading = $('#loading');
+    $element = $('#relic');
+    $viewport = $element.find('.viewport');
+    $loading = $element.find('.loading');
 
-    camera = new THREE.PerspectiveCamera(45, $container.width() / $container.height(), 0.1, 10000);
-
-    camera.position.x = currentObject.cameraX;
-    camera.position.y = currentObject.cameraY;
-    camera.position.z = currentObject.cameraZ;
+    $loading.hide();
 
     scene = new THREE.Scene();
 
-    var light1 = new THREE.DirectionalLight(currentObject.directionalLight1Color, currentObject.directionalLight1Intensity);
+    modelGroup = new THREE.Object3D();
+    lightGroup = new THREE.Object3D();
+
+    // LIGHTS //
+
+    var light1 = new THREE.DirectionalLight(directionalLight1Color, directionalLight1Intensity);
     light1.position.set(1, 1, 1);
-    scene.add(light1);
+    lightGroup.add(light1);
 
-    var light2 = new THREE.DirectionalLight(currentObject.directionalLight2Color, currentObject.directionalLight2Intensity);
+    var light2 = new THREE.DirectionalLight(directionalLight2Color, directionalLight2Intensity);
     light2.position.set(-1, -1, -1);
-    scene.add(light2);
+    lightGroup.add(light2);
 
-    var ambientLight = new THREE.AmbientLight(currentObject.ambientLightColor);
-    scene.add(ambientLight);
+    var ambientLight = new THREE.AmbientLight(ambientLightColor);
+    lightGroup.add(ambientLight);
 
-    group = new THREE.Object3D();
+    scene.add(lightGroup);
+
+    // CAMERA //
+
+    camera = new THREE.PerspectiveCamera(fov, $viewport.width() / $viewport.height(), near, far);
+    camera.position.z = cameraZ;
+
+    // ACTION //
 
     renderer = Detector.webgl? new THREE.WebGLRenderer({ antialias: true, alpha: true }): new THREE.CanvasRenderer();
-    renderer.setSize($container.width(), $container.height());
+    renderer.setSize($viewport.width(), $viewport.height());
 
-    $container.append(renderer.domElement);
+    $viewport.append(renderer.domElement);
 
     if (showStats) {
         stats = new Stats();
         stats.domElement.style.position = 'absolute';
         stats.domElement.style.top = '0px';
-        $container.append(stats.domElement);
+        $viewport.append(stats.domElement);
     }
 
     document.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -120,51 +100,47 @@ function init() {
 
     window.addEventListener('resize', resize, false);
 
-    THREE.DefaultLoadingManager.onProgress = function (item, loaded, total) {
-        console.log(item, loaded, total);
+    var loadProgress = function(progress) {
+        var $loadingBar = $loading.find('.bar');
+        var fullWidth = $loadingBar.parent().width();
+        var width = Math.floor(fullWidth * progress);
+        $loadingBar.width(width);
     };
 
-    var texture = THREE.ImageUtils.loadTexture(currentObject.texture, {}, function(){
-            textureLoaded(texture);
+    var loader = new THREE.ObjectLoader();
+    $loading.show();
+
+    loader.load(currentObject,
+        function(obj) {
+            modelGroup.add(obj);
+            scene.add(modelGroup);
+            $loading.fadeOut(fadeSpeed);
         },
-        function(){
-            alert('error')
-        });
-}
-
-function textureLoaded(texture) {
-    texture.minFilter = THREE.NearestFilter; // or THREE.LinearFilter when the texture is not a power of 2:
-    material = new THREE.MeshPhongMaterial({ map: texture, shininess: currentObject.shininess, shading: currentObject.shading });
-
-    var loader = new THREE.JSONLoader();
-    loader.load(currentObject.model, modelLoaded);
-}
-
-function modelLoaded(geometry) {
-    var mesh = new THREE.Mesh(geometry, material);
-    group.add(mesh);
-    scene.add(group);
-
-    group.translateX(currentObject.translateX);
-    group.translateY(currentObject.translateY);
-    group.translateZ(currentObject.translateZ);
-
-    group.rotateX(currentObject.rotateX);
-    group.rotateY(currentObject.rotateY);
-    group.rotateZ(currentObject.rotateZ);
+        function(e) {
+            loadProgress(e.loaded / e.total);
+        },
+        function(e) {
+            // error
+            console.log(e);
+        }
+    );
 }
 
 function resize() {
-    $container.width(800);
-    $container.height(600);
 
-    viewportHalfX = $container.width() / 2;
-    viewportHalfY = $container.height() / 2;
+    $element.width(width);
+    $element.height(height);
 
-    camera.aspect = $container.width() / $container.height();
+    $viewport.width(width);
+    $viewport.height(height);
+
+    viewportHalfX = $viewport.width() / 2;
+    viewportHalfY = $viewport.height() / 2;
+
+    camera.aspect = $viewport.width() / $viewport.height();
     camera.updateProjectionMatrix();
 
-    renderer.setSize($container.width(), $container.height());
+    renderer.setSize($viewport.width(), $viewport.height());
 
     $loading.css({
         left: (viewportHalfX) - ($loading.width() / 2),
@@ -359,25 +335,27 @@ function getZoomScale() {
 function draw() {
     requestAnimationFrame(draw);
     render();
-    stats.update();
+    if (showStats){
+        stats.update();
+    }
 }
 
 function render() {
 
     // horizontal rotation
-    group.rotation.y += (targetRotationX - group.rotation.y) * 0.1;
+    modelGroup.rotation.y += (targetRotationX - modelGroup.rotation.y) * 0.1;
 
     // vertical rotation
-    var finalRotationY = (targetRotationY - group.rotation.x);
+    var finalRotationY = (targetRotationY - modelGroup.rotation.x);
 
-    if (group.rotation.x <= 1 && group.rotation.x >= -1) {
-        group.rotation.x += finalRotationY * 0.1;
+    if (modelGroup.rotation.x <= 1 && modelGroup.rotation.x >= -1) {
+        modelGroup.rotation.x += finalRotationY * 0.1;
     }
 
-    if (group.rotation.x > 1) {
-        group.rotation.x = 1
-    } else if (group.rotation.x < -1) {
-        group.rotation.x = -1
+    if (modelGroup.rotation.x > 1) {
+        modelGroup.rotation.x = 1
+    } else if (modelGroup.rotation.x < -1) {
+        modelGroup.rotation.x = -1
     }
 
     camera.position.z *= scale;

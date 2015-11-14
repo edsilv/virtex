@@ -7,31 +7,12 @@
 
     <style>
         body {
-            font-family: Monospace;
             color: #fff;
-            margin: 0px;
+            margin: 0;
             overflow: hidden;
-            position: relative;
         }
 
-        .loading {
-            position: absolute;
-            width: 200px;
-            height: 10px;
-            border: 1px solid grey;
-        }
-
-        .loading .bar {
-            height: 10px;
-            background-color: #fff;
-        }
-
-        #container{
-            width: 1024px;
-            height: 768px;
-        }
-
-        canvas {
+        #relic {
             background: #252424;
             background: -moz-radial-gradient(center, ellipse cover,  #252424 0%, #171717 85%);
             background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#252424), color-stop(85%,#171717));
@@ -40,14 +21,33 @@
             background: -ms-radial-gradient(center, ellipse cover,  #252424 0%,#171717 85%);
             background: radial-gradient(ellipse at center,  #252424 0%,#171717 85%);
         }
+
+        .viewport{
+            position: relative;
+        }
+
+        .loading {
+            position: absolute;
+            width: 150px;
+            height: 5px;
+            background-color: #171717;
+        }
+
+        .loading .bar {
+            height: 5px;
+            width: 1px;
+            background-color: #fff;
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="container"></div>
-
-    <div class="loading">
-        <div class="bar"></div>
+    <div id="relic">
+        <div class="viewport"></div>
+        <div class="loading">
+            <div class="bar"></div>
+        </div>
     </div>
 
     <script src="js/three.min.js"></script>
