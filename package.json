@@ -1,0 +1,35 @@
+{
+  "name": "virtex3d",
+  "version": "0.0.0",
+  "description": "three.js object viewer",
+  "main": "gulpfile.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-bump": "^1.0.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-connect": "^2.2.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-typescript": "^2.9.2",
+    "merge2": "^0.3.6",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.1.4",
+    "yargs": "^3.29.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edsilv/virtex.git"
+  },
+  "author": "Edward Silverton <e.silverton@gmail.com> (http://edsilv.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/edsilv/virtex/issues"
+  },
+  "homepage": "https://github.com/edsilv/virtex#readme"
+}
