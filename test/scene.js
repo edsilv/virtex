@@ -1,6 +1,6 @@
 var showStats = false;
 
-var $element, $viewport, $loading, stats, camera, scene, renderer, lightGroup, modelGroup, viewportHalfX, viewportHalfY;
+var $element, $viewport, $loading, $loadingBar, stats, camera, scene, renderer, lightGroup, modelGroup, viewportHalfX, viewportHalfY;
 
 var targetRotationX = 0;
 var targetRotationOnMouseDownX = 0;
@@ -50,6 +50,7 @@ function init() {
     $element = $('#relic');
     $viewport = $element.find('.viewport');
     $loading = $element.find('.loading');
+    $loadingBar = $loading.find('.bar');
 
     $loading.hide();
 
@@ -101,8 +102,7 @@ function init() {
     window.addEventListener('resize', resize, false);
 
     var loadProgress = function(progress) {
-        var $loadingBar = $loading.find('.bar');
-        var fullWidth = $loadingBar.parent().width();
+        var fullWidth = $loading.width();
         var width = Math.floor(fullWidth * progress);
         $loadingBar.width(width);
     };
@@ -116,8 +116,8 @@ function init() {
             scene.add(modelGroup);
             $loading.fadeOut(fadeSpeed);
         },
-        function(e) {
-            loadProgress(e.loaded / e.total);
+        function(xhr) {
+            loadProgress(xhr.loaded / xhr.total);
         },
         function(e) {
             // error
