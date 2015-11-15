@@ -1,1 +1,3 @@
-# relic
+# virtex
+
+three.js object viewer
