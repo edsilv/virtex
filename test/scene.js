@@ -21,11 +21,12 @@ var height = 600;
 //var panStart = new THREE.Vector2();
 
 var objects = {
-    kiss: 'models/kiss.json',
-    ecorche: 'objects/ecorche.json'
+    kiss: 'objects/kiss.json',
+    ecorche: 'objects/ecorche.json',
+    skull: 'objects/skull.json'
 };
 
-var currentObject = objects.ecorche;
+var currentObject = objects.skull;
 var ambientLightColor = 0xc2c1be;
 var cameraZ = 4.5;
 var directionalLight1Color = 0xffffff;
