@@ -26,7 +26,8 @@ var objects = {
     skull: 'objects/skull.json'
 };
 
-var currentObject = objects.skull;
+var currentObject = objects.ecorche;
+
 var ambientLightColor = 0xc2c1be;
 var cameraZ = 4.5;
 var directionalLight1Color = 0xffffff;
