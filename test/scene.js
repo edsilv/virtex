@@ -47,7 +47,7 @@ function init() {
 
     if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-    $element = $('#relic');
+    $element = $('#virtex');
     $viewport = $element.find('.viewport');
     $loading = $element.find('.loading');
     $loadingBar = $loading.find('.bar');
