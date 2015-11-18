@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>virtex: test</title>
+    <link rel="stylesheet" type="text/css" href="dist/virtex.css" />
 
     <script src="js/jquery.js"></script>
 
@@ -11,49 +12,38 @@
             margin: 0;
             overflow: hidden;
         }
-
-        #virtex {
-            background: #252424;
-            background: -moz-radial-gradient(center, ellipse cover,  #252424 0%, #171717 85%);
-            background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#252424), color-stop(85%,#171717));
-            background: -webkit-radial-gradient(center, ellipse cover,  #252424 0%,#171717 85%);
-            background: -o-radial-gradient(center, ellipse cover,  #252424 0%,#171717 85%);
-            background: -ms-radial-gradient(center, ellipse cover,  #252424 0%,#171717 85%);
-            background: radial-gradient(ellipse at center,  #252424 0%,#171717 85%);
-        }
-
-        .viewport{
-            position: relative;
-        }
-
-        .loading {
-            position: absolute;
-            width: 150px;
-            height: 5px;
-            background-color: #171717;
-        }
-
-        .loading .bar {
-            height: 5px;
-            width: 1px;
-            background-color: #fff;
-        }
-
     </style>
 </head>
 <body>
 
-    <div id="virtex">
+    <div id="viewer" class="virtex" style="width: 800px; height: 600px">
         <div class="viewport"></div>
         <div class="loading">
             <div class="bar"></div>
         </div>
     </div>
 
+    <script src="dist/virtex.js"></script>
     <script src="js/three.min.js"></script>
     <script src="js/stats.min.js"></script>
     <script src="js/Detector.js"></script>
     <script src="scene.js"></script>
+
+    <script>
+        $(function() {
+
+            var objects = {
+                kiss: 'objects/kiss.json',
+                ecorche: 'objects/ecorche.json',
+                skull: 'objects/skull.json'
+            };
+
+            virtex({
+                id: "viewer",
+                object: objects.skull
+            });
+        });
+    </script>
 
 </body>
 </html>

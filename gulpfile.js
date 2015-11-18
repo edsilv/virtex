@@ -1,86 +1,59 @@
-var c = require('./gulpfile.config');
-var concat = require('gulp-concat');
-var config = new c();
-var connect = require('gulp-connect');
-var gulp = require('gulp');
-var merge = require('merge2');
-var path = require('path');
-var requireDir = require('require-dir');
-var runSequence = require('run-sequence');
-var sourcemaps = require('gulp-sourcemaps');
-var tasks = requireDir('./tasks');
-var ts = require('gulp-typescript');
+var browserify = require('gulp-browserify'),
+    concat = require('gulp-concat'),
+    Config = require('./gulpfile.config'),
+    config = new Config(),
+    connect = require('gulp-connect'),
+    del = require('del'),
+    eventStream = require('event-stream'),
+    gulp = require('gulp');
+    insert = require('gulp-insert'),
+    path = require('path'),
+    rename = require('gulp-rename'),
+    requireDir = require('require-dir'),
+    runSequence = require('run-sequence'),
+    tasks = requireDir('./tasks'),
+    ts = require('gulp-typescript'),
+    uglify = require('gulp-uglify');
 
-gulp.task('build:dev', function() {
-
-    var result = gulp.src([
-        './src/*.ts',
-        './src/**/*.ts',
-        '!./lib/**/*.ts',
-        './typings/*.ts'
-    ])
-        .pipe(sourcemaps.init())
+gulp.task('build', function() {
+    var tsResult = gulp.src(['src/*.ts', '!src/*.d.ts'])
         .pipe(ts({
-            //sortOutput: true,
+            declarationFiles: true,
+            noExternalResolve: true,
             module: 'amd',
-            target: 'es5',
-            declaration: true,
-            noExternalResolve: true
+            sortOutput: true
         }));
 
-    return merge([
-        result.dts
-            .pipe(concat(config.dtsOut))
-            .pipe(gulp.dest(config.build)),
-        result.js
-            .pipe(concat(config.jsOut))
-            .pipe(sourcemaps.write())
-            .pipe(gulp.dest(config.build))
-    ]);
+    return eventStream.merge(
+        tsResult.dts.pipe(gulp.dest(config.dist)),
+        tsResult.js.pipe(gulp.dest(config.dist))
+    );
 });
 
-gulp.task('build:test', function() {
-
-    var result = gulp.src([
-        './test/*.ts',
-        './.build/*.d.ts',
-        './typings/*.ts'
-    ])
-        .pipe(sourcemaps.init())
-        .pipe(ts({
-            sortOutput: true,
-            module: 'amd',
-            target: 'es5'
-        }));
-
-    return result.js
-            .pipe(sourcemaps.write())
-            .pipe(gulp.dest('./test'));
+gulp.task('browserify', function (cb) {
+    return gulp.src(['./*.js'], { cwd: config.dist })
+        .pipe(browserify({
+            transform: ['deamdify'],
+            standalone: config.lib
+        }))
+        .pipe(rename(config.jsOut))
+        .pipe(gulp.dest(config.dist));
 });
 
-gulp.task('build:dist', function() {
+gulp.task('clean:dist', function (cb) {
+    del([
+        config.dist + '/*'
+    ], cb);
+});
 
-    var result = gulp.src([
-            './src/*.ts',
-            './src/**/*.ts',
-            '!./lib/**/*.ts',
-            './typings/*.ts'
-        ])
-        .pipe(ts({
-            sortOutput: true,
-            module: 'amd',
-            target: 'es5',
-            declaration: true
-        }));
-
-    return merge([
-        result.dts
-            .pipe(concat(config.dtsOut))
-            .pipe(gulp.dest(config.dist)),
-        result.js
-            .pipe(concat(config.jsOut))
-            .pipe(gulp.dest(config.dist))
-    ]);
+gulp.task('minify', function() {
+    return gulp.src([config.out], { cwd: config.dist })
+        .pipe(rename(function (path) {
+            path.extname = ".min" + path.extname;
+        }))
+        .pipe(uglify())
+        .pipe(insert.prepend(config.header))
+        .pipe(gulp.dest(config.dist));
 });
 
 function mount(connect, dir) {
@@ -93,16 +66,12 @@ gulp.task('test', function() {
         middleware: function(connect, opt) {
             return [
                 // serve contents of the dist folder
-                mount(connect, './')
+                mount(connect, config.dist)
             ]
         }
     });
 });
 
 gulp.task('default', function(cb) {
-    runSequence('build:dev', 'build:test', cb);
-});
-
-gulp.task('dist', function(cb) {
-    runSequence('build:dist', cb);
+    runSequence('clean:dist', 'build', 'browserify', 'concat', cb);
 });
