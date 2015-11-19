@@ -1,33 +1,39 @@
-var browserify = require('gulp-browserify'),
-    concat = require('gulp-concat'),
-    Config = require('./gulpfile.config'),
-    config = new Config(),
-    connect = require('gulp-connect'),
-    del = require('del'),
-    eventStream = require('event-stream'),
-    gulp = require('gulp');
-    insert = require('gulp-insert'),
-    path = require('path'),
-    rename = require('gulp-rename'),
-    requireDir = require('require-dir'),
-    runSequence = require('run-sequence'),
-    tasks = requireDir('./tasks'),
-    ts = require('gulp-typescript'),
-    uglify = require('gulp-uglify');
+var browserify = require('gulp-browserify');
+var concat = require('gulp-concat');
+var Config = require('./gulpfile.config');
+var config = new Config();
+var connect = require('gulp-connect');
+var del = require('del');
+var eventStream = require('event-stream');
+var gulp = require('gulp');
+var insert = require('gulp-insert');
+var merge = require('merge2');
+var path = require('path');
+var rename = require('gulp-rename');
+var requireDir = require('require-dir');
+var runSequence = require('run-sequence');
+var tasks = requireDir('./tasks');
+var ts = require('gulp-typescript');
+var uglify = require('gulp-uglify');
 
 gulp.task('build', function() {
-    var tsResult = gulp.src(['src/*.ts', '!src/*.d.ts'])
+    var result = gulp.src(config.tsSrc)
         .pipe(ts({
             declarationFiles: true,
             noExternalResolve: true,
+            target: 'es3',
             module: 'amd',
             sortOutput: true
         }));
 
-    return eventStream.merge(
-        tsResult.dts.pipe(gulp.dest(config.dist)),
-        tsResult.js.pipe(gulp.dest(config.dist))
-    );
+    return merge([
+        result.dts
+            .pipe(concat(config.dtsOut))
+            .pipe(gulp.dest(config.dist)),
+        result.js
+            .pipe(concat(config.jsOut))
+            .pipe(gulp.dest(config.dist))
+    ]);
 });
 
 gulp.task('browserify', function (cb) {
@@ -73,5 +79,5 @@ gulp.task('test', function() {
 });
 
 gulp.task('default', function(cb) {
-    runSequence('clean:dist', 'build', 'browserify', 'concat', cb);
+    runSequence('clean:dist', 'build', 'browserify', cb);
 });

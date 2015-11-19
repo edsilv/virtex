@@ -7,6 +7,9 @@ var GulpConfig = (function () {
         this.header = '// ' + metadata.name + ' v' + metadata.version + ' ' + metadata.homepage + '\n';
         this.jsOut = this.lib + '.js';
         this.dtsOut = this.lib + '.d.ts';
+        this.tsSrc = [
+            'src/*.ts',
+            'typings/*.ts'];
     }
     return GulpConfig;
 })();

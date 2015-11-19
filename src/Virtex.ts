@@ -3,7 +3,7 @@ declare var Stats: any;
 
 class Virtex {
 
-    public options: virtex.Options;
+    public options: IOptions;
 
     private _$element: JQuery;
     private _$viewport: JQuery;
@@ -32,8 +32,8 @@ class Virtex {
     private _zoomSpeed: number = 1;
     private _dollyStart: THREE.Vector2 = new THREE.Vector2();
 
-    constructor(options: virtex.Options) {
-        this.options = $.extend(<virtex.Options>{
+    constructor(options: IOptions) {
+        this.options = $.extend(<IOptions>{
             ambientLightColor: 0xc2c1be,
             cameraZ: 4.5,
             directionalLight1Color: 0xffffff,
@@ -90,7 +90,8 @@ class Virtex {
 
         // ACTION //
 
-        this._renderer = Detector.webgl? new THREE.WebGLRenderer({ antialias: true, alpha: true }): new THREE.CanvasRenderer();
+        // todo: test canvasrenderer, add to three.d.ts
+        //this._renderer = Detector.webgl? new THREE.WebGLRenderer({ antialias: true, alpha: true }): new THREE.CanvasRenderer();
         this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
 
         this._$viewport.append(this._renderer.domElement);
@@ -278,13 +279,13 @@ class Virtex {
 
     private _draw(): void {
         requestAnimationFrame(this._draw);
-        this.render();
+        this._render();
         if (this.options.showStats){
             this._stats.update();
         }
     }
 
-    render(): void {
+    private _render(): void {
 
         // horizontal rotation
         this._modelGroup.rotation.y += (this._targetRotationX - this._modelGroup.rotation.y) * 0.1;
