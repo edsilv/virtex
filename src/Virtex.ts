@@ -1,5 +1,17 @@
+import Object3D = THREE.Object3D;
 declare var Detector: any;
 declare var Stats: any;
+
+var requestAnimFrame = (function () {
+    return window.requestAnimationFrame ||
+        (<any>window).webkitRequestAnimationFrame ||
+        (<any>window).mozRequestAnimationFrame ||
+        (<any>window).oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 1000 / 200);
+        };
+})();
 
 class Virtex {
 
@@ -90,8 +102,7 @@ class Virtex {
 
         // ACTION //
 
-        // todo: test canvasrenderer, add to three.d.ts
-        //this._renderer = Detector.webgl? new THREE.WebGLRenderer({ antialias: true, alpha: true }): new THREE.CanvasRenderer();
+        this._renderer = Detector.webgl? new THREE.WebGLRenderer({ antialias: true, alpha: true }): new THREE.CanvasRenderer();
         this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
 
         this._$viewport.append(this._renderer.domElement);
@@ -103,44 +114,46 @@ class Virtex {
             this._$viewport.append(this._stats.domElement);
         }
 
-        document.addEventListener('mousedown', this._onDocumentMouseDown, false);
-        document.addEventListener('touchstart', this._onDocumentTouchStart, false);
-        document.addEventListener('touchmove', this._onDocumentTouchMove, false);
-        document.addEventListener('mousewheel', this._onMouseWheel, false);
-        document.addEventListener('DOMMouseScroll', this._onMouseWheel, false); // firefox
-        window.addEventListener('resize', this._resize, false);
-
-        var loadProgress = function(progress) {
-            var fullWidth = this._$loading.width();
-            var width = Math.floor(fullWidth * progress);
-            this._$loadingBar.width(width);
-        };
+        document.addEventListener('mousedown', () => this._onDocumentMouseDown, false);
+        document.addEventListener('touchstart', () => this._onDocumentTouchStart, false);
+        document.addEventListener('touchmove', () => this._onDocumentTouchMove, false);
+        document.addEventListener('mousewheel', () => this._onMouseWheel, false);
+        document.addEventListener('DOMMouseScroll', () => this._onMouseWheel, false); // firefox
+        window.addEventListener('resize', () => this._resize(), false);
 
         var loader = new THREE.ObjectLoader();
         this._$loading.show();
 
         loader.load(this.options.object,
-            (obj) => {
+            (obj: Object3D) => {
                 this._modelGroup.add(obj);
                 this._scene.add(this._modelGroup);
                 this._$loading.fadeOut(this.options.fadeSpeed);
             },
-            (xhr) => {
-                loadProgress(xhr.loaded / xhr.total);
+            (e: ProgressEvent) => {
+                if (e.lengthComputable) {
+                    this._loadProgress(e.loaded / e.total);
+                }
             },
-            (e) => {
+            (e: ErrorEvent) => {
                 // error
                 console.log(e);
             }
         );
     }
 
+    private _loadProgress (progress: number): void {
+        var fullWidth = this._$loading.width();
+        var width = Math.floor(fullWidth * progress);
+        this._$loadingBar.width(width);
+    }
+
     private _onDocumentMouseDown(event): void {
         event.preventDefault();
 
-        document.addEventListener('mousemove', this._onDocumentMouseMove, false);
-        document.addEventListener('mouseup', this._onDocumentMouseUp, false);
-        document.addEventListener('mouseout', this._onDocumentMouseOut, false);
+        document.addEventListener('mousemove', () => this._onDocumentMouseMove, false);
+        document.addEventListener('mouseup', () => this._onDocumentMouseUp, false);
+        document.addEventListener('mouseout', () => this._onDocumentMouseOut, false);
 
         this._mouseXOnMouseDown = event.clientX - this._viewportHalfX;
         this._targetRotationOnMouseDownX = this._targetRotationX;
@@ -278,7 +291,7 @@ class Virtex {
     }
 
     private _draw(): void {
-        requestAnimationFrame(this._draw);
+        requestAnimFrame(() => this._draw());
         this._render();
         if (this.options.showStats){
             this._stats.update();

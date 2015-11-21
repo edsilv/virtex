@@ -14,9 +14,30 @@ var mouseYOnMouseDown = 0;
 var scale = 1;
 var zoomSpeed = 1;
 var dollyStart = new THREE.Vector2();
+var width = 800;
+var height = 600;
 
 //var pan = new THREE.Vector3();
 //var panStart = new THREE.Vector2();
+
+var objects = {
+    kiss: 'models/kiss.json',
+    ecorche: 'objects/ecorche.json'
+};
+
+var currentObject = objects.ecorche;
+var ambientLightColor = 0xc2c1be;
+var cameraZ = 4.5;
+var directionalLight1Color = 0xffffff;
+var directionalLight1Intensity = 1;
+var directionalLight2Color = 0x002958;
+var directionalLight2Intensity = 0.5;
+var fadeSpeed = 1750;
+var far = 10000;
+var fov = 45;
+var near = 0.1;
+var shading = THREE.SmoothShading;
+var shininess = 1;
 
 init();
 resize();

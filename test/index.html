@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>virtex: test</title>
-    <link rel="stylesheet" type="text/css" href="dist/virtex.css" />
+    <link rel="stylesheet" type="text/css" href="virtex.css" />
 
     <script src="js/jquery.js"></script>
 
@@ -17,17 +17,17 @@
 <body>
 
     <div id="viewer" class="virtex" style="width: 800px; height: 600px">
-        <div class="viewport"></div>
-        <div class="loading">
-            <div class="bar"></div>
-        </div>
+        <!--<div class="viewport"></div>-->
+        <!--<div class="loading">-->
+            <!--<div class="bar"></div>-->
+        <!--</div>-->
     </div>
 
-    <script src="dist/virtex.js"></script>
+    <script src="virtex.js"></script>
     <script src="js/three.min.js"></script>
     <script src="js/stats.min.js"></script>
     <script src="js/Detector.js"></script>
-    <script src="scene.js"></script>
+    <!--<script src="scene.js"></script>-->
 
     <script>
         $(function() {
@@ -38,7 +38,7 @@
                 skull: 'objects/skull.json'
             };
 
-            virtex({
+            new virtex({
                 id: "viewer",
                 object: objects.skull
             });

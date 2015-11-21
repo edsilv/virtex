@@ -62,6 +62,11 @@ gulp.task('minify', function() {
         .pipe(gulp.dest(config.dist));
 });
 
+gulp.task('copy:css', function() {
+    return gulp.src('src/*.css')
+        .pipe(gulp.dest(config.dist));
+});
+
 function mount(connect, dir) {
     return connect.static(path.resolve(dir));
 }
@@ -79,5 +84,5 @@ gulp.task('test', function() {
 });
 
 gulp.task('default', function(cb) {
-    runSequence('clean:dist', 'build', 'browserify', cb);
+    runSequence('clean:dist', 'build', 'browserify', 'copy:css', cb);
 });
