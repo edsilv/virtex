@@ -100,15 +100,17 @@ class Virtex {
 
         // CAMERA //
 
-        this._camera = new THREE.PerspectiveCamera(this.options.fov, this._$viewport.width() / this._$viewport.height(), this.options.near, this.options.far);
+        this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
         this._camera.position.z = this.options.cameraZ;
 
-        // ACTION //
+        // RENDERER //
 
         this._renderer = Detector.webgl? new THREE.WebGLRenderer({ antialias: true, alpha: true }): new THREE.CanvasRenderer();
         this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
 
         this._$viewport.append(this._renderer.domElement);
+
+        // STATS //
 
         if (this.options.showStats) {
             this._stats = new Stats();
@@ -116,6 +118,8 @@ class Virtex {
             this._stats.domElement.style.top = '0px';
             this._$viewport.append(this._stats.domElement);
         }
+
+        // EVENTS //
 
         this._$element.on('mousedown', (e) => {
             this._onMouseDown(e.originalEvent);
@@ -154,6 +158,8 @@ class Virtex {
         });
 
         window.addEventListener('resize', () => this._resize(), false);
+
+        // LOADER //
 
         var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
         this._$loading.show();
@@ -306,7 +312,6 @@ class Virtex {
     }
 
     private _onTouchEnd(event): void {
-        console.log('touchend');
         this._isMouseDown = false;
     }
 

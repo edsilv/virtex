@@ -24,20 +24,18 @@
     <script src="js/three.min.js"></script>
     <script src="js/stats.min.js"></script>
     <script src="js/Detector.js"></script>
-    <!--<script src="scene.js"></script>-->
 
     <script>
         $(function() {
 
             var objects = {
-                kiss: 'objects/kiss.json',
                 ecorche: 'objects/ecorche.json',
                 skull: 'objects/skull.json'
             };
 
             new virtex({
                 element: "#viewer",
-                object: objects.skull,
+                object: objects.ecorche,
                 showStats: false
             });
         });
