@@ -6,17 +6,18 @@ var requestAnimFrame = function () {
     }();
 var Virtex = function () {
         function Virtex(options) {
-            this._targetRotationX = 0;
-            this._targetRotationOnMouseDownX = 0;
-            this._targetRotationY = 0;
-            this._targetRotationOnMouseDownY = 0;
+            this._isMouseDown = false;
             this._mouseX = 0;
             this._mouseXOnMouseDown = 0;
             this._mouseY = 0;
             this._mouseYOnMouseDown = 0;
+            this._targetRotationOnMouseDownX = 0;
+            this._targetRotationOnMouseDownY = 0;
+            this._targetRotationX = 0;
+            this._targetRotationY = 0;
+            this._dollyStart = new THREE.Vector2();
             this._scale = 1;
             this._zoomSpeed = 1;
-            this._dollyStart = new THREE.Vector2();
             this.options = $.extend({
                 ambientLightColor: 12763582,
                 cameraZ: 4.5,
@@ -40,7 +41,8 @@ var Virtex = function () {
             var _this = this;
             if (!Detector.webgl)
                 Detector.addGetWebGLMessage();
-            this._$element = $(this.options.id);
+            this._$element = $(this.options.element);
+            this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
             this._$viewport = this._$element.find('.viewport');
             this._$loading = this._$element.find('.loading');
             this._$loadingBar = this._$loading.find('.bar');
@@ -71,21 +73,33 @@ var Virtex = function () {
                 this._stats.domElement.style.top = '0px';
                 this._$viewport.append(this._stats.domElement);
             }
-            document.addEventListener('mousedown', function () {
-                return _this._onDocumentMouseDown;
-            }, false);
-            document.addEventListener('touchstart', function () {
-                return _this._onDocumentTouchStart;
-            }, false);
-            document.addEventListener('touchmove', function () {
-                return _this._onDocumentTouchMove;
-            }, false);
-            document.addEventListener('mousewheel', function () {
-                return _this._onMouseWheel;
-            }, false);
-            document.addEventListener('DOMMouseScroll', function () {
-                return _this._onMouseWheel;
-            }, false);
+            this._$element.on('mousedown', function (e) {
+                _this._onMouseDown(e.originalEvent);
+            });
+            this._$element.on('mousemove', function (e) {
+                _this._onMouseMove(e.originalEvent);
+            });
+            this._$element.on('mouseup', function (e) {
+                _this._onMouseUp(e.originalEvent);
+            });
+            this._$element.on('mouseout', function (e) {
+                _this._onMouseOut(e.originalEvent);
+            });
+            this._$element.on('mousewheel', function (e) {
+                _this._onMouseWheel(e.originalEvent);
+            });
+            this._$element.on('DOMMouseScroll', function (e) {
+                _this._onMouseWheel(e.originalEvent);
+            });
+            this._$element.on('touchstart', function (e) {
+                _this._onTouchStart(e.originalEvent);
+            });
+            this._$element.on('touchmove', function (e) {
+                _this._onTouchMove(e.originalEvent);
+            });
+            this._$element.on('touchend', function (e) {
+                _this._onTouchEnd(e.originalEvent);
+            });
             window.addEventListener('resize', function () {
                 return _this._resize();
             }, false);
@@ -108,76 +122,27 @@ var Virtex = function () {
             var width = Math.floor(fullWidth * progress);
             this._$loadingBar.width(width);
         };
-        Virtex.prototype._onDocumentMouseDown = function (event) {
-            var _this = this;
+        Virtex.prototype._onMouseDown = function (event) {
             event.preventDefault();
-            document.addEventListener('mousemove', function () {
-                return _this._onDocumentMouseMove;
-            }, false);
-            document.addEventListener('mouseup', function () {
-                return _this._onDocumentMouseUp;
-            }, false);
-            document.addEventListener('mouseout', function () {
-                return _this._onDocumentMouseOut;
-            }, false);
+            this._isMouseDown = true;
             this._mouseXOnMouseDown = event.clientX - this._viewportHalfX;
             this._targetRotationOnMouseDownX = this._targetRotationX;
             this._mouseYOnMouseDown = event.clientY - this._viewportHalfY;
             this._targetRotationOnMouseDownY = this._targetRotationY;
         };
-        Virtex.prototype._onDocumentMouseMove = function (event) {
+        Virtex.prototype._onMouseMove = function (event) {
             this._mouseX = event.clientX - this._viewportHalfX;
             this._mouseY = event.clientY - this._viewportHalfY;
-            this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.02;
-            this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.02;
-        };
-        Virtex.prototype._onDocumentMouseUp = function (event) {
-            document.removeEventListener('mousemove', this._onDocumentMouseMove, false);
-            document.removeEventListener('mouseup', this._onDocumentMouseUp, false);
-            document.removeEventListener('mouseout', this._onDocumentMouseOut, false);
-        };
-        Virtex.prototype._onDocumentMouseOut = function (event) {
-            document.removeEventListener('mousemove', this._onDocumentMouseMove, false);
-            document.removeEventListener('mouseup', this._onDocumentMouseUp, false);
-            document.removeEventListener('mouseout', this._onDocumentMouseOut, false);
-        };
-        Virtex.prototype._onDocumentTouchStart = function (event) {
-            if (event.touches.length === 1) {
-                event.preventDefault();
-                this._mouseXOnMouseDown = event.touches[0].pageX - this._viewportHalfX;
-                this._targetRotationOnMouseDownX = this._targetRotationX;
-                this._mouseYOnMouseDown = event.touches[0].pageY - this._viewportHalfY;
-                this._targetRotationOnMouseDownY = this._targetRotationY;
+            if (this._isMouseDown) {
+                this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.02;
+                this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.02;
             }
         };
-        Virtex.prototype._onDocumentTouchMove = function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            switch (event.touches.length) {
-            case 1:
-                event.preventDefault();
-                this._mouseX = event.touches[0].pageX - this._viewportHalfX;
-                this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.05;
-                this._mouseY = event.touches[0].pageY - this._viewportHalfY;
-                this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.05;
-                break;
-            case 2:
-                var dx = event.touches[0].pageX - event.touches[1].pageX;
-                var dy = event.touches[0].pageY - event.touches[1].pageY;
-                var distance = Math.sqrt(dx * dx + dy * dy);
-                var dollyEnd = new THREE.Vector2(0, distance);
-                var dollyDelta = new THREE.Vector2();
-                dollyDelta.subVectors(dollyEnd, this._dollyStart);
-                if (dollyDelta.y > 0) {
-                    this._dollyOut();
-                } else if (dollyDelta.y < 0) {
-                    this._dollyIn();
-                }
-                this._dollyStart.copy(dollyEnd);
-                break;
-            case 3:
-                break;
-            }
+        Virtex.prototype._onMouseUp = function (event) {
+            this._isMouseDown = false;
+        };
+        Virtex.prototype._onMouseOut = function (event) {
+            this._isMouseDown = false;
         };
         Virtex.prototype._onMouseWheel = function (event) {
             event.preventDefault();
@@ -193,6 +158,51 @@ var Virtex = function () {
             } else if (delta < 0) {
                 this._dollyIn();
             }
+        };
+        Virtex.prototype._onTouchStart = function (event) {
+            var touches = event.touches;
+            if (touches.length === 1) {
+                this._isMouseDown = true;
+                event.preventDefault();
+                this._mouseXOnMouseDown = touches[0].pageX - this._viewportHalfX;
+                this._targetRotationOnMouseDownX = this._targetRotationX;
+                this._mouseYOnMouseDown = touches[0].pageY - this._viewportHalfY;
+                this._targetRotationOnMouseDownY = this._targetRotationY;
+            }
+        };
+        Virtex.prototype._onTouchMove = function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            var touches = event.touches;
+            switch (touches.length) {
+            case 1:
+                event.preventDefault();
+                this._mouseX = touches[0].pageX - this._viewportHalfX;
+                this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.05;
+                this._mouseY = touches[0].pageY - this._viewportHalfY;
+                this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.05;
+                break;
+            case 2:
+                var dx = touches[0].pageX - touches[1].pageX;
+                var dy = touches[0].pageY - touches[1].pageY;
+                var distance = Math.sqrt(dx * dx + dy * dy);
+                var dollyEnd = new THREE.Vector2(0, distance);
+                var dollyDelta = new THREE.Vector2();
+                dollyDelta.subVectors(dollyEnd, this._dollyStart);
+                if (dollyDelta.y > 0) {
+                    this._dollyOut();
+                } else if (dollyDelta.y < 0) {
+                    this._dollyIn();
+                }
+                this._dollyStart.copy(dollyEnd);
+                break;
+            case 3:
+                break;
+            }
+        };
+        Virtex.prototype._onTouchEnd = function (event) {
+            console.log('touchend');
+            this._isMouseDown = false;
         };
         Virtex.prototype._dollyIn = function (dollyScale) {
             if (dollyScale === undefined) {

@@ -1,4 +1,5 @@
 import Object3D = THREE.Object3D;
+import Options = virtex.Options;
 declare var Detector: any;
 declare var Stats: any;
 
@@ -15,37 +16,38 @@ var requestAnimFrame = (function () {
 
 class Virtex {
 
-    public options: IOptions;
+    public options: Options;
 
     private _$element: JQuery;
     private _$viewport: JQuery;
     private _$loading: JQuery;
     private _$loadingBar: JQuery;
 
-    private _stats: any;
     private _camera: THREE.PerspectiveCamera;
-    private _scene: THREE.Scene;
-    private _renderer: THREE.Renderer;
     private _lightGroup: THREE.Group;
     private _modelGroup: THREE.Group;
+    private _renderer: THREE.Renderer;
+    private _scene: THREE.Scene;
+    private _stats: any;
     private _viewportHalfX: number;
     private _viewportHalfY: number;
 
-    private _targetRotationX: number = 0;
-    private _targetRotationOnMouseDownX: number = 0;
-    private _targetRotationY: number = 0;
-    private _targetRotationOnMouseDownY: number = 0;
+    private _isMouseDown: boolean = false;
     private _mouseX: number = 0;
     private _mouseXOnMouseDown: number = 0;
     private _mouseY: number = 0;
     private _mouseYOnMouseDown: number = 0;
+    private _targetRotationOnMouseDownX: number = 0;
+    private _targetRotationOnMouseDownY: number = 0;
+    private _targetRotationX: number = 0;
+    private _targetRotationY: number = 0;
 
+    private _dollyStart: THREE.Vector2 = new THREE.Vector2();
     private _scale: number = 1;
     private _zoomSpeed: number = 1;
-    private _dollyStart: THREE.Vector2 = new THREE.Vector2();
 
-    constructor(options: IOptions) {
-        this.options = $.extend(<IOptions>{
+    constructor(options: Options) {
+        this.options = $.extend(<Options>{
             ambientLightColor: 0xc2c1be,
             cameraZ: 4.5,
             directionalLight1Color: 0xffffff,
@@ -70,7 +72,8 @@ class Virtex {
 
         if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-        this._$element = $(this.options.id);
+        this._$element = $(this.options.element);
+        this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
         this._$viewport = this._$element.find('.viewport');
         this._$loading = this._$element.find('.loading');
         this._$loadingBar = this._$loading.find('.bar');
@@ -114,14 +117,45 @@ class Virtex {
             this._$viewport.append(this._stats.domElement);
         }
 
-        document.addEventListener('mousedown', () => this._onDocumentMouseDown, false);
-        document.addEventListener('touchstart', () => this._onDocumentTouchStart, false);
-        document.addEventListener('touchmove', () => this._onDocumentTouchMove, false);
-        document.addEventListener('mousewheel', () => this._onMouseWheel, false);
-        document.addEventListener('DOMMouseScroll', () => this._onMouseWheel, false); // firefox
+        this._$element.on('mousedown', (e) => {
+            this._onMouseDown(e.originalEvent);
+        });
+
+        this._$element.on('mousemove', (e) => {
+            this._onMouseMove(e.originalEvent);
+        });
+
+        this._$element.on('mouseup', (e) => {
+            this._onMouseUp(e.originalEvent);
+        });
+
+        this._$element.on('mouseout', (e) => {
+            this._onMouseOut(e.originalEvent);
+        });
+
+        this._$element.on('mousewheel', (e) => {
+            this._onMouseWheel(e.originalEvent);
+        });
+
+        this._$element.on('DOMMouseScroll', (e) => {
+            this._onMouseWheel(e.originalEvent); // firefox
+        });
+
+        this._$element.on('touchstart', (e) => {
+            this._onTouchStart(e.originalEvent);
+        });
+
+        this._$element.on('touchmove', (e) => {
+            this._onTouchMove(e.originalEvent);
+        });
+
+        this._$element.on('touchend', (e) => {
+            this._onTouchEnd(e.originalEvent);
+        });
+
         window.addEventListener('resize', () => this._resize(), false);
 
-        var loader = new THREE.ObjectLoader();
+        var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
         this._$loading.show();
 
         loader.load(this.options.object,
@@ -148,12 +182,10 @@ class Virtex {
         this._$loadingBar.width(width);
     }
 
-    private _onDocumentMouseDown(event): void {
+    private _onMouseDown(event): void {
         event.preventDefault();
 
-        document.addEventListener('mousemove', () => this._onDocumentMouseMove, false);
-        document.addEventListener('mouseup', () => this._onDocumentMouseUp, false);
-        document.addEventListener('mouseout', () => this._onDocumentMouseOut, false);
+        this._isMouseDown = true;
 
         this._mouseXOnMouseDown = event.clientX - this._viewportHalfX;
         this._targetRotationOnMouseDownX = this._targetRotationX;
@@ -162,90 +194,23 @@ class Virtex {
         this._targetRotationOnMouseDownY = this._targetRotationY;
     }
 
-    private _onDocumentMouseMove(event): void {
+    private _onMouseMove(event): void {
+
         this._mouseX = event.clientX - this._viewportHalfX;
         this._mouseY = event.clientY - this._viewportHalfY;
 
-        this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.02;
-        this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.02;
-    }
-
-    private _onDocumentMouseUp(event): void {
-        document.removeEventListener('mousemove', this._onDocumentMouseMove, false);
-        document.removeEventListener('mouseup', this._onDocumentMouseUp, false);
-        document.removeEventListener('mouseout', this._onDocumentMouseOut, false);
-    }
-
-    private _onDocumentMouseOut(event): void {
-        document.removeEventListener('mousemove', this._onDocumentMouseMove, false);
-        document.removeEventListener('mouseup', this._onDocumentMouseUp, false);
-        document.removeEventListener('mouseout', this._onDocumentMouseOut, false);
-    }
-
-    private _onDocumentTouchStart(event): void {
-
-        if (event.touches.length === 1) {
-
-            event.preventDefault();
-
-            this._mouseXOnMouseDown = event.touches[0].pageX - this._viewportHalfX;
-            this._targetRotationOnMouseDownX = this._targetRotationX;
-
-            this._mouseYOnMouseDown = event.touches[0].pageY - this._viewportHalfY;
-            this._targetRotationOnMouseDownY = this._targetRotationY;
+        if (this._isMouseDown){
+            this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.02;
+            this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.02;
         }
     }
 
-    private _onDocumentTouchMove(event): void {
+    private _onMouseUp(event): void {
+        this._isMouseDown = false;
+    }
 
-        event.preventDefault();
-        event.stopPropagation();
-
-        switch (event.touches.length) {
-
-            case 1: // one-fingered touch: rotate
-                event.preventDefault();
-
-                this._mouseX = event.touches[0].pageX - this._viewportHalfX;
-                this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.05;
-
-                this._mouseY = event.touches[0].pageY - this._viewportHalfY;
-                this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.05;
-
-                break;
-
-            case 2: // two-fingered touch: dolly
-                var dx = event.touches[0].pageX - event.touches[1].pageX;
-                var dy = event.touches[0].pageY - event.touches[1].pageY;
-                var distance = Math.sqrt(dx * dx + dy * dy);
-
-                var dollyEnd = new THREE.Vector2(0, distance);
-                var dollyDelta = new THREE.Vector2();
-                dollyDelta.subVectors(dollyEnd, this._dollyStart);
-
-                if (dollyDelta.y > 0) {
-                    this._dollyOut();
-                } else if (dollyDelta.y < 0) {
-                    this._dollyIn();
-                }
-
-                this._dollyStart.copy(dollyEnd);
-
-                break;
-
-            case 3: // three-fingered touch: pan
-
-                //var panEnd = new THREE.Vector2();
-                //panEnd.set(event.touches[0].pageX, event.touches[0].pageY);
-                //var panDelta = new THREE.Vector2();
-                //panDelta.subVectors(panEnd, panStart);
-                //
-                //panCamera(panDelta.x, panDelta.y);
-                //
-                //panStart.copy(panEnd);
-
-                break;
-        }
+    private _onMouseOut(event): void {
+        this._isMouseDown = false;
     }
 
     private _onMouseWheel(event): void {
@@ -266,6 +231,83 @@ class Virtex {
         } else if (delta < 0) {
             this._dollyIn();
         }
+    }
+
+    private _onTouchStart(event): void {
+
+        const touches = event.touches;
+
+        if (touches.length === 1) {
+
+            this._isMouseDown = true;
+
+            event.preventDefault();
+
+            this._mouseXOnMouseDown = touches[0].pageX - this._viewportHalfX;
+            this._targetRotationOnMouseDownX = this._targetRotationX;
+
+            this._mouseYOnMouseDown = touches[0].pageY - this._viewportHalfY;
+            this._targetRotationOnMouseDownY = this._targetRotationY;
+        }
+    }
+
+    private _onTouchMove(event): void {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const touches = event.touches;
+
+        switch (touches.length) {
+
+            case 1: // one-fingered touch: rotate
+                event.preventDefault();
+
+                this._mouseX = touches[0].pageX - this._viewportHalfX;
+                this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.05;
+
+                this._mouseY = touches[0].pageY - this._viewportHalfY;
+                this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.05;
+
+                break;
+
+            case 2: // two-fingered touch: dolly
+                var dx = touches[0].pageX - touches[1].pageX;
+                var dy = touches[0].pageY - touches[1].pageY;
+                var distance = Math.sqrt(dx * dx + dy * dy);
+
+                var dollyEnd = new THREE.Vector2(0, distance);
+                var dollyDelta = new THREE.Vector2();
+                dollyDelta.subVectors(dollyEnd, this._dollyStart);
+
+                if (dollyDelta.y > 0) {
+                    this._dollyOut();
+                } else if (dollyDelta.y < 0) {
+                    this._dollyIn();
+                }
+
+                this._dollyStart.copy(dollyEnd);
+
+                break;
+
+            case 3: // three-fingered touch: pan
+
+                //var panEnd = new THREE.Vector2();
+                //panEnd.set(touches[0].pageX, touches[0].pageY);
+                //var panDelta = new THREE.Vector2();
+                //panDelta.subVectors(panEnd, panStart);
+                //
+                //panCamera(panDelta.x, panDelta.y);
+                //
+                //panStart.copy(panEnd);
+
+                break;
+        }
+    }
+
+    private _onTouchEnd(event): void {
+        console.log('touchend');
+        this._isMouseDown = false;
     }
 
     private _dollyIn(dollyScale?: number): void {

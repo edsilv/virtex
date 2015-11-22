@@ -4,7 +4,6 @@ var Config = require('./gulpfile.config');
 var config = new Config();
 var connect = require('gulp-connect');
 var del = require('del');
-var eventStream = require('event-stream');
 var gulp = require('gulp');
 var insert = require('gulp-insert');
 var merge = require('merge2');

@@ -17,10 +17,7 @@
 <body>
 
     <div id="viewer" class="virtex" style="width: 800px; height: 600px">
-        <!--<div class="viewport"></div>-->
-        <!--<div class="loading">-->
-            <!--<div class="bar"></div>-->
-        <!--</div>-->
+
     </div>
 
     <script src="virtex.js"></script>
@@ -39,8 +36,9 @@
             };
 
             new virtex({
-                id: "viewer",
-                object: objects.skull
+                element: "#viewer",
+                object: objects.skull,
+                showStats: false
             });
         });
     </script>
