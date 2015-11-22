@@ -59,7 +59,7 @@ var Virtex = function () {
             var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
             this._lightGroup.add(ambientLight);
             this._scene.add(this._lightGroup);
-            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._$viewport.width() / this._$viewport.height(), this.options.near, this.options.far);
+            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
             this._camera.position.z = this.options.cameraZ;
             this._renderer = Detector.webgl ? new THREE.WebGLRenderer({
                 antialias: true,
@@ -201,7 +201,6 @@ var Virtex = function () {
             }
         };
         Virtex.prototype._onTouchEnd = function (event) {
-            console.log('touchend');
             this._isMouseDown = false;
         };
         Virtex.prototype._dollyIn = function (dollyScale) {

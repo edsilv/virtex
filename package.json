@@ -1,7 +1,13 @@
 {
   "name": "virtex3d",
   "version": "0.1.0",
-  "description": "three.js object viewer",
+  "description": "3D object viewer built with three.js",
+  "keywords": [
+    "3D",
+    "three.js",
+    "webgl",
+    "viewer"
+  ],
   "main": "gulpfile.js",
   "directories": {
     "test": "test"
