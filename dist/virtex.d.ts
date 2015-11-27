@@ -18,7 +18,6 @@ declare module Virtex {
     }
 }
 
-import IOptions = Virtex.IOptions;
 declare module Virtex {
     interface IVirtex {
         options: IOptions;
