@@ -1,5 +1,6 @@
 import Object3D = THREE.Object3D;
-import Options = virtex.Options;
+import IOptions = Virtex.IOptions;
+import IVirtex = Virtex.IVirtex;
 declare var Detector: any;
 declare var Stats: any;
 
@@ -14,9 +15,9 @@ var requestAnimFrame = (function () {
         };
 })();
 
-class Virtex {
+class Virtex implements IVirtex {
 
-    public options: Options;
+    public options: IOptions;
 
     private _$element: JQuery;
     private _$viewport: JQuery;
@@ -46,8 +47,8 @@ class Virtex {
     private _scale: number = 1;
     private _zoomSpeed: number = 1;
 
-    constructor(options: Options) {
-        this.options = $.extend(<Options>{
+    constructor(options: IOptions) {
+        this.options = $.extend(<IOptions>{
             ambientLightColor: 0xc2c1be,
             cameraZ: 4.5,
             directionalLight1Color: 0xffffff,

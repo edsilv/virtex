@@ -1,5 +1,5 @@
-module virtex{
-    export interface Options {
+module Virtex{
+    export interface IOptions {
         ambientLightColor: number;
         cameraZ: number;
         directionalLight1Color: number;
