@@ -1,3 +1,3 @@
 interface IVirtex {
-    create: (element: string, options: Virtex.IOptions) => Virtex.Viewport;
+    create: (options: Virtex.IOptions) => Virtex.Viewport;
 }

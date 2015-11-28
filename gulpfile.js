@@ -20,8 +20,8 @@ gulp.task('build', function() {
         .pipe(ts({
             declarationFiles: true,
             noExternalResolve: true,
-            target: 'es3',
-            module: 'amd',
+            noLib: false,
+            module: 'commonjs',
             sortOutput: true
         }));
 
@@ -38,7 +38,6 @@ gulp.task('build', function() {
 gulp.task('browserify', function (cb) {
     return gulp.src(['./*.js'], { cwd: config.dist })
         .pipe(browserify({
-            transform: ['deamdify'],
             standalone: config.lib
         }))
         .pipe(rename(config.jsOut))

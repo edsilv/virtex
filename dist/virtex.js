@@ -3,7 +3,8 @@
 
 
 
-var Object3D = THREE.Object3D;
+
+
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||

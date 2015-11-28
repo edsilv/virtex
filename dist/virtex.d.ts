@@ -1,3 +1,4 @@
+
 declare module Virtex {
     interface IOptions {
         ambientLightColor: number;
@@ -19,10 +20,9 @@ declare module Virtex {
 }
 
 interface IVirtex {
-    create: (element: string, options: Virtex.IOptions) => Virtex.Viewport;
+    create: (options: Virtex.IOptions) => Virtex.Viewport;
 }
 
-import Object3D = THREE.Object3D;
 declare var Detector: any;
 declare var Stats: any;
 declare var requestAnimFrame: any;

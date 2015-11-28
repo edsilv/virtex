@@ -1,4 +1,3 @@
-import Object3D = THREE.Object3D;
 declare var Detector: any;
 declare var Stats: any;
 
@@ -16,37 +15,37 @@ var requestAnimFrame = (function () {
 module Virtex {
     export class Viewport {
 
-        public options:IOptions;
+        public options: IOptions;
 
-        private _$element:JQuery;
-        private _$viewport:JQuery;
-        private _$loading:JQuery;
-        private _$loadingBar:JQuery;
+        private _$element: JQuery;
+        private _$viewport: JQuery;
+        private _$loading: JQuery;
+        private _$loadingBar: JQuery;
 
-        private _camera:THREE.PerspectiveCamera;
-        private _lightGroup:THREE.Group;
-        private _modelGroup:THREE.Group;
-        private _renderer:THREE.Renderer;
-        private _scene:THREE.Scene;
-        private _stats:any;
-        private _viewportHalfX:number;
-        private _viewportHalfY:number;
+        private _camera: THREE.PerspectiveCamera;
+        private _lightGroup: THREE.Group;
+        private _modelGroup: THREE.Group;
+        private _renderer: THREE.Renderer;
+        private _scene: THREE.Scene;
+        private _stats: any;
+        private _viewportHalfX: number;
+        private _viewportHalfY: number;
 
-        private _isMouseDown:boolean = false;
-        private _mouseX:number = 0;
-        private _mouseXOnMouseDown:number = 0;
-        private _mouseY:number = 0;
-        private _mouseYOnMouseDown:number = 0;
-        private _targetRotationOnMouseDownX:number = 0;
-        private _targetRotationOnMouseDownY:number = 0;
-        private _targetRotationX:number = 0;
-        private _targetRotationY:number = 0;
+        private _isMouseDown: boolean = false;
+        private _mouseX: number = 0;
+        private _mouseXOnMouseDown: number = 0;
+        private _mouseY: number = 0;
+        private _mouseYOnMouseDown: number = 0;
+        private _targetRotationOnMouseDownX: number = 0;
+        private _targetRotationOnMouseDownY: number = 0;
+        private _targetRotationX: number = 0;
+        private _targetRotationY: number = 0;
 
-        private _dollyStart:THREE.Vector2 = new THREE.Vector2();
-        private _scale:number = 1;
-        private _zoomSpeed:number = 1;
+        private _dollyStart: THREE.Vector2 = new THREE.Vector2();
+        private _scale: number = 1;
+        private _zoomSpeed: number = 1;
 
-        constructor(options:IOptions) {
+        constructor(options: IOptions) {
             this.options = $.extend(<IOptions>{
                 ambientLightColor: 0xc2c1be,
                 cameraZ: 4.5,
@@ -68,7 +67,7 @@ module Virtex {
             this._draw();
         }
 
-        private _init():void {
+        private _init(): void {
 
             if (!Detector.webgl) Detector.addGetWebGLMessage();
 
@@ -112,6 +111,7 @@ module Virtex {
                 antialias: true,
                 alpha: true
             }) : new THREE.CanvasRenderer();
+
             this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
 
             this._$viewport.append(this._renderer.domElement);
@@ -169,34 +169,34 @@ module Virtex {
 
             this._$loading.show();
 
-            var loader:THREE.ObjectLoader = new THREE.ObjectLoader();
+            var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
             loader.setCrossOrigin('anonymous');
 
             loader.load(this.options.object,
-                (obj:Object3D) => {
+                (obj: THREE.Object3D) => {
                     this._modelGroup.add(obj);
                     this._scene.add(this._modelGroup);
                     this._$loading.fadeOut(this.options.fadeSpeed);
                 },
-                (e:ProgressEvent) => {
+                (e: ProgressEvent) => {
                     if (e.lengthComputable) {
                         this._loadProgress(e.loaded / e.total);
                     }
                 },
-                (e:ErrorEvent) => {
+                (e: ErrorEvent) => {
                     // error
                     console.log(e);
                 }
             );
         }
 
-        private _loadProgress(progress:number):void {
+        private _loadProgress(progress: number): void {
             var fullWidth = this._$loading.width();
             var width = Math.floor(fullWidth * progress);
             this._$loadingBar.width(width);
         }
 
-        private _onMouseDown(event):void {
+        private _onMouseDown(event): void {
             event.preventDefault();
 
             this._isMouseDown = true;
@@ -208,7 +208,7 @@ module Virtex {
             this._targetRotationOnMouseDownY = this._targetRotationY;
         }
 
-        private _onMouseMove(event):void {
+        private _onMouseMove(event): void {
 
             this._mouseX = event.clientX - this._viewportHalfX;
             this._mouseY = event.clientY - this._viewportHalfY;
@@ -219,15 +219,15 @@ module Virtex {
             }
         }
 
-        private _onMouseUp(event):void {
+        private _onMouseUp(event): void {
             this._isMouseDown = false;
         }
 
-        private _onMouseOut(event):void {
+        private _onMouseOut(event): void {
             this._isMouseDown = false;
         }
 
-        private _onMouseWheel(event):void {
+        private _onMouseWheel(event): void {
 
             event.preventDefault();
             event.stopPropagation();
@@ -247,7 +247,7 @@ module Virtex {
             }
         }
 
-        private _onTouchStart(event):void {
+        private _onTouchStart(event): void {
 
             const touches = event.touches;
 
@@ -265,7 +265,7 @@ module Virtex {
             }
         }
 
-        private _onTouchMove(event):void {
+        private _onTouchMove(event): void {
 
             event.preventDefault();
             event.stopPropagation();
@@ -319,11 +319,11 @@ module Virtex {
             }
         }
 
-        private _onTouchEnd(event):void {
+        private _onTouchEnd(event): void {
             this._isMouseDown = false;
         }
 
-        private _dollyIn(dollyScale?:number):void {
+        private _dollyIn(dollyScale?: number): void {
 
             if (dollyScale === undefined) {
                 dollyScale = this._getZoomScale();
@@ -332,7 +332,7 @@ module Virtex {
             this._scale /= dollyScale;
         }
 
-        private _dollyOut(dollyScale?:number):void {
+        private _dollyOut(dollyScale?: number): void {
 
             if (dollyScale === undefined) {
                 dollyScale = this._getZoomScale();
@@ -341,11 +341,11 @@ module Virtex {
             this._scale *= dollyScale;
         }
 
-        private _getZoomScale():number {
+        private _getZoomScale(): number {
             return Math.pow(0.95, this._zoomSpeed);
         }
 
-        private _draw():void {
+        private _draw(): void {
             requestAnimFrame(() => this._draw());
             this._render();
             if (this.options.showStats) {
@@ -353,7 +353,7 @@ module Virtex {
             }
         }
 
-        private _render():void {
+        private _render(): void {
 
             // horizontal rotation
             this._modelGroup.rotation.y += (this._targetRotationX - this._modelGroup.rotation.y) * 0.1;
@@ -380,15 +380,15 @@ module Virtex {
             this._renderer.render(this._scene, this._camera);
         }
 
-        private _getWidth():number {
+        private _getWidth(): number {
             return this._$element.width();
         }
 
-        private _getHeight():number {
+        private _getHeight(): number {
             return this._$element.height();
         }
 
-        private _resize():void {
+        private _resize(): void {
 
             this._$element.width(this._getWidth());
             this._$element.height(this._getHeight());

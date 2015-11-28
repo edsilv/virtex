@@ -8,6 +8,7 @@ var GulpConfig = (function () {
         this.jsOut = this.lib + '.js';
         this.dtsOut = this.lib + '.d.ts';
         this.tsSrc = [
+            'src/_references.ts',
             'src/*.ts',
             'typings/*.ts'];
     }
