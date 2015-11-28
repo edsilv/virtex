@@ -1,5 +1,3 @@
-module Virtex {
-    export interface IVirtex {
-        options: IOptions;
-    }
+interface IVirtex {
+    create: (element: string, options: Virtex.IOptions) => Virtex.Viewport;
 }
