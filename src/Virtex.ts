@@ -165,8 +165,10 @@ class Virtex implements IVirtex {
 
         // LOADER //
 
-        var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
         this._$loading.show();
+
+        var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
+        loader.setCrossOrigin('anonymous');
 
         loader.load(this.options.object,
             (obj: Object3D) => {

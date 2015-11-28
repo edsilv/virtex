@@ -105,8 +105,9 @@ var Virtex = function () {
             window.addEventListener('resize', function () {
                 return _this._resize();
             }, false);
-            var loader = new THREE.ObjectLoader();
             this._$loading.show();
+            var loader = new THREE.ObjectLoader();
+            loader.setCrossOrigin('anonymous');
             loader.load(this.options.object, function (obj) {
                 _this._modelGroup.add(obj);
                 _this._scene.add(_this._modelGroup);
