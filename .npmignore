@@ -6,3 +6,4 @@ test
 typings
 gulpfile.config.js
 gulpfile.js
+npm-debug.log
