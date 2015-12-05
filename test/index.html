@@ -29,15 +29,17 @@
         $(function() {
 
             var objects = {
+                animalskull: 'objects/animal-skull.json',
                 ecorche: 'objects/ecorche.json',
-                animalskull: 'objects/skull.json'
+                thekiss: 'objects/thekiss.json'
             };
 
             // test cross origin
-//            var objects = {
-//                ecorche: 'http://universalviewer.io.s3.amazonaws.com/manifests/nelis/ecorche/ecorche.json',
-//                animalskull: 'http://universalviewer.io.s3.amazonaws.com/manifests/nelis/animal-skull/animal-skull.json'
-//            };
+        //    var objects = {
+        //        animalskull: 'http://files.universalviewer.io/manifests/nelis/animal-skull/animal-skull.json',
+        //        ecorche: 'http://files.universalviewer.io/manifests/nelis/ecorche/ecorche.json',
+        //        thekiss: 'http://files.universalviewer.io/manifests/foundobjects/thekiss/thekiss.json'
+        //    };
 
             virtex.create({
                 element: "#viewer",

@@ -10,6 +10,8 @@ module Virtex{
         fadeSpeed: number;
         far: number;
         fov: number;
+        maxZoom: number;
+        minZoom: number;
         near: number;
         object: string;
         shading: THREE.Shading;
