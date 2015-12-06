@@ -36,6 +36,7 @@ declare module Virtex {
         private _$viewport;
         private _$loading;
         private _$loadingBar;
+        private _$oldie;
         private _camera;
         private _lightGroup;
         private _modelGroup;
@@ -70,9 +71,9 @@ declare module Virtex {
         private _render();
         private _getWidth();
         private _getHeight();
-        private _resize();
         zoomIn(): void;
         zoomOut(): void;
+        private _resize();
     }
 }
 

@@ -48,17 +48,25 @@ var Virtex;
                 showStats: false,
                 zoomSpeed: 1.5
             }, options);
-            this._init();
+            var success = this._init();
             this._resize();
-            this._draw();
+            if (success) {
+                this._draw();
+            }
         }
         Viewport.prototype._init = function () {
             var _this = this;
-            if (!Detector.webgl)
-                Detector.addGetWebGLMessage();
             this._$element = $(this.options.element);
-            if (!this._$element.length)
+            if (!this._$element.length) {
                 console.log('element not found');
+                return false;
+            }
+            if (!Detector.webgl) {
+                Detector.addGetWebGLMessage();
+                this._$oldie = $('#oldie');
+                this._$oldie.appendTo(this._$element);
+                return false;
+            }
             this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
             this._$viewport = this._$element.find('.viewport');
             this._$loading = this._$element.find('.loading');
@@ -81,10 +89,10 @@ var Virtex;
             this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
             this._camera.position.z = this._targetZoom = this.options.cameraZ;
             // RENDERER //
-            this._renderer = Detector.webgl ? new THREE.WebGLRenderer({
+            this._renderer = new THREE.WebGLRenderer({
                 antialias: true,
                 alpha: true
-            }) : new THREE.CanvasRenderer();
+            });
             this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             this._$viewport.append(this._renderer.domElement);
             // STATS //
@@ -139,6 +147,7 @@ var Virtex;
                 // error
                 console.log(e);
             });
+            return true;
         };
         Viewport.prototype._loadProgress = function (progress) {
             var fullWidth = this._$loading.width();
@@ -269,21 +278,6 @@ var Virtex;
         Viewport.prototype._getHeight = function () {
             return this._$element.height();
         };
-        Viewport.prototype._resize = function () {
-            this._$element.width(this._getWidth());
-            this._$element.height(this._getHeight());
-            this._$viewport.width(this._getWidth());
-            this._$viewport.height(this._getHeight());
-            this._viewportHalfX = this._$viewport.width() / 2;
-            this._viewportHalfY = this._$viewport.height() / 2;
-            this._camera.aspect = this._$viewport.width() / this._$viewport.height();
-            this._camera.updateProjectionMatrix();
-            this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
-            this._$loading.css({
-                left: (this._viewportHalfX) - (this._$loading.width() / 2),
-                top: (this._viewportHalfY) - (this._$loading.height() / 2)
-            });
-        };
         Viewport.prototype.zoomIn = function () {
             var t = this._camera.position.z - this.options.zoomSpeed;
             if (t > this.options.minZoom) {
@@ -300,6 +294,29 @@ var Virtex;
             }
             else {
                 this._targetZoom = this.options.maxZoom;
+            }
+        };
+        Viewport.prototype._resize = function () {
+            if (this._$element && this._$viewport) {
+                this._$element.width(this._getWidth());
+                this._$element.height(this._getHeight());
+                this._$viewport.width(this._getWidth());
+                this._$viewport.height(this._getHeight());
+                this._viewportHalfX = this._$viewport.width() / 2;
+                this._viewportHalfY = this._$viewport.height() / 2;
+                this._camera.aspect = this._$viewport.width() / this._$viewport.height();
+                this._camera.updateProjectionMatrix();
+                this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+                this._$loading.css({
+                    left: (this._viewportHalfX) - (this._$loading.width() / 2),
+                    top: (this._viewportHalfY) - (this._$loading.height() / 2)
+                });
+            }
+            else if (this._$oldie) {
+                this._$oldie.css({
+                    left: (this._$element.width() / 2) - (this._$oldie.outerWidth() / 2),
+                    top: (this._$element.height() / 2) - (this._$oldie.outerHeight() / 2)
+                });
             }
         };
         return Viewport;

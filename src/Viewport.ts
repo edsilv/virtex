@@ -21,6 +21,7 @@ module Virtex {
         private _$viewport: JQuery;
         private _$loading: JQuery;
         private _$loadingBar: JQuery;
+        private _$oldie: JQuery;
 
         private _camera: THREE.PerspectiveCamera;
         private _lightGroup: THREE.Group;
@@ -63,18 +64,30 @@ module Virtex {
                 zoomSpeed: 1.5
             }, options);
 
-            this._init();
+            var success: boolean = this._init();
+
             this._resize();
-            this._draw();
+
+            if (success){
+                this._draw();
+            }
         }
 
-        private _init(): void {
-
-            if (!Detector.webgl) Detector.addGetWebGLMessage();
+        private _init(): boolean {
 
             this._$element = $(this.options.element);
 
-            if (!this._$element.length) console.log('element not found');
+            if (!this._$element.length){
+                console.log('element not found');
+                return false;
+            }
+
+            if (!Detector.webgl) {
+                Detector.addGetWebGLMessage();
+                this._$oldie = $('#oldie');
+                this._$oldie.appendTo(this._$element);
+                return false;
+            }
 
             this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
             this._$viewport = this._$element.find('.viewport');
@@ -108,10 +121,10 @@ module Virtex {
 
             // RENDERER //
 
-            this._renderer = Detector.webgl ? new THREE.WebGLRenderer({
+            this._renderer = new THREE.WebGLRenderer({
                 antialias: true,
                 alpha: true
-            }) : new THREE.CanvasRenderer();
+            });
 
             this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
 
@@ -189,6 +202,8 @@ module Virtex {
                     console.log(e);
                 }
             );
+
+            return true;
         }
 
         private _loadProgress(progress: number): void {
@@ -364,28 +379,6 @@ module Virtex {
             return this._$element.height();
         }
 
-        private _resize(): void {
-
-            this._$element.width(this._getWidth());
-            this._$element.height(this._getHeight());
-
-            this._$viewport.width(this._getWidth());
-            this._$viewport.height(this._getHeight());
-
-            this._viewportHalfX = this._$viewport.width() / 2;
-            this._viewportHalfY = this._$viewport.height() / 2;
-
-            this._camera.aspect = this._$viewport.width() / this._$viewport.height();
-            this._camera.updateProjectionMatrix();
-
-            this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
-
-            this._$loading.css({
-                left: (this._viewportHalfX) - (this._$loading.width() / 2),
-                top: (this._viewportHalfY) - (this._$loading.height() / 2)
-            });
-        }
-
         public zoomIn(): void {
             var t = this._camera.position.z - this.options.zoomSpeed;
             if (t > this.options.minZoom){
@@ -401,6 +394,35 @@ module Virtex {
                 this._targetZoom = t;
             } else {
                 this._targetZoom = this.options.maxZoom;
+            }
+        }
+
+        private _resize(): void {
+
+            if (this._$element && this._$viewport){
+                this._$element.width(this._getWidth());
+                this._$element.height(this._getHeight());
+
+                this._$viewport.width(this._getWidth());
+                this._$viewport.height(this._getHeight());
+
+                this._viewportHalfX = this._$viewport.width() / 2;
+                this._viewportHalfY = this._$viewport.height() / 2;
+
+                this._camera.aspect = this._$viewport.width() / this._$viewport.height();
+                this._camera.updateProjectionMatrix();
+
+                this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+
+                this._$loading.css({
+                    left: (this._viewportHalfX) - (this._$loading.width() / 2),
+                    top: (this._viewportHalfY) - (this._$loading.height() / 2)
+                });
+            } else if (this._$oldie) {
+                this._$oldie.css({
+                    left: (this._$element.width() / 2) - (this._$oldie.outerWidth() / 2),
+                    top: (this._$element.height() / 2) - (this._$oldie.outerHeight() / 2)
+                });
             }
         }
     }
