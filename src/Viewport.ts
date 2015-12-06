@@ -36,14 +36,12 @@ module Virtex {
         private _mouseXOnMouseDown: number = 0;
         private _mouseY: number = 0;
         private _mouseYOnMouseDown: number = 0;
+        private _pinchStart: THREE.Vector2 = new THREE.Vector2();
         private _targetRotationOnMouseDownX: number = 0;
         private _targetRotationOnMouseDownY: number = 0;
         private _targetRotationX: number = 0;
         private _targetRotationY: number = 0;
-
-        private _dollyStart: THREE.Vector2 = new THREE.Vector2();
-        private _scale: number = 1;
-        private _zoomSpeed: number = 1;
+        private _targetZoom: number;
 
         constructor(options: IOptions) {
             this.options = $.extend(<IOptions>{
@@ -61,7 +59,8 @@ module Virtex {
                 near: 0.1,
                 shading: THREE.SmoothShading,
                 shininess: 1,
-                showStats: false
+                showStats: false,
+                zoomSpeed: 1.5
             }, options);
 
             this._init();
@@ -105,7 +104,7 @@ module Virtex {
             // CAMERA //
 
             this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
-            this._camera.position.z = this.options.cameraZ;
+            this._camera.position.z = this._targetZoom = this.options.cameraZ;
 
             // RENDERER //
 
@@ -243,9 +242,9 @@ module Virtex {
             }
 
             if (delta > 0) {
-                this._dollyOut();
+                this.zoomIn();
             } else if (delta < 0) {
-                this._dollyIn();
+                this.zoomOut();
             }
         }
 
@@ -287,22 +286,22 @@ module Virtex {
 
                     break;
 
-                case 2: // two-fingered touch: dolly
+                case 2: // two-fingered touch: zoom
                     var dx = touches[0].pageX - touches[1].pageX;
                     var dy = touches[0].pageY - touches[1].pageY;
                     var distance = Math.sqrt(dx * dx + dy * dy);
 
-                    var dollyEnd = new THREE.Vector2(0, distance);
-                    var dollyDelta = new THREE.Vector2();
-                    dollyDelta.subVectors(dollyEnd, this._dollyStart);
+                    var pinchEnd = new THREE.Vector2(0, distance);
+                    var pinchDelta = new THREE.Vector2();
+                    pinchDelta.subVectors(pinchEnd, this._pinchStart);
 
-                    if (dollyDelta.y > 0) {
-                        this._dollyOut();
-                    } else if (dollyDelta.y < 0) {
-                        this._dollyIn();
+                    if (pinchDelta.y > 0) {
+                        this.zoomIn();
+                    } else if (pinchDelta.y < 0) {
+                        this.zoomOut();
                     }
 
-                    this._dollyStart.copy(dollyEnd);
+                    this._pinchStart.copy(pinchEnd);
 
                     break;
 
@@ -323,28 +322,6 @@ module Virtex {
 
         private _onTouchEnd(event): void {
             this._isMouseDown = false;
-        }
-
-        private _dollyIn(dollyScale?: number): void {
-
-            if (dollyScale === undefined) {
-                dollyScale = this._getZoomScale();
-            }
-
-            this._scale /= dollyScale;
-        }
-
-        private _dollyOut(dollyScale?: number): void {
-
-            if (dollyScale === undefined) {
-                dollyScale = this._getZoomScale();
-            }
-
-            this._scale *= dollyScale;
-        }
-
-        private _getZoomScale(): number {
-            return Math.pow(0.95, this._zoomSpeed);
         }
 
         private _draw(): void {
@@ -373,14 +350,8 @@ module Virtex {
                 this._modelGroup.rotation.x = -1
             }
 
-            var newCameraZ = this._camera.position.z *= this._scale;
-            newCameraZ = Math.min(Math.max(newCameraZ, this.options.minZoom), this.options.maxZoom);
-            this._camera.position.z = newCameraZ;
-            //camera.position.add(pan);
-
-            // reset scale
-            this._scale = 1;
-            //pan.set(0, 0, 0);
+            var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
+            this._camera.position.z = this._camera.position.z + zoomDelta;
 
             this._renderer.render(this._scene, this._camera);
         }
@@ -416,11 +387,21 @@ module Virtex {
         }
 
         public zoomIn(): void {
-            this._dollyIn(1.2);
+            var t = this._camera.position.z - this.options.zoomSpeed;
+            if (t > this.options.minZoom){
+                this._targetZoom = t;
+            } else {
+                this._targetZoom = this.options.minZoom;
+            }
         }
 
         public zoomOut(): void {
-            this._dollyOut(1.2);
+            var t = this._camera.position.z + this.options.zoomSpeed;
+            if (t < this.options.maxZoom){
+                this._targetZoom = t;
+            } else {
+                this._targetZoom = this.options.maxZoom;
+            }
         }
     }
 }

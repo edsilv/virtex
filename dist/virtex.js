@@ -25,13 +25,11 @@ var Virtex;
             this._mouseXOnMouseDown = 0;
             this._mouseY = 0;
             this._mouseYOnMouseDown = 0;
+            this._pinchStart = new THREE.Vector2();
             this._targetRotationOnMouseDownX = 0;
             this._targetRotationOnMouseDownY = 0;
             this._targetRotationX = 0;
             this._targetRotationY = 0;
-            this._dollyStart = new THREE.Vector2();
-            this._scale = 1;
-            this._zoomSpeed = 1;
             this.options = $.extend({
                 ambientLightColor: 0xd0d0d0,
                 cameraZ: 4.5,
@@ -47,7 +45,8 @@ var Virtex;
                 near: 0.1,
                 shading: THREE.SmoothShading,
                 shininess: 1,
-                showStats: false
+                showStats: false,
+                zoomSpeed: 1.5
             }, options);
             this._init();
             this._resize();
@@ -80,7 +79,7 @@ var Virtex;
             this._scene.add(this._lightGroup);
             // CAMERA //
             this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
-            this._camera.position.z = this.options.cameraZ;
+            this._camera.position.z = this._targetZoom = this.options.cameraZ;
             // RENDERER //
             this._renderer = Detector.webgl ? new THREE.WebGLRenderer({
                 antialias: true,
@@ -179,10 +178,10 @@ var Virtex;
                 delta = -event.detail;
             }
             if (delta > 0) {
-                this._dollyOut();
+                this.zoomIn();
             }
             else if (delta < 0) {
-                this._dollyIn();
+                this.zoomOut();
             }
         };
         Viewport.prototype._onTouchStart = function (event) {
@@ -212,16 +211,16 @@ var Virtex;
                     var dx = touches[0].pageX - touches[1].pageX;
                     var dy = touches[0].pageY - touches[1].pageY;
                     var distance = Math.sqrt(dx * dx + dy * dy);
-                    var dollyEnd = new THREE.Vector2(0, distance);
-                    var dollyDelta = new THREE.Vector2();
-                    dollyDelta.subVectors(dollyEnd, this._dollyStart);
-                    if (dollyDelta.y > 0) {
-                        this._dollyOut();
+                    var pinchEnd = new THREE.Vector2(0, distance);
+                    var pinchDelta = new THREE.Vector2();
+                    pinchDelta.subVectors(pinchEnd, this._pinchStart);
+                    if (pinchDelta.y > 0) {
+                        this.zoomIn();
                     }
-                    else if (dollyDelta.y < 0) {
-                        this._dollyIn();
+                    else if (pinchDelta.y < 0) {
+                        this.zoomOut();
                     }
-                    this._dollyStart.copy(dollyEnd);
+                    this._pinchStart.copy(pinchEnd);
                     break;
                 case 3:
                     //var panEnd = new THREE.Vector2();
@@ -237,21 +236,6 @@ var Virtex;
         };
         Viewport.prototype._onTouchEnd = function (event) {
             this._isMouseDown = false;
-        };
-        Viewport.prototype._dollyIn = function (dollyScale) {
-            if (dollyScale === undefined) {
-                dollyScale = this._getZoomScale();
-            }
-            this._scale /= dollyScale;
-        };
-        Viewport.prototype._dollyOut = function (dollyScale) {
-            if (dollyScale === undefined) {
-                dollyScale = this._getZoomScale();
-            }
-            this._scale *= dollyScale;
-        };
-        Viewport.prototype._getZoomScale = function () {
-            return Math.pow(0.95, this._zoomSpeed);
         };
         Viewport.prototype._draw = function () {
             var _this = this;
@@ -275,13 +259,8 @@ var Virtex;
             else if (this._modelGroup.rotation.x < -1) {
                 this._modelGroup.rotation.x = -1;
             }
-            var newCameraZ = this._camera.position.z *= this._scale;
-            newCameraZ = Math.min(Math.max(newCameraZ, this.options.minZoom), this.options.maxZoom);
-            this._camera.position.z = newCameraZ;
-            //camera.position.add(pan);
-            // reset scale
-            this._scale = 1;
-            //pan.set(0, 0, 0);
+            var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
+            this._camera.position.z = this._camera.position.z + zoomDelta;
             this._renderer.render(this._scene, this._camera);
         };
         Viewport.prototype._getWidth = function () {
@@ -306,10 +285,22 @@ var Virtex;
             });
         };
         Viewport.prototype.zoomIn = function () {
-            this._dollyIn(1.2);
+            var t = this._camera.position.z - this.options.zoomSpeed;
+            if (t > this.options.minZoom) {
+                this._targetZoom = t;
+            }
+            else {
+                this._targetZoom = this.options.minZoom;
+            }
         };
         Viewport.prototype.zoomOut = function () {
-            this._dollyOut(1.2);
+            var t = this._camera.position.z + this.options.zoomSpeed;
+            if (t < this.options.maxZoom) {
+                this._targetZoom = t;
+            }
+            else {
+                this._targetZoom = this.options.maxZoom;
+            }
         };
         return Viewport;
     })();

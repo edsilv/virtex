@@ -17,5 +17,6 @@ module Virtex{
         shading: THREE.Shading;
         shininess: number;
         showStats: boolean;
+        zoomSpeed: number;
     }
 }
