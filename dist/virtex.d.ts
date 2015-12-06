@@ -74,6 +74,8 @@ declare module Virtex {
         private _getWidth();
         private _getHeight();
         private _resize();
+        zoomIn(): void;
+        zoomOut(): void;
     }
 }
 

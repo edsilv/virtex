@@ -414,5 +414,13 @@ module Virtex {
                 top: (this._viewportHalfY) - (this._$loading.height() / 2)
             });
         }
+
+        public zoomIn(): void {
+            this._dollyIn(1.2);
+        }
+
+        public zoomOut(): void {
+            this._dollyOut(1.2);
+        }
     }
 }

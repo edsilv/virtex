@@ -16,6 +16,11 @@
 </head>
 <body>
 
+    <div>
+        <button id="zoomIn">+</button>
+        <button id="zoomOut">-</button>
+    </div>
+
     <div id="viewer" class="virtex" style="width: 800px; height: 600px">
 
     </div>
@@ -41,10 +46,22 @@
         //        thekiss: 'http://files.universalviewer.io/manifests/foundobjects/thekiss/thekiss.json'
         //    };
 
-            virtex.create({
+            var viewport = virtex.create({
                 element: "#viewer",
                 object: objects.ecorche,
                 showStats: false
+            });
+
+            $('#zoomIn').on('click', function(e){
+                e.preventDefault();
+
+                viewport.zoomIn();
+            });
+
+            $('#zoomOut').on('click', function(e){
+                e.preventDefault();
+
+                viewport.zoomOut();
             });
         });
     </script>

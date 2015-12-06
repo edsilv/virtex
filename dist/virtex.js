@@ -305,6 +305,12 @@ var Virtex;
                 top: (this._viewportHalfY) - (this._$loading.height() / 2)
             });
         };
+        Viewport.prototype.zoomIn = function () {
+            this._dollyIn(1.2);
+        };
+        Viewport.prototype.zoomOut = function () {
+            this._dollyOut(1.2);
+        };
         return Viewport;
     })();
     Virtex.Viewport = Viewport;
