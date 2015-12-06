@@ -61,7 +61,7 @@ module Virtex {
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
-                zoomSpeed: 1.5
+                zoomSpeed: 1
             }, options);
 
             var success: boolean = this._init();
