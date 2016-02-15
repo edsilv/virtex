@@ -142,39 +142,39 @@ module Virtex {
             // EVENTS //
 
             this._$element.on('mousedown', (e) => {
-                this._onMouseDown(e.originalEvent);
+                this._onMouseDown(<MouseEvent>e.originalEvent);
             });
 
             this._$element.on('mousemove', (e) => {
-                this._onMouseMove(e.originalEvent);
+                this._onMouseMove(<MouseEvent>e.originalEvent);
             });
 
             this._$element.on('mouseup', (e) => {
-                this._onMouseUp(e.originalEvent);
+                this._onMouseUp(<MouseEvent>e.originalEvent);
             });
 
             this._$element.on('mouseout', (e) => {
-                this._onMouseOut(e.originalEvent);
+                this._onMouseOut(<MouseEvent>e.originalEvent);
             });
 
             this._$element.on('mousewheel', (e) => {
-                this._onMouseWheel(e.originalEvent);
+                this._onMouseWheel(<MouseWheelEvent>e.originalEvent);
             });
 
             this._$element.on('DOMMouseScroll', (e) => {
-                this._onMouseWheel(e.originalEvent); // firefox
+                this._onMouseWheel(<MouseWheelEvent>e.originalEvent); // firefox
             });
 
             this._$element.on('touchstart', (e) => {
-                this._onTouchStart(e.originalEvent);
+                this._onTouchStart(<TouchEvent>e.originalEvent);
             });
 
             this._$element.on('touchmove', (e) => {
-                this._onTouchMove(e.originalEvent);
+                this._onTouchMove(<TouchEvent>e.originalEvent);
             });
 
             this._$element.on('touchend', (e) => {
-                this._onTouchEnd(e.originalEvent);
+                this._onTouchEnd(<TouchEvent>e.originalEvent);
             });
 
             window.addEventListener('resize', () => this._resize(), false);
@@ -212,7 +212,7 @@ module Virtex {
             this._$loadingBar.width(width);
         }
 
-        private _onMouseDown(event): void {
+        private _onMouseDown(event: MouseEvent): void {
             event.preventDefault();
 
             this._isMouseDown = true;
@@ -224,7 +224,7 @@ module Virtex {
             this._targetRotationOnMouseDownY = this._targetRotationY;
         }
 
-        private _onMouseMove(event): void {
+        private _onMouseMove(event: MouseEvent): void {
 
             this._mouseX = event.clientX - this._viewportHalfX;
             this._mouseY = event.clientY - this._viewportHalfY;
@@ -235,15 +235,15 @@ module Virtex {
             }
         }
 
-        private _onMouseUp(event): void {
+        private _onMouseUp(event: MouseEvent): void {
             this._isMouseDown = false;
         }
 
-        private _onMouseOut(event): void {
+        private _onMouseOut(event: MouseEvent): void {
             this._isMouseDown = false;
         }
 
-        private _onMouseWheel(event): void {
+        private _onMouseWheel(event: MouseWheelEvent): void {
 
             event.preventDefault();
             event.stopPropagation();
@@ -263,7 +263,7 @@ module Virtex {
             }
         }
 
-        private _onTouchStart(event): void {
+        private _onTouchStart(event: TouchEvent): void {
 
             const touches = event.touches;
 
@@ -281,7 +281,7 @@ module Virtex {
             }
         }
 
-        private _onTouchMove(event): void {
+        private _onTouchMove(event: TouchEvent): void {
 
             event.preventDefault();
             event.stopPropagation();
@@ -335,7 +335,7 @@ module Virtex {
             }
         }
 
-        private _onTouchEnd(event): void {
+        private _onTouchEnd(event: TouchEvent): void {
             this._isMouseDown = false;
         }
 
@@ -392,6 +392,7 @@ module Virtex {
             var t = this._camera.position.z + this.options.zoomSpeed;
             if (t < this.options.maxZoom){
                 this._targetZoom = t;
+                console.log(t);
             } else {
                 this._targetZoom = this.options.maxZoom;
             }
