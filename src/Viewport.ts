@@ -52,6 +52,7 @@ module Virtex {
                 directionalLight1Intensity: 0.75,
                 directionalLight2Color: 0x002958,
                 directionalLight2Intensity: 0.5,
+                doubleSided: true,
                 fadeSpeed: 1750,
                 far: 10000,
                 fov: 45,
@@ -188,7 +189,15 @@ module Virtex {
 
             loader.load(this.options.object,
                 (obj: THREE.Object3D) => {
+
+                    if (this.options.doubleSided){
+                        obj.traverse((child: any) => {
+                            if (child.material) child.material.side = THREE.DoubleSide;
+                        });
+                    }
+
                     this._modelGroup.add(obj);
+
                     this._scene.add(this._modelGroup);
                     this._$loading.fadeOut(this.options.fadeSpeed);
                 },
