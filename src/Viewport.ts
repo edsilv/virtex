@@ -401,7 +401,6 @@ module Virtex {
             var t = this._camera.position.z + this.options.zoomSpeed;
             if (t < this.options.maxZoom){
                 this._targetZoom = t;
-                console.log(t);
             } else {
                 this._targetZoom = this.options.maxZoom;
             }
