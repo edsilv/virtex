@@ -13,5 +13,10 @@ Clone the repo then run:
     gulp test
 
 ##Examples
+
  - [Universal Viewer 3D Extension](http://universalviewer.io/examples/?manifest=http%3A%2F%2Ffiles.universalviewer.io%2Fmanifests%2Fnelis%2Fecorche.json)
+ 
+ ##Guides
+ 
+ - [Complete Photogrammetry Workflow](https://www.gitbook.com/book/sophiedixon/photogrammetry-guide/details)
 
