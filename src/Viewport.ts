@@ -1,5 +1,6 @@
 declare var Detector: any;
 declare var Stats: any;
+declare var WebVRManager: any;
 
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
@@ -43,6 +44,9 @@ module Virtex {
         private _targetRotationX: number = 0;
         private _targetRotationY: number = 0;
         private _targetZoom: number;
+        private _vrControls: THREE.VRControls;
+        private _vrEffect: THREE.VREffect;
+        private _vrManager: any;
 
         constructor(options: IOptions) {
             this.options = $.extend(<IOptions>{
@@ -127,7 +131,18 @@ module Virtex {
                 alpha: true
             });
 
-            this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+            //this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+
+            // CONTROLS //
+            
+            // Apply VR headset positional data to camera.
+            this._vrControls = new THREE.VRControls(this._camera);
+            
+            // EFFECTS //
+            
+            // Apply VR stereo rendering to renderer.
+            this._vrEffect = new THREE.VREffect(this._renderer);
+            this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
 
             this._$viewport.append(this._renderer.domElement);
 
@@ -211,6 +226,14 @@ module Virtex {
                     console.log(e);
                 }
             );
+
+            // Create a VR manager helper to enter and exit VR mode.
+            var params = {
+                hideButton: false, // Default: false.
+                isUndistorted: false // Default: false.
+            };
+            
+            this._vrManager = new WebVRManager(this._renderer, this._vrEffect, params);
 
             return true;
         }
@@ -377,7 +400,13 @@ module Virtex {
             var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
             this._camera.position.z = this._camera.position.z + zoomDelta;
 
-            this._renderer.render(this._scene, this._camera);
+            // Update VR headset position and apply to camera.
+            this._vrControls.update();
+
+            // Render the scene through the manager.
+            this._vrManager.render(this._scene, this._camera);
+
+            //this._renderer.render(this._scene, this._camera);
         }
 
         private _getWidth(): number {

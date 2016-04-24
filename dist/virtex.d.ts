@@ -29,6 +29,7 @@ interface IVirtex {
 
 declare var Detector: any;
 declare var Stats: any;
+declare var WebVRManager: any;
 declare var requestAnimFrame: any;
 declare module Virtex {
     class Viewport {
@@ -57,6 +58,9 @@ declare module Virtex {
         private _targetRotationX;
         private _targetRotationY;
         private _targetZoom;
+        private _vrControls;
+        private _vrEffect;
+        private _vrManager;
         constructor(options: IOptions);
         private _init();
         private _loadProgress(progress);
