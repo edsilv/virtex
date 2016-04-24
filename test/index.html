@@ -4,13 +4,17 @@
     <title>virtex: test</title>
     <link rel="stylesheet" type="text/css" href="virtex.css" />
 
-    <script src="js/jquery.js"></script>
+    <script src="jquery/dist/jquery.js"></script>
 
     <style>
         body {
             color: #fff;
-            margin: 0;
+            margin: 0px;
+            padding: 0;
             overflow: hidden;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
         }
     </style>
 </head>
@@ -21,12 +25,10 @@
         <button id="zoomOut">-</button>
     </div>
 
-    <div id="viewer" class="virtex" style="width: 800px; height: 600px">
-
-    </div>
+    <div id="viewer" class="virtex" style="width: 800px; height: 600px"></div>
 
     <script src="virtex.js"></script>
-    <script src="js/three.min.js"></script>
+    <script src="three/three.min.js"></script>
     <script src="js/stats.min.js"></script>
     <script src="js/Detector.js"></script>
 
