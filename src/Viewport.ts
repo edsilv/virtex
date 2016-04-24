@@ -131,6 +131,8 @@ module Virtex {
                 alpha: true
             });
 
+            this._$viewport.append(this._renderer.domElement);
+            
             //this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
 
             // CONTROLS //
@@ -144,7 +146,7 @@ module Virtex {
             this._vrEffect = new THREE.VREffect(this._renderer);
             this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
 
-            this._$viewport.append(this._renderer.domElement);
+            //this._$viewport.append(this._renderer.domElement);
 
             // STATS //
 

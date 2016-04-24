@@ -94,6 +94,8 @@ var Virtex;
                 antialias: true,
                 alpha: true
             });
+            //this._renderer.setPixelRatio(window.devicePixelRatio);
+            this._$viewport.append(this._renderer.domElement);
             //this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             // CONTROLS //
             // Apply VR headset positional data to camera.
@@ -102,7 +104,7 @@ var Virtex;
             // Apply VR stereo rendering to renderer.
             this._vrEffect = new THREE.VREffect(this._renderer);
             this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
-            this._$viewport.append(this._renderer.domElement);
+            //this._$viewport.append(this._renderer.domElement);
             // STATS //
             if (this.options.showStats) {
                 this._stats = new Stats();
