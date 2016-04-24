@@ -26,10 +26,12 @@
     "gulp-rename": "^1.2.0",
     "gulp-typescript": "^2.2.1",
     "gulp-uglify": "^0.3.1",
+    "jquery": "^2.2.3",
     "merge2": "^0.3.6",
     "path": "^0.11.14",
     "require-dir": "^0.3.0",
     "run-sequence": "^1.0.1",
+    "three": "^0.76.1",
     "yargs": "^3.12.0"
   },
   "scripts": {
