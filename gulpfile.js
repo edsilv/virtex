@@ -74,8 +74,8 @@ gulp.task('test', function() {
         root: './test',
         middleware: function(connect, opt) {
             return [
-                // serve contents of the dist folder
-                mount(connect, config.dist)
+                mount(connect, config.dist), // serve contents of the dist folder
+                mount(connect, './node_modules') // serve node_modules
             ]
         }
     });
