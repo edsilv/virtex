@@ -291,10 +291,10 @@ var Virtex;
             else if (this._modelGroup.rotation.x < -1) {
                 this._modelGroup.rotation.x = -1;
             }
-            var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
-            this._camera.position.z = this._camera.position.z + zoomDelta;
             // Update VR headset position and apply to camera.
             //this._vrControls.update();
+            var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
+            this._camera.position.z = this._camera.position.z + zoomDelta;
             this._vrEffect.render(this._scene, this._camera);
             // Render the scene through the manager.
             //this._vrManager.render(this._scene, this._camera);
