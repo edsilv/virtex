@@ -216,7 +216,7 @@ module Virtex {
                     this._modelGroup.add(obj);
                     
                     this._modelGroup.position.z = -5;
-                    this._modelGroup.position.y = -2.5;
+                    //this._modelGroup.position.y = -2.5;
 
                     this._scene.add(this._modelGroup);
                     this._$loading.fadeOut(this.options.fadeSpeed);
