@@ -403,12 +403,14 @@ module Virtex {
             this._camera.position.z = this._camera.position.z + zoomDelta;
 
             // Update VR headset position and apply to camera.
-            this._vrControls.update();
+            //this._vrControls.update();
+
+            this._vrEffect.render(this._scene, this._camera);
 
             // Render the scene through the manager.
             //this._vrManager.render(this._scene, this._camera);
 
-            this._renderer.render(this._scene, this._camera);
+            //this._renderer.render(this._scene, this._camera);
         }
 
         private _getWidth(): number {
