@@ -154,6 +154,8 @@ var Virtex;
                     });
                 }
                 _this._modelGroup.add(obj);
+                _this._modelGroup.position.z = -5;
+                _this._modelGroup.position.y = -2.5;
                 _this._scene.add(_this._modelGroup);
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
             }, function (e) {
