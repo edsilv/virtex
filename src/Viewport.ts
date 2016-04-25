@@ -1,6 +1,6 @@
 declare var Detector: any;
 declare var Stats: any;
-declare var WebVRManager: any;
+//declare var WebVRManager: any;
 
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
@@ -46,7 +46,7 @@ module Virtex {
         private _targetZoom: number;
         private _vrControls: THREE.VRControls;
         private _vrEffect: THREE.VREffect;
-        private _vrManager: any;
+        //private _vrManager: any;
 
         constructor(options: IOptions) {
             this.options = $.extend(<IOptions>{
@@ -230,12 +230,12 @@ module Virtex {
             );
 
             // Create a VR manager helper to enter and exit VR mode.
-            var params = {
-                hideButton: false, // Default: false.
-                isUndistorted: false // Default: false.
-            };
+            // var params = {
+            //     hideButton: false, // Default: false.
+            //     isUndistorted: false // Default: false.
+            // };
             
-            this._vrManager = new WebVRManager(this._renderer, this._vrEffect, params);
+            //this._vrManager = new WebVRManager(this._renderer, this._vrEffect, params);
 
             return true;
         }
@@ -406,9 +406,9 @@ module Virtex {
             this._vrControls.update();
 
             // Render the scene through the manager.
-            this._vrManager.render(this._scene, this._camera);
+            //this._vrManager.render(this._scene, this._camera);
 
-            //this._renderer.render(this._scene, this._camera);
+            this._renderer.render(this._scene, this._camera);
         }
 
         private _getWidth(): number {

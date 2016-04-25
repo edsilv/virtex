@@ -6,6 +6,7 @@
 
 
 
+//declare var WebVRManager: any;
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
@@ -19,6 +20,7 @@ var requestAnimFrame = (function () {
 var Virtex;
 (function (Virtex) {
     var Viewport = (function () {
+        //private _vrManager: any;
         function Viewport(options) {
             this._isMouseDown = false;
             this._mouseX = 0;
@@ -94,7 +96,6 @@ var Virtex;
                 antialias: true,
                 alpha: true
             });
-            //this._renderer.setPixelRatio(window.devicePixelRatio);
             this._$viewport.append(this._renderer.domElement);
             //this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             // CONTROLS //
@@ -164,11 +165,11 @@ var Virtex;
                 console.log(e);
             });
             // Create a VR manager helper to enter and exit VR mode.
-            var params = {
-                hideButton: false,
-                isUndistorted: false // Default: false.
-            };
-            this._vrManager = new WebVRManager(this._renderer, this._vrEffect, params);
+            // var params = {
+            //     hideButton: false, // Default: false.
+            //     isUndistorted: false // Default: false.
+            // };
+            //this._vrManager = new WebVRManager(this._renderer, this._vrEffect, params);
             return true;
         };
         Viewport.prototype._loadProgress = function (progress) {
@@ -295,8 +296,8 @@ var Virtex;
             // Update VR headset position and apply to camera.
             this._vrControls.update();
             // Render the scene through the manager.
-            this._vrManager.render(this._scene, this._camera);
-            //this._renderer.render(this._scene, this._camera);
+            //this._vrManager.render(this._scene, this._camera);
+            this._renderer.render(this._scene, this._camera);
         };
         Viewport.prototype._getWidth = function () {
             return this._$element.width();
