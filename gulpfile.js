@@ -65,6 +65,18 @@ gulp.task('copy:css', function() {
         .pipe(gulp.dest(config.dist));
 });
 
+gulp.task('copy:js', function() {
+    return gulp.src([
+        'dist/virtex.js',
+        'node_modules/three/three.min.js',
+        'node_modules/three/examples/js/controls/VRControls.js',
+        'node_modules/three/examples/js/effects/VREffect.js',
+        'node_modules/three/examples/js/libs/stats.min.js',
+        'node_modules/three/examples/js/Detector.js',
+        'node_modules/webvr-polyfill/build/webvr-polyfill.js'
+    ]).pipe(gulp.dest('./test/js'));
+});
+
 function mount(connect, dir) {
     return connect.static(path.resolve(dir));
 }
@@ -74,13 +86,13 @@ gulp.task('test', function() {
         root: './test',
         middleware: function(connect, opt) {
             return [
-                mount(connect, config.dist), // serve contents of the dist folder
-                mount(connect, './node_modules') // serve node_modules
+                //mount(connect, config.dist), // serve contents of the dist folder
+                //mount(connect, './node_modules') // serve node_modules
             ]
         }
     });
 });
 
 gulp.task('default', function(cb) {
-    runSequence('clean:dist', 'build', 'browserify', 'copy:css', cb);
+    runSequence('clean:dist', 'build', 'browserify', 'copy:css', 'copy:js', cb);
 });
