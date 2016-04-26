@@ -1,25 +1,26 @@
 
 declare module Virtex {
     interface IOptions {
-        ambientLightColor: number;
-        cameraZ: number;
-        directionalLight1Color: number;
-        directionalLight1Intensity: number;
-        directionalLight2Color: number;
-        directionalLight2Intensity: number;
-        doubleSided: boolean;
-        element: string;
-        fadeSpeed: number;
-        far: number;
-        fov: number;
-        maxZoom: number;
-        minZoom: number;
-        near: number;
-        object: string;
-        shading: THREE.Shading;
-        shininess: number;
-        showStats: boolean;
-        zoomSpeed: number;
+        ambientLightColor?: number;
+        cameraZ?: number;
+        directionalLight1Color?: number;
+        directionalLight1Intensity?: number;
+        directionalLight2Color?: number;
+        directionalLight2Intensity?: number;
+        doubleSided?: boolean;
+        element?: string;
+        fadeSpeed?: number;
+        far?: number;
+        fov?: number;
+        maxZoom?: number;
+        minZoom?: number;
+        near?: number;
+        object?: string;
+        shading?: THREE.Shading;
+        shininess?: number;
+        showStats?: boolean;
+        vrMode?: boolean;
+        zoomSpeed?: number;
     }
 }
 
@@ -46,7 +47,11 @@ declare module Virtex {
         private _stats;
         private _viewportHalfX;
         private _viewportHalfY;
+        private _isFirstLoad;
+        private _isFullscreen;
         private _isMouseDown;
+        private _lastHeight;
+        private _lastWidth;
         private _mouseX;
         private _mouseXOnMouseDown;
         private _mouseY;
@@ -60,6 +65,8 @@ declare module Virtex {
         private _vrControls;
         private _vrEffect;
         constructor(options: IOptions);
+        private _refresh(options);
+        private _getDefaultOptions();
         private _init();
         private _loadProgress(progress);
         private _onMouseDown(event);
@@ -76,6 +83,11 @@ declare module Virtex {
         private _getHeight();
         zoomIn(): void;
         zoomOut(): void;
+        enterVRMode(): void;
+        enterFullscreen(): void;
+        exitFullscreen(): void;
+        private _getRequestFullScreen(elem);
+        private _getExitFullScreen();
         private _resize();
     }
 }

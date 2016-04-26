@@ -28,6 +28,8 @@
     <div>
         <button id="zoomIn">+</button>
         <button id="zoomOut">-</button>
+        <button id="fullscreen">fs</button>
+        <button id="vr">vr</button>
     </div>
 
     <div id="viewer" class="virtex" style="width: 800px; height: 600px"></div>
@@ -39,6 +41,7 @@
     <script src="js/stats.min.js"></script>
     <script src="js/Detector.js"></script>
     <script src="js/webvr-polyfill.js"></script>
+    <script src="js/key-codes.js"></script>
     <!--<script src="webvr-boilerplate/build/webvr-manager.js"></script>-->
 
     <script>
@@ -112,6 +115,18 @@
                 e.preventDefault();
 
                 viewport.zoomOut();
+            });
+            
+            $('#fullscreen').on('click', function(e){
+                e.preventDefault();
+
+                viewport.enterFullscreen();
+            });
+            
+            $('#vr').on('click', function(e){
+                e.preventDefault();
+
+                viewport.enterVRMode();
             });
         });
     </script>

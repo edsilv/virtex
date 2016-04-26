@@ -74,8 +74,15 @@ gulp.task('copy:js', function() {
         'node_modules/three/examples/js/effects/VREffect.js',
         'node_modules/three/examples/js/libs/stats.min.js',
         'node_modules/three/examples/js/Detector.js',
-        'node_modules/webvr-polyfill/build/webvr-polyfill.js'
+        'node_modules/webvr-polyfill/build/webvr-polyfill.js',
+        'node_modules/key-codes/dist/key-codes.js'
     ]).pipe(gulp.dest('./test/js'));
+});
+
+gulp.task('copy:typings', function() {
+    return gulp.src([
+        'node_modules/key-codes/dist/key-codes.d.ts'
+    ]).pipe(gulp.dest('./typings'));
 });
 
 function mount(connect, dir) {
@@ -96,4 +103,8 @@ gulp.task('test', function() {
 
 gulp.task('default', function(cb) {
     runSequence('clean:dist', 'build', 'browserify', 'copy:css', 'copy:js', cb);
+});
+
+gulp.task('sync', function(cb) {
+    runSequence('copy:typings', cb);
 });
