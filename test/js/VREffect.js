@@ -69,7 +69,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	// fullscreen
 
-	var isPresenting = false;
+	var isPresenting = true;
 
 	var canvas = renderer.domElement;
 	var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
