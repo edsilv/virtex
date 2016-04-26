@@ -68,6 +68,7 @@ declare module Virtex {
         constructor(options: IOptions);
         private _getDefaultOptions();
         private _init();
+        private _createCamera();
         private _createRenderer();
         private _fullscreenChanged();
         private _createEventListeners();

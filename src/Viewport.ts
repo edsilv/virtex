@@ -132,10 +132,7 @@ module Virtex {
 
             this._scene.add(this._lightGroup);
 
-            // CAMERA //
-
-            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
-            this._camera.position.z = this._targetZoom = this.options.cameraZ;
+            this._createCamera();
 
             this._createRenderer();
 
@@ -153,6 +150,11 @@ module Virtex {
             }
 
             return true;
+        }
+
+        private _createCamera(): void {
+            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
+            this._camera.position.z = this._targetZoom = this.options.cameraZ;
         }
 
         private _createRenderer(): void {
@@ -437,8 +439,14 @@ module Virtex {
             if (this._isVRMode){
                 // Update VR headset position and apply to camera.
                 this._vrControls.update();
-
-                this._vrEffect.render(this._scene, this._camera);
+                
+                // Scene may be an array of two scenes, one for each eye.
+                if (this._scene instanceof Array) {
+                    this._vrEffect.render(this._scene[0], this._camera);
+                } else {
+                    this._vrEffect.render(this._scene, this._camera);
+                }
+                
             } else {
                 this._renderer.render(this._scene, this._camera);
             }
@@ -482,8 +490,10 @@ module Virtex {
             
             this._isVRMode = true;
             
-            this._modelGroup.position.z = -1;
+            //this._modelGroup.position.z = -1;
             //this._modelGroup.position.y = -2.5;
+            
+            //this._createCamera();
             
             this._createRenderer();
             
@@ -497,6 +507,8 @@ module Virtex {
             this._isVRMode = false;
             
             this._modelGroup.position.z = 0;
+            
+            this._createCamera();
             
             this._createRenderer();
         }

@@ -96,9 +96,7 @@ var Virtex;
             var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
             this._lightGroup.add(ambientLight);
             this._scene.add(this._lightGroup);
-            // CAMERA //
-            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
-            this._camera.position.z = this._targetZoom = this.options.cameraZ;
+            this._createCamera();
             this._createRenderer();
             this._createEventListeners();
             this._loadObject(this.options.object);
@@ -110,6 +108,10 @@ var Virtex;
                 this._$viewport.append(this._stats.domElement);
             }
             return true;
+        };
+        Viewport.prototype._createCamera = function () {
+            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
+            this._camera.position.z = this._targetZoom = this.options.cameraZ;
         };
         Viewport.prototype._createRenderer = function () {
             this._renderer = new THREE.WebGLRenderer({
@@ -326,7 +328,13 @@ var Virtex;
             if (this._isVRMode) {
                 // Update VR headset position and apply to camera.
                 this._vrControls.update();
-                this._vrEffect.render(this._scene, this._camera);
+                // Scene may be an array of two scenes, one for each eye.
+                if (this._scene instanceof Array) {
+                    this._vrEffect.render(this._scene[0], this._camera);
+                }
+                else {
+                    this._vrEffect.render(this._scene, this._camera);
+                }
             }
             else {
                 this._renderer.render(this._scene, this._camera);
@@ -366,8 +374,9 @@ var Virtex;
             if (!this.options.vrEnabled)
                 return;
             this._isVRMode = true;
-            this._modelGroup.position.z = -1;
+            //this._modelGroup.position.z = -1;
             //this._modelGroup.position.y = -2.5;
+            //this._createCamera();
             this._createRenderer();
             this.enterFullscreen();
         };
@@ -376,6 +385,7 @@ var Virtex;
                 return;
             this._isVRMode = false;
             this._modelGroup.position.z = 0;
+            this._createCamera();
             this._createRenderer();
         };
         Viewport.prototype.enterFullscreen = function () {
