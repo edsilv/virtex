@@ -32,8 +32,8 @@ module Virtex {
         private _viewportHalfX: number;
         private _viewportHalfY: number;
 
-        private _isFirstLoad: boolean = true;
         private _isFullscreen: boolean = false;
+        private _isVRMode: boolean = false;
         private _isMouseDown: boolean = false;
         private _lastHeight: number;
         private _lastWidth: number;
@@ -51,14 +51,10 @@ module Virtex {
         private _vrEffect: THREE.VREffect;
 
         constructor(options: IOptions) {
-            this._refresh(options);
-        }
+            this.options = $.extend(this._getDefaultOptions(), options);
 
-        private _refresh(options: IOptions): void {
-            if (this._isFirstLoad){
-                this.options = $.extend(this._getDefaultOptions(), options);
-            } else {
-                this.options = $.extend(this.options, options);
+            if (!this.options.fullscreenEnabled){
+                this.options.vrEnabled = false;
             }
 
             var success: boolean = this._init();
@@ -68,8 +64,6 @@ module Virtex {
             if (success){
                 this._draw();
             }
-            
-            this._isFirstLoad = false;
         }
 
         private _getDefaultOptions(): IOptions {
@@ -87,10 +81,11 @@ module Virtex {
                 maxZoom: 10,
                 minZoom: 2,
                 near: 0.1,
+                fullscreenEnabled: true,
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
-                vrMode: false,
+                vrEnabled: false,
                 zoomSpeed: 1
             }
         }
@@ -142,14 +137,32 @@ module Virtex {
             this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
             this._camera.position.z = this._targetZoom = this.options.cameraZ;
 
-            // RENDERER //
+            this._createRenderer();
+
+            this._createEventListeners();
+
+            this._loadObject(this.options.object);
+            
+            // STATS //
+
+            if (this.options.showStats) {
+                this._stats = new Stats();
+                this._stats.domElement.style.position = 'absolute';
+                this._stats.domElement.style.top = '0px';
+                this._$viewport.append(this._stats.domElement);
+            }
+
+            return true;
+        }
+
+        private _createRenderer(): void {
 
             this._renderer = new THREE.WebGLRenderer({
                 antialias: true,
                 alpha: true
             });
-
-            if (this.options.vrMode){
+            
+            if (this._isVRMode){
 
                 // Apply VR headset positional data to camera.
                 this._vrControls = new THREE.VRControls(this._camera);
@@ -162,114 +175,100 @@ module Virtex {
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             }
 
-            this._$viewport.append(this._renderer.domElement);
-
-            // STATS //
-
-            if (this.options.showStats) {
-                this._stats = new Stats();
-                this._stats.domElement.style.position = 'absolute';
-                this._stats.domElement.style.top = '0px';
-                this._$viewport.append(this._stats.domElement);
+            this._$viewport.empty().append(this._renderer.domElement);
+        }
+        
+        private _fullscreenChanged(): void {
+            if (this._isFullscreen) { // exiting fullscreen
+                this.exitFullscreen();
+                this.exitVRMode();
+                this._$element.width(this._lastWidth);
+                this._$element.height(this._lastHeight);
+            } else { // entering fullscreen
+                this._lastWidth = this._getWidth();
+                this._lastHeight = this._getHeight();
             }
-
-            // EVENTS //
-            if (this._isFirstLoad){
-
+            
+            this._isFullscreen = !this._isFullscreen;
+            this._resize();
+        }
+        
+        private _createEventListeners(): void {
+            
+            if (this.options.fullscreenEnabled){
                 $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', (e) => {
-
-                    if (this._isFullscreen) { // exiting fullscreen
-                        this.exitFullscreen();
-                        this._$element.width(this._lastWidth);
-                        this._$element.height(this._lastHeight);
-                    } else { // entering fullscreen
-                        this._lastWidth = this._getWidth();
-                        this._lastHeight = this._getHeight();
-                    }
-                    
-                    this._isFullscreen = !this._isFullscreen;
-                    this._resize();
+                    this._fullscreenChanged();
                 });
-                
-                this._$element.on('mousedown', (e) => {
-                    this._onMouseDown(<MouseEvent>e.originalEvent);
-                });
-
-                this._$element.on('mousemove', (e) => {
-                    this._onMouseMove(<MouseEvent>e.originalEvent);
-                });
-
-                this._$element.on('mouseup', (e) => {
-                    this._onMouseUp(<MouseEvent>e.originalEvent);
-                });
-
-                this._$element.on('mouseout', (e) => {
-                    this._onMouseOut(<MouseEvent>e.originalEvent);
-                });
-
-                this._$element.on('mousewheel', (e) => {
-                    this._onMouseWheel(<MouseWheelEvent>e.originalEvent);
-                });
-
-                this._$element.on('DOMMouseScroll', (e) => {
-                    this._onMouseWheel(<MouseWheelEvent>e.originalEvent); // firefox
-                });
-
-                this._$element.on('touchstart', (e) => {
-                    this._onTouchStart(<TouchEvent>e.originalEvent);
-                });
-
-                this._$element.on('touchmove', (e) => {
-                    this._onTouchMove(<TouchEvent>e.originalEvent);
-                });
-
-                this._$element.on('touchend', (e) => {
-                    this._onTouchEnd(<TouchEvent>e.originalEvent);
-                });
-
-                window.addEventListener('resize', () => this._resize(), false);
             }
+            
+            this._$element.on('mousedown', (e) => {
+                this._onMouseDown(<MouseEvent>e.originalEvent);
+            });
 
-            // LOADER //
+            this._$element.on('mousemove', (e) => {
+                this._onMouseMove(<MouseEvent>e.originalEvent);
+            });
 
-            if (this._isFirstLoad){
-                this._$loading.show();
+            this._$element.on('mouseup', (e) => {
+                this._onMouseUp(<MouseEvent>e.originalEvent);
+            });
 
-                var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
-                loader.setCrossOrigin('anonymous');
+            this._$element.on('mouseout', (e) => {
+                this._onMouseOut(<MouseEvent>e.originalEvent);
+            });
 
-                loader.load(this.options.object,
-                    (obj: THREE.Object3D) => {
+            this._$element.on('mousewheel', (e) => {
+                this._onMouseWheel(<MouseWheelEvent>e.originalEvent);
+            });
 
-                        if (this.options.doubleSided){
-                            obj.traverse((child: any) => {
-                                if (child.material) child.material.side = THREE.DoubleSide;
-                            });
-                        }
+            this._$element.on('DOMMouseScroll', (e) => {
+                this._onMouseWheel(<MouseWheelEvent>e.originalEvent); // firefox
+            });
 
-                        this._modelGroup.add(obj);
-                        
-                        if (this.options.vrMode){
-                            this._modelGroup.position.z = -1;
-                            //this._modelGroup.position.y = -2.5;
-                        }
-    
-                        this._scene.add(this._modelGroup);
-                        this._$loading.fadeOut(this.options.fadeSpeed);
-                    },
-                    (e: ProgressEvent) => {
-                        if (e.lengthComputable) {
-                            this._loadProgress(e.loaded / e.total);
-                        }
-                    },
-                    (e: ErrorEvent) => {
-                        // error
-                        console.log(e);
+            this._$element.on('touchstart', (e) => {
+                this._onTouchStart(<TouchEvent>e.originalEvent);
+            });
+
+            this._$element.on('touchmove', (e) => {
+                this._onTouchMove(<TouchEvent>e.originalEvent);
+            });
+
+            this._$element.on('touchend', (e) => {
+                this._onTouchEnd(<TouchEvent>e.originalEvent);
+            });
+
+            window.addEventListener('resize', () => this._resize(), false);
+        }
+        
+        private _loadObject(object: string): void {
+            this._$loading.show();
+
+            var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
+            loader.setCrossOrigin('anonymous');
+
+            loader.load(object,
+                (obj: THREE.Object3D) => {
+
+                    if (this.options.doubleSided){
+                        obj.traverse((child: any) => {
+                            if (child.material) child.material.side = THREE.DoubleSide;
+                        });
                     }
-                );
-            }
 
-            return true;
+                    this._modelGroup.add(obj);
+                    this._scene.add(this._modelGroup);
+                    this._$loading.fadeOut(this.options.fadeSpeed);
+                },
+                (e: ProgressEvent) => {
+                    if (e.lengthComputable) {
+                        this._loadProgress(e.loaded / e.total);
+                    }
+                },
+                (e: ErrorEvent) => {
+                    // error
+                    console.log(e);
+                }
+            );
         }
 
         private _loadProgress(progress: number): void {
@@ -435,7 +434,7 @@ module Virtex {
             
             this._camera.position.z = this._camera.position.z + zoomDelta;
             
-            if (this.options.vrMode){
+            if (this._isVRMode){
                 // Update VR headset position and apply to camera.
                 this._vrControls.update();
 
@@ -478,17 +477,34 @@ module Virtex {
         }
         
         public enterVRMode(): void {
-            var options: IOptions = <IOptions>{
-                vrMode: true
-            }
             
-            this._refresh(options);
+            if (!this.options.vrEnabled) return;
+            
+            this._isVRMode = true;
+            
+            this._modelGroup.position.z = -1;
+            //this._modelGroup.position.y = -2.5;
+            
+            this._createRenderer();
             
             this.enterFullscreen();
         }
         
+        public exitVRMode(): void {
+            
+            if (!this.options.vrEnabled) return;
+            
+            this._isVRMode = false;
+            
+            this._modelGroup.position.z = 0;
+            
+            this._createRenderer();
+        }
+        
         public enterFullscreen(): void {
-
+            
+            if (!this.options.fullscreenEnabled) return;
+            
             var elem = this._$element[0];
 
             var requestFullScreen = this._getRequestFullScreen(elem);
@@ -537,6 +553,7 @@ module Virtex {
         private _resize(): void {
 
             if (this._$element && this._$viewport){
+                
                 this._$element.width(this._getWidth());
                 this._$element.height(this._getHeight());
 
@@ -548,13 +565,18 @@ module Virtex {
 
                 this._camera.aspect = this._$viewport.width() / this._$viewport.height();
                 this._camera.updateProjectionMatrix();
-
-                this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+                
+                if (this._isVRMode){
+                    this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());                    
+                } else {
+                    this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+                }
 
                 this._$loading.css({
                     left: (this._viewportHalfX) - (this._$loading.width() / 2),
                     top: (this._viewportHalfY) - (this._$loading.height() / 2)
                 });
+                
             } else if (this._$oldie) {
                 this._$oldie.css({
                     left: (this._$element.width() / 2) - (this._$oldie.outerWidth() / 2),

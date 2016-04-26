@@ -12,6 +12,7 @@ declare module Virtex {
         fadeSpeed?: number;
         far?: number;
         fov?: number;
+        fullscreenEnabled?: boolean;
         maxZoom?: number;
         minZoom?: number;
         near?: number;
@@ -19,7 +20,7 @@ declare module Virtex {
         shading?: THREE.Shading;
         shininess?: number;
         showStats?: boolean;
-        vrMode?: boolean;
+        vrEnabled?: boolean;
         zoomSpeed?: number;
     }
 }
@@ -47,8 +48,8 @@ declare module Virtex {
         private _stats;
         private _viewportHalfX;
         private _viewportHalfY;
-        private _isFirstLoad;
         private _isFullscreen;
+        private _isVRMode;
         private _isMouseDown;
         private _lastHeight;
         private _lastWidth;
@@ -65,9 +66,12 @@ declare module Virtex {
         private _vrControls;
         private _vrEffect;
         constructor(options: IOptions);
-        private _refresh(options);
         private _getDefaultOptions();
         private _init();
+        private _createRenderer();
+        private _fullscreenChanged();
+        private _createEventListeners();
+        private _loadObject(object);
         private _loadProgress(progress);
         private _onMouseDown(event);
         private _onMouseMove(event);
@@ -84,6 +88,7 @@ declare module Virtex {
         zoomIn(): void;
         zoomOut(): void;
         enterVRMode(): void;
+        exitVRMode(): void;
         enterFullscreen(): void;
         exitFullscreen(): void;
         private _getRequestFullScreen(elem);

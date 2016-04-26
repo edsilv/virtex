@@ -20,8 +20,8 @@ var Virtex;
 (function (Virtex) {
     var Viewport = (function () {
         function Viewport(options) {
-            this._isFirstLoad = true;
             this._isFullscreen = false;
+            this._isVRMode = false;
             this._isMouseDown = false;
             this._mouseX = 0;
             this._mouseXOnMouseDown = 0;
@@ -32,22 +32,16 @@ var Virtex;
             this._targetRotationOnMouseDownY = 0;
             this._targetRotationX = 0;
             this._targetRotationY = 0;
-            this._refresh(options);
-        }
-        Viewport.prototype._refresh = function (options) {
-            if (this._isFirstLoad) {
-                this.options = $.extend(this._getDefaultOptions(), options);
-            }
-            else {
-                this.options = $.extend(this.options, options);
+            this.options = $.extend(this._getDefaultOptions(), options);
+            if (!this.options.fullscreenEnabled) {
+                this.options.vrEnabled = false;
             }
             var success = this._init();
             this._resize();
             if (success) {
                 this._draw();
             }
-            this._isFirstLoad = false;
-        };
+        }
         Viewport.prototype._getDefaultOptions = function () {
             return {
                 ambientLightColor: 0xd0d0d0,
@@ -63,15 +57,15 @@ var Virtex;
                 maxZoom: 10,
                 minZoom: 2,
                 near: 0.1,
+                fullscreenEnabled: true,
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
-                vrMode: false,
+                vrEnabled: false,
                 zoomSpeed: 1
             };
         };
         Viewport.prototype._init = function () {
-            var _this = this;
             this._$element = $(this.options.element);
             this._$element.empty();
             if (!this._$element.length) {
@@ -105,12 +99,24 @@ var Virtex;
             // CAMERA //
             this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
             this._camera.position.z = this._targetZoom = this.options.cameraZ;
-            // RENDERER //
+            this._createRenderer();
+            this._createEventListeners();
+            this._loadObject(this.options.object);
+            // STATS //
+            if (this.options.showStats) {
+                this._stats = new Stats();
+                this._stats.domElement.style.position = 'absolute';
+                this._stats.domElement.style.top = '0px';
+                this._$viewport.append(this._stats.domElement);
+            }
+            return true;
+        };
+        Viewport.prototype._createRenderer = function () {
             this._renderer = new THREE.WebGLRenderer({
                 antialias: true,
                 alpha: true
             });
-            if (this.options.vrMode) {
+            if (this._isVRMode) {
                 // Apply VR headset positional data to camera.
                 this._vrControls = new THREE.VRControls(this._camera);
                 // Apply VR stereo rendering to renderer.
@@ -120,86 +126,81 @@ var Virtex;
             else {
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             }
-            this._$viewport.append(this._renderer.domElement);
-            // STATS //
-            if (this.options.showStats) {
-                this._stats = new Stats();
-                this._stats.domElement.style.position = 'absolute';
-                this._stats.domElement.style.top = '0px';
-                this._$viewport.append(this._stats.domElement);
+            this._$viewport.empty().append(this._renderer.domElement);
+        };
+        Viewport.prototype._fullscreenChanged = function () {
+            if (this._isFullscreen) {
+                this.exitFullscreen();
+                this.exitVRMode();
+                this._$element.width(this._lastWidth);
+                this._$element.height(this._lastHeight);
             }
-            // EVENTS //
-            if (this._isFirstLoad) {
+            else {
+                this._lastWidth = this._getWidth();
+                this._lastHeight = this._getHeight();
+            }
+            this._isFullscreen = !this._isFullscreen;
+            this._resize();
+        };
+        Viewport.prototype._createEventListeners = function () {
+            var _this = this;
+            if (this.options.fullscreenEnabled) {
                 $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function (e) {
-                    if (_this._isFullscreen) {
-                        _this.exitFullscreen();
-                        _this._$element.width(_this._lastWidth);
-                        _this._$element.height(_this._lastHeight);
-                    }
-                    else {
-                        _this._lastWidth = _this._getWidth();
-                        _this._lastHeight = _this._getHeight();
-                    }
-                    _this._isFullscreen = !_this._isFullscreen;
-                    _this._resize();
-                });
-                this._$element.on('mousedown', function (e) {
-                    _this._onMouseDown(e.originalEvent);
-                });
-                this._$element.on('mousemove', function (e) {
-                    _this._onMouseMove(e.originalEvent);
-                });
-                this._$element.on('mouseup', function (e) {
-                    _this._onMouseUp(e.originalEvent);
-                });
-                this._$element.on('mouseout', function (e) {
-                    _this._onMouseOut(e.originalEvent);
-                });
-                this._$element.on('mousewheel', function (e) {
-                    _this._onMouseWheel(e.originalEvent);
-                });
-                this._$element.on('DOMMouseScroll', function (e) {
-                    _this._onMouseWheel(e.originalEvent); // firefox
-                });
-                this._$element.on('touchstart', function (e) {
-                    _this._onTouchStart(e.originalEvent);
-                });
-                this._$element.on('touchmove', function (e) {
-                    _this._onTouchMove(e.originalEvent);
-                });
-                this._$element.on('touchend', function (e) {
-                    _this._onTouchEnd(e.originalEvent);
-                });
-                window.addEventListener('resize', function () { return _this._resize(); }, false);
-            }
-            // LOADER //
-            if (this._isFirstLoad) {
-                this._$loading.show();
-                var loader = new THREE.ObjectLoader();
-                loader.setCrossOrigin('anonymous');
-                loader.load(this.options.object, function (obj) {
-                    if (_this.options.doubleSided) {
-                        obj.traverse(function (child) {
-                            if (child.material)
-                                child.material.side = THREE.DoubleSide;
-                        });
-                    }
-                    _this._modelGroup.add(obj);
-                    if (_this.options.vrMode) {
-                        _this._modelGroup.position.z = -1;
-                    }
-                    _this._scene.add(_this._modelGroup);
-                    _this._$loading.fadeOut(_this.options.fadeSpeed);
-                }, function (e) {
-                    if (e.lengthComputable) {
-                        _this._loadProgress(e.loaded / e.total);
-                    }
-                }, function (e) {
-                    // error
-                    console.log(e);
+                    _this._fullscreenChanged();
                 });
             }
-            return true;
+            this._$element.on('mousedown', function (e) {
+                _this._onMouseDown(e.originalEvent);
+            });
+            this._$element.on('mousemove', function (e) {
+                _this._onMouseMove(e.originalEvent);
+            });
+            this._$element.on('mouseup', function (e) {
+                _this._onMouseUp(e.originalEvent);
+            });
+            this._$element.on('mouseout', function (e) {
+                _this._onMouseOut(e.originalEvent);
+            });
+            this._$element.on('mousewheel', function (e) {
+                _this._onMouseWheel(e.originalEvent);
+            });
+            this._$element.on('DOMMouseScroll', function (e) {
+                _this._onMouseWheel(e.originalEvent); // firefox
+            });
+            this._$element.on('touchstart', function (e) {
+                _this._onTouchStart(e.originalEvent);
+            });
+            this._$element.on('touchmove', function (e) {
+                _this._onTouchMove(e.originalEvent);
+            });
+            this._$element.on('touchend', function (e) {
+                _this._onTouchEnd(e.originalEvent);
+            });
+            window.addEventListener('resize', function () { return _this._resize(); }, false);
+        };
+        Viewport.prototype._loadObject = function (object) {
+            var _this = this;
+            this._$loading.show();
+            var loader = new THREE.ObjectLoader();
+            loader.setCrossOrigin('anonymous');
+            loader.load(object, function (obj) {
+                if (_this.options.doubleSided) {
+                    obj.traverse(function (child) {
+                        if (child.material)
+                            child.material.side = THREE.DoubleSide;
+                    });
+                }
+                _this._modelGroup.add(obj);
+                _this._scene.add(_this._modelGroup);
+                _this._$loading.fadeOut(_this.options.fadeSpeed);
+            }, function (e) {
+                if (e.lengthComputable) {
+                    _this._loadProgress(e.loaded / e.total);
+                }
+            }, function (e) {
+                // error
+                console.log(e);
+            });
         };
         Viewport.prototype._loadProgress = function (progress) {
             var fullWidth = this._$loading.width();
@@ -322,7 +323,7 @@ var Virtex;
             }
             var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
             this._camera.position.z = this._camera.position.z + zoomDelta;
-            if (this.options.vrMode) {
+            if (this._isVRMode) {
                 // Update VR headset position and apply to camera.
                 this._vrControls.update();
                 this._vrEffect.render(this._scene, this._camera);
@@ -362,13 +363,24 @@ var Virtex;
             }
         };
         Viewport.prototype.enterVRMode = function () {
-            var options = {
-                vrMode: true
-            };
-            this._refresh(options);
+            if (!this.options.vrEnabled)
+                return;
+            this._isVRMode = true;
+            this._modelGroup.position.z = -1;
+            //this._modelGroup.position.y = -2.5;
+            this._createRenderer();
             this.enterFullscreen();
         };
+        Viewport.prototype.exitVRMode = function () {
+            if (!this.options.vrEnabled)
+                return;
+            this._isVRMode = false;
+            this._modelGroup.position.z = 0;
+            this._createRenderer();
+        };
         Viewport.prototype.enterFullscreen = function () {
+            if (!this.options.fullscreenEnabled)
+                return;
             var elem = this._$element[0];
             var requestFullScreen = this._getRequestFullScreen(elem);
             if (requestFullScreen) {
@@ -421,7 +433,12 @@ var Virtex;
                 this._viewportHalfY = this._$viewport.height() / 2;
                 this._camera.aspect = this._$viewport.width() / this._$viewport.height();
                 this._camera.updateProjectionMatrix();
-                this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+                if (this._isVRMode) {
+                    this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
+                }
+                else {
+                    this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+                }
                 this._$loading.css({
                     left: (this._viewportHalfX) - (this._$loading.width() / 2),
                     top: (this._viewportHalfY) - (this._$loading.height() / 2)

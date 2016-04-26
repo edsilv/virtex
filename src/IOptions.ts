@@ -11,6 +11,7 @@ module Virtex{
         fadeSpeed?: number;
         far?: number;
         fov?: number;
+        fullscreenEnabled?: boolean;
         maxZoom?: number;
         minZoom?: number;
         near?: number;
@@ -18,7 +19,7 @@ module Virtex{
         shading?: THREE.Shading;
         shininess?: number;
         showStats?: boolean;
-        vrMode?: boolean;
+        vrEnabled?: boolean;
         zoomSpeed?: number;
     }
 }
