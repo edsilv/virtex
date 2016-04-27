@@ -32,9 +32,10 @@ var Virtex;
             this._targetRotationOnMouseDownY = 0;
             this._targetRotationX = 0;
             this._targetRotationY = 0;
+            this._vrEnabled = true;
             this.options = $.extend(this._getDefaultOptions(), options);
             if (!this.options.fullscreenEnabled) {
-                this.options.vrEnabled = false;
+                this._vrEnabled = false;
             }
             var success = this._init();
             this._resize();
@@ -61,7 +62,6 @@ var Virtex;
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
-                vrEnabled: false,
                 zoomSpeed: 1
             };
         };
@@ -310,22 +310,10 @@ var Virtex;
             }
         };
         Viewport.prototype._render = function () {
-            // horizontal rotation
-            this._modelGroup.rotation.y += (this._targetRotationX - this._modelGroup.rotation.y) * 0.1;
-            // vertical rotation
-            var finalRotationY = (this._targetRotationY - this._modelGroup.rotation.x);
-            if (this._modelGroup.rotation.x <= 1 && this._modelGroup.rotation.x >= -1) {
-                this._modelGroup.rotation.x += finalRotationY * 0.1;
-            }
-            if (this._modelGroup.rotation.x > 1) {
-                this._modelGroup.rotation.x = 1;
-            }
-            else if (this._modelGroup.rotation.x < -1) {
-                this._modelGroup.rotation.x = -1;
-            }
-            var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
-            this._camera.position.z = this._camera.position.z + zoomDelta;
             if (this._isVRMode) {
+                if (this._isMouseDown) {
+                    this._modelGroup.rotation.y += 0.1;
+                }
                 // Update VR headset position and apply to camera.
                 this._vrControls.update();
                 // Scene may be an array of two scenes, one for each eye.
@@ -337,6 +325,21 @@ var Virtex;
                 }
             }
             else {
+                // horizontal rotation
+                this._modelGroup.rotation.y += (this._targetRotationX - this._modelGroup.rotation.y) * 0.1;
+                // vertical rotation
+                var finalRotationY = (this._targetRotationY - this._modelGroup.rotation.x);
+                if (this._modelGroup.rotation.x <= 1 && this._modelGroup.rotation.x >= -1) {
+                    this._modelGroup.rotation.x += finalRotationY * 0.1;
+                }
+                if (this._modelGroup.rotation.x > 1) {
+                    this._modelGroup.rotation.x = 1;
+                }
+                else if (this._modelGroup.rotation.x < -1) {
+                    this._modelGroup.rotation.x = -1;
+                }
+                var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
+                this._camera.position.z = this._camera.position.z + zoomDelta;
                 this._renderer.render(this._scene, this._camera);
             }
         };
@@ -371,20 +374,16 @@ var Virtex;
             }
         };
         Viewport.prototype.enterVRMode = function () {
-            if (!this.options.vrEnabled)
+            if (!this._vrEnabled)
                 return;
             this._isVRMode = true;
-            //this._modelGroup.position.z = -1;
-            //this._modelGroup.position.y = -2.5;
-            //this._createCamera();
             this._createRenderer();
             this.enterFullscreen();
         };
         Viewport.prototype.exitVRMode = function () {
-            if (!this.options.vrEnabled)
+            if (!this._vrEnabled)
                 return;
             this._isVRMode = false;
-            this._modelGroup.position.z = 0;
             this._createCamera();
             this._createRenderer();
         };

@@ -66,9 +66,14 @@ gulp.task('copy:css', function() {
         .pipe(gulp.dest('./test/css'));
 });
 
-gulp.task('copy:js', function() {
+gulp.task('copy:build', function() {
     return gulp.src([
-        'dist/virtex.js',
+        'dist/virtex.js'
+    ]).pipe(gulp.dest('./test/js'));
+});
+
+gulp.task('copy:libs', function() {
+    return gulp.src([
         'node_modules/three/three.min.js',
         'node_modules/three/examples/js/controls/VRControls.js',
         'node_modules/three/examples/js/effects/VREffect.js',
@@ -102,9 +107,9 @@ gulp.task('test', function() {
 });
 
 gulp.task('default', function(cb) {
-    runSequence('clean:dist', 'build', 'browserify', 'copy:css', 'copy:js', cb);
+    runSequence('clean:dist', 'build', 'browserify', 'copy:css', 'copy:build', cb);
 });
 
 gulp.task('sync', function(cb) {
-    runSequence('copy:typings', cb);
+    runSequence('copy:typings', 'copy:libs', cb);
 });

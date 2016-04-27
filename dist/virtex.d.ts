@@ -20,7 +20,6 @@ declare module Virtex {
         shading?: THREE.Shading;
         shininess?: number;
         showStats?: boolean;
-        vrEnabled?: boolean;
         zoomSpeed?: number;
     }
 }
@@ -65,6 +64,7 @@ declare module Virtex {
         private _targetZoom;
         private _vrControls;
         private _vrEffect;
+        private _vrEnabled;
         constructor(options: IOptions);
         private _getDefaultOptions();
         private _init();
