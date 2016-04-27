@@ -71,6 +71,7 @@ declare module Virtex {
         private _createLights();
         private _createCamera();
         private _createRenderer();
+        private _createControls();
         private _createEventListeners();
         private _loadObject(object);
         private _loadProgress(progress);

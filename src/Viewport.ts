@@ -119,6 +119,7 @@ module Virtex {
 
             this._createLights();
             this._createCamera();
+            this._createControls();
             this._createRenderer();
             this._createEventListeners();
 
@@ -167,9 +168,6 @@ module Virtex {
             
             if (this._isVRMode){
 
-                // Apply VR headset positional data to camera.
-                this._vrControls = new THREE.VRControls(this._camera);
-
                 // Apply VR stereo rendering to renderer.
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
@@ -179,6 +177,14 @@ module Virtex {
             }
 
             this._$viewport.empty().append(this._renderer.domElement);
+        }
+        
+        private _createControls(): void {
+
+            if (this._isVRMode){
+                // Apply VR headset positional data to camera.
+                this._vrControls = new THREE.VRControls(this._camera);                
+            }
         }
 
         private _createEventListeners(): void {
@@ -495,6 +501,7 @@ module Virtex {
             
             this._isVRMode = true;
             
+            this._createControls();
             this._createRenderer();
             
             this.enterFullscreen();

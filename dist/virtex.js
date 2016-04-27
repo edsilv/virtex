@@ -88,6 +88,7 @@ var Virtex;
             this._scene.add(this._objectGroup);
             this._createLights();
             this._createCamera();
+            this._createControls();
             this._createRenderer();
             this._createEventListeners();
             this._loadObject(this.options.object);
@@ -122,8 +123,6 @@ var Virtex;
                 alpha: true
             });
             if (this._isVRMode) {
-                // Apply VR headset positional data to camera.
-                this._vrControls = new THREE.VRControls(this._camera);
                 // Apply VR stereo rendering to renderer.
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
@@ -132,6 +131,12 @@ var Virtex;
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             }
             this._$viewport.empty().append(this._renderer.domElement);
+        };
+        Viewport.prototype._createControls = function () {
+            if (this._isVRMode) {
+                // Apply VR headset positional data to camera.
+                this._vrControls = new THREE.VRControls(this._camera);
+            }
         };
         Viewport.prototype._createEventListeners = function () {
             var _this = this;
@@ -379,6 +384,7 @@ var Virtex;
             if (!this._vrEnabled)
                 return;
             this._isVRMode = true;
+            this._createControls();
             this._createRenderer();
             this.enterFullscreen();
         };
