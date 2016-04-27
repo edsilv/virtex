@@ -84,8 +84,8 @@ var Virtex;
             this._$loadingBar = this._$loading.find('.bar');
             this._$loading.hide();
             this._scene = new THREE.Scene();
-            this._modelGroup = new THREE.Object3D();
-            this._lightGroup = new THREE.Object3D();
+            this._objectGroup = new THREE.Object3D();
+            this._scene.add(this._objectGroup);
             this._createLights();
             this._createCamera();
             this._createRenderer();
@@ -101,6 +101,8 @@ var Virtex;
             return true;
         };
         Viewport.prototype._createLights = function () {
+            this._lightGroup = new THREE.Object3D();
+            this._scene.add(this._lightGroup);
             var light1 = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
             light1.position.set(1, 1, 1);
             this._lightGroup.add(light1);
@@ -109,7 +111,6 @@ var Virtex;
             this._lightGroup.add(light2);
             var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
             this._lightGroup.add(ambientLight);
-            this._scene.add(this._lightGroup);
         };
         Viewport.prototype._createCamera = function () {
             this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
@@ -180,8 +181,7 @@ var Virtex;
                             child.material.side = THREE.DoubleSide;
                     });
                 }
-                _this._modelGroup.add(obj);
-                _this._scene.add(_this._modelGroup);
+                _this._objectGroup.add(obj);
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
             }, function (e) {
                 if (e.lengthComputable) {
@@ -314,7 +314,7 @@ var Virtex;
         Viewport.prototype._render = function () {
             if (this._isVRMode) {
                 if (this._isMouseDown) {
-                    this._modelGroup.rotation.y += 0.1;
+                    this._objectGroup.rotation.y += 0.1;
                 }
                 // Update VR headset position and apply to camera.
                 this._vrControls.update();
@@ -328,17 +328,17 @@ var Virtex;
             }
             else {
                 // horizontal rotation
-                this._modelGroup.rotation.y += (this._targetRotationX - this._modelGroup.rotation.y) * 0.1;
+                this._objectGroup.rotation.y += (this._targetRotationX - this._objectGroup.rotation.y) * 0.1;
                 // vertical rotation
-                var finalRotationY = (this._targetRotationY - this._modelGroup.rotation.x);
-                if (this._modelGroup.rotation.x <= 1 && this._modelGroup.rotation.x >= -1) {
-                    this._modelGroup.rotation.x += finalRotationY * 0.1;
+                var finalRotationY = (this._targetRotationY - this._objectGroup.rotation.x);
+                if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
+                    this._objectGroup.rotation.x += finalRotationY * 0.1;
                 }
-                if (this._modelGroup.rotation.x > 1) {
-                    this._modelGroup.rotation.x = 1;
+                if (this._objectGroup.rotation.x > 1) {
+                    this._objectGroup.rotation.x = 1;
                 }
-                else if (this._modelGroup.rotation.x < -1) {
-                    this._modelGroup.rotation.x = -1;
+                else if (this._objectGroup.rotation.x < -1) {
+                    this._objectGroup.rotation.x = -1;
                 }
                 var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
                 this._camera.position.z = this._camera.position.z + zoomDelta;

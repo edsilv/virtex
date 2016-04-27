@@ -41,7 +41,7 @@ declare module Virtex {
         private _$oldie;
         private _camera;
         private _lightGroup;
-        private _modelGroup;
+        private _objectGroup;
         private _renderer;
         private _scene;
         private _stats;

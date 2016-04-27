@@ -25,7 +25,7 @@ module Virtex {
 
         private _camera: THREE.PerspectiveCamera;
         private _lightGroup: THREE.Group;
-        private _modelGroup: THREE.Group;
+        private _objectGroup: THREE.Group;
         private _renderer: THREE.Renderer;
         private _scene: THREE.Scene;
         private _stats: any;
@@ -114,8 +114,8 @@ module Virtex {
             this._$loading.hide();
 
             this._scene = new THREE.Scene();
-            this._modelGroup = new THREE.Object3D();
-            this._lightGroup = new THREE.Object3D();
+            this._objectGroup = new THREE.Object3D();
+            this._scene.add(this._objectGroup);
 
             this._createLights();
             this._createCamera();
@@ -137,6 +137,10 @@ module Virtex {
         }
 
         private _createLights(): void {
+            
+            this._lightGroup = new THREE.Object3D();
+            this._scene.add(this._lightGroup);
+            
             const light1 = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
             light1.position.set(1, 1, 1);
             this._lightGroup.add(light1);
@@ -147,8 +151,6 @@ module Virtex {
 
             const ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
             this._lightGroup.add(ambientLight);
-
-            this._scene.add(this._lightGroup);
         }
 
         private _createCamera(): void {
@@ -241,8 +243,7 @@ module Virtex {
                         });
                     }
 
-                    this._modelGroup.add(obj);
-                    this._scene.add(this._modelGroup);
+                    this._objectGroup.add(obj);
                     this._$loading.fadeOut(this.options.fadeSpeed);
                 },
                 (e: ProgressEvent) => {
@@ -418,7 +419,7 @@ module Virtex {
             if (this._isVRMode){
                 
                 if (this._isMouseDown) {
-                    this._modelGroup.rotation.y += 0.1;
+                    this._objectGroup.rotation.y += 0.1;
                 }
                 
                 // Update VR headset position and apply to camera.
@@ -433,19 +434,19 @@ module Virtex {
                 
             } else {
                 // horizontal rotation
-                this._modelGroup.rotation.y += (this._targetRotationX - this._modelGroup.rotation.y) * 0.1;
+                this._objectGroup.rotation.y += (this._targetRotationX - this._objectGroup.rotation.y) * 0.1;
 
                 // vertical rotation
-                var finalRotationY = (this._targetRotationY - this._modelGroup.rotation.x);
+                var finalRotationY = (this._targetRotationY - this._objectGroup.rotation.x);
 
-                if (this._modelGroup.rotation.x <= 1 && this._modelGroup.rotation.x >= -1) {
-                    this._modelGroup.rotation.x += finalRotationY * 0.1;
+                if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
+                    this._objectGroup.rotation.x += finalRotationY * 0.1;
                 }
 
-                if (this._modelGroup.rotation.x > 1) {
-                    this._modelGroup.rotation.x = 1
-                } else if (this._modelGroup.rotation.x < -1) {
-                    this._modelGroup.rotation.x = -1
+                if (this._objectGroup.rotation.x > 1) {
+                    this._objectGroup.rotation.x = 1
+                } else if (this._objectGroup.rotation.x < -1) {
+                    this._objectGroup.rotation.x = -1
                 }
 
                 var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
