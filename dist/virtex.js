@@ -21,8 +21,8 @@ var Virtex;
     var Viewport = (function () {
         function Viewport(options) {
             this._isFullscreen = false;
-            this._isVRMode = false;
             this._isMouseDown = false;
+            this._isVRMode = false;
             this._mouseX = 0;
             this._mouseXOnMouseDown = 0;
             this._mouseY = 0;
@@ -86,16 +86,7 @@ var Virtex;
             this._scene = new THREE.Scene();
             this._modelGroup = new THREE.Object3D();
             this._lightGroup = new THREE.Object3D();
-            // LIGHTS //
-            var light1 = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
-            light1.position.set(1, 1, 1);
-            this._lightGroup.add(light1);
-            var light2 = new THREE.DirectionalLight(this.options.directionalLight2Color, this.options.directionalLight2Intensity);
-            light2.position.set(-1, -1, -1);
-            this._lightGroup.add(light2);
-            var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
-            this._lightGroup.add(ambientLight);
-            this._scene.add(this._lightGroup);
+            this._createLights();
             this._createCamera();
             this._createRenderer();
             this._createEventListeners();
@@ -108,6 +99,17 @@ var Virtex;
                 this._$viewport.append(this._stats.domElement);
             }
             return true;
+        };
+        Viewport.prototype._createLights = function () {
+            var light1 = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
+            light1.position.set(1, 1, 1);
+            this._lightGroup.add(light1);
+            var light2 = new THREE.DirectionalLight(this.options.directionalLight2Color, this.options.directionalLight2Intensity);
+            light2.position.set(-1, -1, -1);
+            this._lightGroup.add(light2);
+            var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
+            this._lightGroup.add(ambientLight);
+            this._scene.add(this._lightGroup);
         };
         Viewport.prototype._createCamera = function () {
             this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
@@ -129,20 +131,6 @@ var Virtex;
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             }
             this._$viewport.empty().append(this._renderer.domElement);
-        };
-        Viewport.prototype._fullscreenChanged = function () {
-            if (this._isFullscreen) {
-                this.exitFullscreen();
-                this.exitVRMode();
-                this._$element.width(this._lastWidth);
-                this._$element.height(this._lastHeight);
-            }
-            else {
-                this._lastWidth = this._getWidth();
-                this._lastHeight = this._getHeight();
-            }
-            this._isFullscreen = !this._isFullscreen;
-            this._resize();
         };
         Viewport.prototype._createEventListeners = function () {
             var _this = this;
@@ -208,6 +196,20 @@ var Virtex;
             var fullWidth = this._$loading.width();
             var width = Math.floor(fullWidth * progress);
             this._$loadingBar.width(width);
+        };
+        Viewport.prototype._fullscreenChanged = function () {
+            if (this._isFullscreen) {
+                this.exitFullscreen();
+                this.exitVRMode();
+                this._$element.width(this._lastWidth);
+                this._$element.height(this._lastHeight);
+            }
+            else {
+                this._lastWidth = this._getWidth();
+                this._lastHeight = this._getHeight();
+            }
+            this._isFullscreen = !this._isFullscreen;
+            this._resize();
         };
         Viewport.prototype._onMouseDown = function (event) {
             event.preventDefault();

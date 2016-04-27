@@ -48,8 +48,8 @@ declare module Virtex {
         private _viewportHalfX;
         private _viewportHalfY;
         private _isFullscreen;
-        private _isVRMode;
         private _isMouseDown;
+        private _isVRMode;
         private _lastHeight;
         private _lastWidth;
         private _mouseX;
@@ -68,12 +68,13 @@ declare module Virtex {
         constructor(options: IOptions);
         private _getDefaultOptions();
         private _init();
+        private _createLights();
         private _createCamera();
         private _createRenderer();
-        private _fullscreenChanged();
         private _createEventListeners();
         private _loadObject(object);
         private _loadProgress(progress);
+        private _fullscreenChanged();
         private _onMouseDown(event);
         private _onMouseMove(event);
         private _onMouseUp(event);
