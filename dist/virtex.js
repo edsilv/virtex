@@ -327,7 +327,7 @@ var Virtex;
             }
         };
         return Viewport;
-    })();
+    }());
     Virtex.Viewport = Viewport;
 })(Virtex || (Virtex = {}));
 
