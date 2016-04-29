@@ -513,8 +513,7 @@ module Virtex {
             
             this._isVRMode = false;
             
-            this._createCamera();
-            
+            this._createCamera();            
             this._createRenderer();
         }
         
