@@ -20,6 +20,7 @@ declare module Virtex {
         shading?: THREE.Shading;
         shininess?: number;
         showStats?: boolean;
+        webVRConfig: any;
         zoomSpeed?: number;
     }
 }
@@ -30,6 +31,7 @@ interface IVirtex {
 
 declare var Detector: any;
 declare var Stats: any;
+declare var VRDisplay: any;
 declare var requestAnimFrame: any;
 declare module Virtex {
     class Viewport {
@@ -47,6 +49,7 @@ declare module Virtex {
         private _stats;
         private _viewportHalfX;
         private _viewportHalfY;
+        private _hmd;
         private _isFullscreen;
         private _isMouseDown;
         private _isVRMode;
@@ -66,6 +69,7 @@ declare module Virtex {
         private _vrEffect;
         private _vrEnabled;
         constructor(options: IOptions);
+        private _getVRDisplay();
         private _getDefaultOptions();
         private _init();
         private _createLights();
@@ -91,6 +95,7 @@ declare module Virtex {
         zoomIn(): void;
         zoomOut(): void;
         enterVRMode(): void;
+        private _completeVRMode();
         exitVRMode(): void;
         enterFullscreen(): void;
         exitFullscreen(): void;

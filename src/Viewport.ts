@@ -1,5 +1,6 @@
 declare var Detector: any;
 declare var Stats: any;
+declare var VRDisplay: any;
 
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
@@ -32,6 +33,7 @@ module Virtex {
         private _viewportHalfX: number;
         private _viewportHalfY: number;
 
+        private _hmd: VRDisplay;
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
         private _isVRMode: boolean = false;
@@ -54,6 +56,8 @@ module Virtex {
         constructor(options: IOptions) {
             this.options = $.extend(this._getDefaultOptions(), options);
 
+            window.WebVRConfig = this.options.webVRConfig; // for webVR polyfill
+
             if (!this.options.fullscreenEnabled){
                 this._vrEnabled = false;
             }
@@ -65,6 +69,24 @@ module Virtex {
             if (success){
                 this._draw();
             }
+        }
+
+        private _getVRDisplay(): Promise<VRDisplay> {
+            return new Promise(function(resolve, reject) {
+                navigator.getVRDisplays().then(function(devices) {
+                    // Promise succeeds, but check if there are any devices actually.
+                    for (var i = 0; i < devices.length; i++) {
+                        if (devices[i] instanceof VRDisplay) {
+                            resolve(devices[i]);
+                            break;
+                        }
+                    }
+                    resolve(null);
+                }, function() {
+                    // No devices are found.
+                    resolve(null);
+                });
+            });
         }
 
         private _getDefaultOptions(): IOptions {
@@ -86,6 +108,39 @@ module Virtex {
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
+                webVRConfig: {
+                    /**
+                     * webvr-polyfill configuration
+                     */
+
+                    // Forces availability of VR mode.
+                    FORCE_ENABLE_VR: true, // Default: false.
+                    PREVENT_DISTORTION: true, // Default: false.
+                    // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
+                    //K_FILTER: 0.98, // Default: 0.98.
+                    // How far into the future to predict during fast motion.
+                    //PREDICTION_TIME_S: 0.040, // Default: 0.040 (in seconds).
+                    // Flag to disable touch panner. In case you have your own touch controls
+                    //TOUCH_PANNER_DISABLED: true, // Default: false.
+                    // Enable yaw panning only, disabling roll and pitch. This can be useful for
+                    // panoramas with nothing interesting above or below.
+                    //YAW_ONLY: true, // Default: false.
+                    // Enable the deprecated version of the API (navigator.getVRDevices).
+                    //ENABLE_DEPRECATED_API: true, // Default: false.
+                    // Scales the recommended buffer size reported by WebVR, which can improve
+                    // performance. Making this very small can lower the effective resolution of
+                    // your scene.
+                    //BUFFER_SCALE: 0.5, // default: 1.0
+                    // Allow VRDisplay.submitFrame to change gl bindings, which is more
+                    // efficient if the application code will re-bind it's resources on the
+                    // next frame anyway.
+                    // Dirty bindings include: gl.FRAMEBUFFER_BINDING, gl.CURRENT_PROGRAM,
+                    // gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING,
+                    // and gl.TEXTURE_BINDING_2D for texture unit 0
+                    // Warning: enabling this might lead to rendering issues.
+                    //DIRTY_SUBMIT_FRAME_BINDINGS: true // default: false
+                    SHOW_EYE_CENTERS: false // Default: false.
+                },
                 zoomSpeed: 1
             }
         }
@@ -106,6 +161,14 @@ module Virtex {
                 this._$oldie.appendTo(this._$element);
                 return false;
             }
+
+            // window.addEventListener('vrdisplaypresentchange', function(e) {
+            //     console.log('onVRDisplayPresentChange', e);
+            // });
+            
+            // window.addEventListener('vrdisplaydeviceparamschange', function(e) {
+            //     console.log('onVRDisplayDeviceParamsChange', e);
+            // });
 
             this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
             this._$viewport = this._$element.find('.viewport');
@@ -498,8 +561,26 @@ module Virtex {
         public enterVRMode(): void {
             
             if (!this._vrEnabled) return;
-            
+
+            // get the hmd if not already set
+            if (!this._hmd){
+                this._getVRDisplay().then((display) => {
+                    if (!display){
+                        console.warn("hmd not found");
+                    } else {
+                        this._hmd = display;
+                        this._completeVRMode();
+                    }
+                });
+            } else {
+                this._completeVRMode();
+            }
+        }
+        
+        private _completeVRMode(): void {
             this._isVRMode = true;
+            
+            this._hmd.requestPresent({source: this._$viewport[0]});
             
             this._createControls();
             this._createRenderer();
