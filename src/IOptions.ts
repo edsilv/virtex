@@ -19,6 +19,7 @@ module Virtex{
         shading?: THREE.Shading;
         shininess?: number;
         showStats?: boolean;
+        vrBackgroundColor: number;
         webVRConfig: any;
         zoomSpeed?: number;
     }

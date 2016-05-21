@@ -27,7 +27,7 @@ module Virtex {
         private _camera: THREE.PerspectiveCamera;
         private _lightGroup: THREE.Group;
         private _objectGroup: THREE.Group;
-        private _renderer: THREE.Renderer;
+        private _renderer: THREE.WebGLRenderer;
         private _scene: THREE.Scene;
         private _stats: any;
         private _viewportHalfX: number;
@@ -108,14 +108,14 @@ module Virtex {
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
+                vrBackgroundColor: 0x000000,
                 webVRConfig: {
                     /**
                      * webvr-polyfill configuration
                      */
-
                     // Forces availability of VR mode.
-                    FORCE_ENABLE_VR: true, // Default: false.
-                    PREVENT_DISTORTION: true, // Default: false.
+                    //FORCE_ENABLE_VR: true, // Default: false.
+                    //PREVENT_DISTORTION: true, // Default: false.
                     // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
                     //K_FILTER: 0.98, // Default: 0.98.
                     // How far into the future to predict during fast motion.
@@ -139,7 +139,7 @@ module Virtex {
                     // and gl.TEXTURE_BINDING_2D for texture unit 0
                     // Warning: enabling this might lead to rendering issues.
                     //DIRTY_SUBMIT_FRAME_BINDINGS: true // default: false
-                    SHOW_EYE_CENTERS: false // Default: false.
+                    //SHOW_EYE_CENTERS: false // Default: false.
                 },
                 zoomSpeed: 1
             }
@@ -228,14 +228,17 @@ module Virtex {
                 antialias: true,
                 alpha: true
             });
-            
+
             if (this._isVRMode){
 
+                this._renderer.setClearColor(this.options.vrBackgroundColor);
+                
                 // Apply VR stereo rendering to renderer.
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
                 
             } else {
+                this._renderer.setClearColor(this.options.vrBackgroundColor, 0);
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             }
 
