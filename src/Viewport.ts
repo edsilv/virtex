@@ -486,12 +486,44 @@ module Virtex {
             }
         }
 
+        public rotateY(radians: number): void {
+            var rotation: number = this._objectGroup.rotation.y + radians;
+            this._objectGroup.rotation.y = rotation;
+
+            // var TAU: number = Math.PI * 2;
+            
+            // if (rotation > TAU){
+            //     rotation = rotation - TAU;
+            //     this._applyTransform();
+            //     this._objectGroup.rotation.y = rotation;
+            // } else if (rotation < (TAU * -1)) {
+            //     rotation = (TAU * -1) - rotation;
+            //     this._applyTransform();
+            //     this._objectGroup.rotation.y = rotation;
+            // } else {
+            //     this._objectGroup.rotation.y = rotation;
+            // }
+
+            // console.log(rotation);
+        }
+        
+        // private _applyTransform(): void{
+        //     this._objectGroup.updateMatrix();
+
+        //     //this._objectGroup.geometry.applyMatrix( this._objectGroup.matrix );
+
+        //     this._objectGroup.position.set( 0, 0, 0 );
+        //     this._objectGroup.rotation.set( 0, 0, 0 );
+        //     this._objectGroup.scale.set( 1, 1, 1 );
+        //     this._objectGroup.updateMatrix();
+        // }
+
         private _render(): void {
 
             if (this._isVRMode){
                 
                 if (this._isMouseDown) {
-                    this._objectGroup.rotation.y += 0.1;
+                    this.rotateY(0.1);
                 }
                 
                 // Update VR headset position and apply to camera.
@@ -506,7 +538,7 @@ module Virtex {
                 
             } else {
                 // horizontal rotation
-                this._objectGroup.rotation.y += (this._targetRotationX - this._objectGroup.rotation.y) * 0.1;
+                this.rotateY((this._targetRotationX - this._objectGroup.rotation.y) * 0.1);
 
                 // vertical rotation
                 var finalRotationY = (this._targetRotationY - this._objectGroup.rotation.x);
@@ -587,6 +619,9 @@ module Virtex {
             
             this._createControls();
             this._createRenderer();
+            
+            // todo: point camera at object
+            //this._camera.lookAt(this._objectGroup.position);
             
             this.enterFullscreen();
         }

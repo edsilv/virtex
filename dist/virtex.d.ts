@@ -90,6 +90,7 @@ declare module Virtex {
         private _onTouchMove(event);
         private _onTouchEnd(event);
         private _draw();
+        rotateY(radians: number): void;
         private _render();
         private _getWidth();
         private _getHeight();
