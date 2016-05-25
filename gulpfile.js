@@ -1,7 +1,7 @@
 var browserify = require('gulp-browserify');
 var concat = require('gulp-concat');
-var Config = require('./gulpfile.config');
-var config = new Config();
+var c = require('./gulpfile.config');
+var config = new c();
 var connect = require('gulp-connect');
 var del = require('del');
 var gulp = require('gulp');
@@ -45,14 +45,12 @@ gulp.task('browserify', function (cb) {
 });
 
 gulp.task('clean:dist', function (cb) {
-    del([
-        config.dist + '/*'
-    ], cb);
+    return del(config.dist + '/*', cb);
 });
 
 gulp.task('minify', function() {
-    return gulp.src([config.out], { cwd: config.dist })
-        .pipe(rename(function (path) {
+    return gulp.src([config.jsOut], { cwd: config.dist })
+        .pipe(rename(function(path) {
             path.extname = ".min" + path.extname;
         }))
         .pipe(uglify())

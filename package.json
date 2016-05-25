@@ -14,7 +14,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "deamdify": "^0.1.1",
     "del": "^1.2.0",
     "event-stream": "^3.1.7",
     "gulp": "^3.8.7",
