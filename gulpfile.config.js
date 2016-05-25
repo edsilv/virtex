@@ -2,11 +2,11 @@ var metadata = require('./package');
 
 var GulpConfig = (function () {
     function GulpConfig() {
-        this.lib = 'virtex';
+        this.name = 'virtex';
         this.dist = './dist';
-        this.header = '// ' + metadata.name + ' v' + metadata.version + ' ' + metadata.homepage + '\n';
-        this.jsOut = this.lib + '.js';
-        this.dtsOut = this.lib + '.d.ts';
+        this.header = '// ' + this.name + ' v' + metadata.version + ' ' + metadata.homepage + '\n';
+        this.jsOut = this.name + '.js';
+        this.dtsOut = this.name + '.d.ts';
         this.tsSrc = [
             'src/_references.ts',
             'src/*.ts',

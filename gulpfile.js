@@ -1,4 +1,4 @@
-var browserify = require('gulp-browserify');
+var browserify = require('browserify');
 var concat = require('gulp-concat');
 var c = require('./gulpfile.config');
 var config = new c();
@@ -12,6 +12,7 @@ var rename = require('gulp-rename');
 var requireDir = require('require-dir');
 var runSequence = require('run-sequence');
 var tasks = requireDir('./tasks');
+var through = require('through2');
 var ts = require('gulp-typescript');
 var uglify = require('gulp-uglify');
 
@@ -35,11 +36,25 @@ gulp.task('build', function() {
     ]);
 });
 
-gulp.task('browserify', function (cb) {
+function bundle(debug) {
+
+  return through.obj(function(file, encoding, cb) {
+    var bundle = browserify({
+            standalone: config.name,
+            debug: debug
+        })
+      .require(file, { entry: file.path })
+      .bundle();
+
+    file.contents = bundle;
+    this.push(file);
+    cb();
+  })
+}
+
+gulp.task('browserify', function(cb) {
     return gulp.src(['./*.js'], { cwd: config.dist })
-        .pipe(browserify({
-            standalone: config.lib
-        }))
+        .pipe(bundle(false))
         .pipe(rename(config.jsOut))
         .pipe(gulp.dest(config.dist));
 });
@@ -53,7 +68,9 @@ gulp.task('minify', function() {
         .pipe(rename(function(path) {
             path.extname = ".min" + path.extname;
         }))
-        .pipe(uglify())
+        .pipe(uglify({
+            mangle: false
+        }))
         .pipe(insert.prepend(config.header))
         .pipe(gulp.dest(config.dist));
 });
@@ -66,7 +83,8 @@ gulp.task('copy:css', function() {
 
 gulp.task('copy:build', function() {
     return gulp.src([
-        'dist/virtex.js'
+        config.dist + '/' + config.jsOut,
+        config.dist + '/' + config.name + '.min.js'
     ]).pipe(gulp.dest('./test/js'));
 });
 
@@ -106,9 +124,7 @@ gulp.task('test', function() {
 });
 
 gulp.task('default', function(cb) {
-    runSequence('clean:dist', 'build', 'browserify', 'copy:css', 'copy:build', cb);
+    runSequence('clean:dist', 'build', 'browserify', 'copy:css', 'minify', 'copy:build', cb);
 });
 
-gulp.task('sync', function(cb) {
-    runSequence('copy:typings', 'copy:libs', cb);
-});
+gulp.task('sync', ['copy:typings', 'copy:libs']);
