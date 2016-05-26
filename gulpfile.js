@@ -2,14 +2,32 @@ var c = require('./gulpfile.config');
 var config = new c();
 var connect = require('gulp-connect');
 var gulp = require('gulp');
+var rename = require('gulp-rename');
 var requireDir = require('require-dir');
 var runSequence = require('run-sequence');
 var tasks = requireDir('./tasks');
-var utils = require('./tasks/utils');
+var utils = require('gulp-utils');
+
+gulp.task('browserify', function(cb) {
+    return gulp.src(config.jsOut, {cwd: config.browserifySrc})
+        .pipe(utils.bundle(config.browserifyConfig))
+        .pipe(rename(config.jsOut))
+        .pipe(gulp.dest(config.browserifyTarget));
+});
 
 gulp.task('minify', function(cb){
     Promise.all([
         utils.minify(config.dist + '/' + config.jsOut, config.dist)
+    ]).then(function(){
+        cb();
+    });
+});
+
+gulp.task('prependHeaders', function(cb){
+    Promise.all([
+        utils.prependHeader(config.header, config.dist + '/' + config.dtsOut, config.dist),
+        utils.prependHeader(config.header, config.dist + '/' + config.jsOut, config.dist),
+        utils.prependHeader(config.header, config.dist + '/' + config.name + '.min.js', config.dist)
     ]).then(function(){
         cb();
     });
@@ -52,8 +70,8 @@ gulp.task('test', function() {
         root: './test',
         middleware: function(connect, opt) {
             return [
-                //mount(connect, config.dist), // serve contents of the dist folder
-                //mount(connect, './node_modules') // serve node_modules
+                //utils.mount(connect, config.dist), // serve contents of the dist folder
+                //utils.mount(connect, './node_modules') // serve node_modules
             ]
         }
     });

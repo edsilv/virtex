@@ -25,6 +25,7 @@
     "gulp-rename": "^1.2.0",
     "gulp-typescript": "^2.2.1",
     "gulp-uglify": "^0.3.1",
+    "gulp-utils": "git://github.com/edsilv/gulp-utils",
     "key-codes": "git://github.com/edsilv/key-codes",
     "merge2": "^0.3.6",
     "path": "^0.11.14",
