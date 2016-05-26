@@ -1,3 +1,4 @@
+// virtex v0.2.7 https://github.com/edsilv/virtex#readme
 
 declare module Virtex {
     interface IOptions {

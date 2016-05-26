@@ -11,6 +11,17 @@ var GulpConfig = (function () {
             'src/_references.ts',
             'src/*.ts',
             'typings/*.ts'];
+        this.tsConfig = {
+            declarationFiles: true,
+            noExternalResolve: true,
+            noLib: false,
+            module: 'commonjs',
+            sortOutput: true
+        };
+        this.browserifyConfig = {
+            standalone: this.name,
+            debug: false
+        };
     }
     return GulpConfig;
 })();
