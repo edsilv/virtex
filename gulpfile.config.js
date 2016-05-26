@@ -22,7 +22,8 @@ var GulpConfig = (function () {
             standalone: this.name,
             debug: false
         };
-        this.browserifyDir = this.dist;
+        this.browserifySrc = this.dist;
+        this.browserifyTarget = this.dist;
     }
     return GulpConfig;
 })();

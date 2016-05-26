@@ -18,8 +18,8 @@ function bundle() {
 }
 
 gulp.task('browserify', function(cb) {
-    return gulp.src(['./*.js'], {cwd: config.browserifyDir})
+    return gulp.src(config.jsOut, {cwd: config.browserifySrc})
         .pipe(bundle())
         .pipe(rename(config.jsOut))
-        .pipe(gulp.dest(config.browserifyDir));
+        .pipe(gulp.dest(config.browserifyTarget));
 });
