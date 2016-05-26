@@ -393,6 +393,7 @@ var Virtex;
                 if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
                     this._objectGroup.rotation.x += finalRotationY * 0.1;
                 }
+                // limit vertical rotation 
                 if (this._objectGroup.rotation.x > 1) {
                     this._objectGroup.rotation.x = 1;
                 }
@@ -400,7 +401,7 @@ var Virtex;
                     this._objectGroup.rotation.x = -1;
                 }
                 var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
-                this._camera.position.z = this._camera.position.z + zoomDelta;
+                this._camera.position.z += zoomDelta;
                 this._renderer.render(this._scene, this._camera);
             }
         };
