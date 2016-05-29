@@ -1,7 +1,13 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
 
+declare namespace Virtex {
+    class Events {
+        static LOADED: string;
+    }
+}
+
 declare module Virtex {
-    interface IOptions {
+    interface IVirtexOptions extends Components.IBaseComponentOptions {
         ambientLightColor?: number;
         cameraZ?: number;
         directionalLight1Color?: number;
@@ -27,18 +33,13 @@ declare module Virtex {
     }
 }
 
-interface IVirtex {
-    create: (options: Virtex.IOptions) => Virtex.Viewport;
-}
-
 declare var Detector: any;
 declare var Stats: any;
 declare var VRDisplay: any;
 declare var requestAnimFrame: any;
 declare module Virtex {
-    class Viewport {
-        options: IOptions;
-        private _$element;
+    class Viewport extends Components.BaseComponent {
+        options: IVirtexOptions;
         private _$viewport;
         private _$loading;
         private _$loadingBar;
@@ -70,10 +71,10 @@ declare module Virtex {
         private _vrControls;
         private _vrEffect;
         private _vrEnabled;
-        constructor(options: IOptions);
+        constructor(options: IVirtexOptions);
+        protected _init(): boolean;
+        protected _getDefaultOptions(): IVirtexOptions;
         private _getVRDisplay();
-        private _getDefaultOptions();
-        private _init();
         private _createLights();
         private _createCamera();
         private _createRenderer();
@@ -104,7 +105,6 @@ declare module Virtex {
         exitFullscreen(): void;
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
-        private _resize();
+        protected _resize(): void;
     }
 }
-

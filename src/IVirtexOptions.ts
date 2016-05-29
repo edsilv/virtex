@@ -1,5 +1,5 @@
 module Virtex{
-    export interface IOptions {
+    export interface IVirtexOptions extends Components.IBaseComponentOptions {
         ambientLightColor?: number;
         cameraZ?: number;
         directionalLight1Color?: number;

@@ -3,7 +3,10 @@ var metadata = require('./package');
 var GulpConfig = (function () {
     function GulpConfig() {
         this.name = 'virtex';
+        // libs that must be included in a consuming app for this component to work
         this.deps = [
+            'node_modules/base-component/dist/base-component.min.js',
+            'node_modules/base-component/node_modules/eventemitter2/lib/eventemitter2.js',
             'node_modules/three/three.min.js',
             'node_modules/three/examples/js/controls/VRControls.js',
             'node_modules/three/examples/js/effects/VREffect.js',
@@ -12,9 +15,13 @@ var GulpConfig = (function () {
             'node_modules/webvr-polyfill/build/webvr-polyfill.js',
             'node_modules/key-codes/dist/key-codes.js'
         ];
-        this.testDeps = [];
+        // libs used for testing purposes, but not needed in a consuming app
+        this.testDeps = [
+            
+        ];
         this.testDepsDir = './test/js';
         this.typings = [
+            'node_modules/base-component/dist/base-component.d.ts',
             'node_modules/key-codes/dist/key-codes.d.ts'
         ];
         this.typingsDir = './typings';

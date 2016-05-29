@@ -1,12 +1,25 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.virtex = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function (global){
+
+
+var Virtex;
+(function (Virtex) {
+    var Events = (function () {
+        function Events() {
+        }
+        Events.LOADED = 'loaded';
+        return Events;
+    }());
+    Virtex.Events = Events;
+})(Virtex || (Virtex = {}));
 
 
 
-
-
-
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
@@ -19,8 +32,10 @@ var requestAnimFrame = (function () {
 })();
 var Virtex;
 (function (Virtex) {
-    var Viewport = (function () {
+    var Viewport = (function (_super) {
+        __extends(Viewport, _super);
         function Viewport(options) {
+            _super.call(this, options);
             this._isFullscreen = false;
             this._isMouseDown = false;
             this._isVRMode = false;
@@ -34,63 +49,16 @@ var Virtex;
             this._targetRotationX = 0;
             this._targetRotationY = 0;
             this._vrEnabled = true;
-            this.options = $.extend(this._getDefaultOptions(), options);
-            window.WebVRConfig = this.options.webVRConfig; // for webVR polyfill
-            if (!this.options.fullscreenEnabled) {
-                this._vrEnabled = false;
-            }
             var success = this._init();
             this._resize();
             if (success) {
                 this._draw();
             }
         }
-        Viewport.prototype._getVRDisplay = function () {
-            return new Promise(function (resolve, reject) {
-                navigator.getVRDisplays().then(function (devices) {
-                    // Promise succeeds, but check if there are any devices actually.
-                    for (var i = 0; i < devices.length; i++) {
-                        if (devices[i] instanceof VRDisplay) {
-                            resolve(devices[i]);
-                            break;
-                        }
-                    }
-                    resolve(null);
-                }, function () {
-                    // No devices are found.
-                    resolve(null);
-                });
-            });
-        };
-        Viewport.prototype._getDefaultOptions = function () {
-            return {
-                ambientLightColor: 0xd0d0d0,
-                cameraZ: 4.5,
-                directionalLight1Color: 0xffffff,
-                directionalLight1Intensity: 0.75,
-                directionalLight2Color: 0x002958,
-                directionalLight2Intensity: 0.5,
-                doubleSided: true,
-                fadeSpeed: 1750,
-                far: 10000,
-                fov: 45,
-                maxZoom: 10,
-                minZoom: 2,
-                near: 0.1,
-                fullscreenEnabled: true,
-                shading: THREE.SmoothShading,
-                shininess: 1,
-                showStats: false,
-                vrBackgroundColor: 0x000000,
-                webVRConfig: {},
-                zoomSpeed: 1
-            };
-        };
         Viewport.prototype._init = function () {
-            this._$element = $(this.options.element);
-            this._$element.empty();
-            if (!this._$element.length) {
-                console.log('element not found');
+            var success = _super.prototype._init.call(this);
+            if (!success) {
+                console.error("Virtex failed to initialise");
                 return false;
             }
             if (!Detector.webgl) {
@@ -98,6 +66,10 @@ var Virtex;
                 this._$oldie = $('#oldie');
                 this._$oldie.appendTo(this._$element);
                 return false;
+            }
+            window.WebVRConfig = this.options.webVRConfig; // for webVR polyfill
+            if (!this.options.fullscreenEnabled) {
+                this._vrEnabled = false;
             }
             // window.addEventListener('vrdisplaypresentchange', function(e) {
             //     console.log('onVRDisplayPresentChange', e);
@@ -127,6 +99,46 @@ var Virtex;
                 this._$viewport.append(this._stats.domElement);
             }
             return true;
+        };
+        Viewport.prototype._getDefaultOptions = function () {
+            return {
+                ambientLightColor: 0xd0d0d0,
+                cameraZ: 4.5,
+                directionalLight1Color: 0xffffff,
+                directionalLight1Intensity: 0.75,
+                directionalLight2Color: 0x002958,
+                directionalLight2Intensity: 0.5,
+                doubleSided: true,
+                fadeSpeed: 1750,
+                far: 10000,
+                fov: 45,
+                maxZoom: 10,
+                minZoom: 2,
+                near: 0.1,
+                fullscreenEnabled: true,
+                shading: THREE.SmoothShading,
+                shininess: 1,
+                showStats: false,
+                vrBackgroundColor: 0x000000,
+                webVRConfig: {},
+                zoomSpeed: 1
+            };
+        };
+        Viewport.prototype._getVRDisplay = function () {
+            return new Promise(function (resolve, reject) {
+                navigator.getVRDisplays().then(function (devices) {
+                    for (var i = 0; i < devices.length; i++) {
+                        if (devices[i] instanceof VRDisplay) {
+                            resolve(devices[i]);
+                            break;
+                        }
+                    }
+                    resolve(null);
+                }, function () {
+                    // No devices are found.
+                    resolve(null);
+                });
+            });
         };
         Viewport.prototype._createLights = function () {
             this._lightGroup = new THREE.Object3D();
@@ -217,6 +229,7 @@ var Virtex;
                 }
                 _this._objectGroup.add(obj);
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
+                _this.emitEvent(Virtex.Events.LOADED, [obj]);
             }, function (e) {
                 if (e.lengthComputable) {
                     _this._loadProgress(e.loaded / e.total);
@@ -545,16 +558,14 @@ var Virtex;
             }
         };
         return Viewport;
-    }());
+    }(Components.BaseComponent));
     Virtex.Viewport = Viewport;
 })(Virtex || (Virtex = {}));
-
-global.virtex = module.exports = {
-    create: function (options) {
-        return new Virtex.Viewport(options);
+module.exports = (function (w) {
+    if (!w.Virtex) {
+        w.Virtex = Virtex;
     }
-};
+})(window);
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1])(1)
 });

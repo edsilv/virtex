@@ -14,6 +14,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "base-component": "git://github.com/edsilv/base-component.git",
     "browserify": "^13.0.1",
     "del": "^1.2.0",
     "event-stream": "^3.1.7",
