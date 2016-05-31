@@ -1,11 +1,5 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
 
-declare namespace Virtex {
-    class Events {
-        static LOADED: string;
-    }
-}
-
 declare module Virtex {
     interface IVirtexOptions extends Components.IBaseComponentOptions {
         ambientLightColor?: number;
@@ -106,5 +100,10 @@ declare module Virtex {
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
         protected _resize(): void;
+    }
+}
+declare namespace Virtex {
+    class Events {
+        static LOADED: string;
     }
 }

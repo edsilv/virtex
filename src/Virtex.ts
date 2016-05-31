@@ -723,6 +723,12 @@ module Virtex {
     }
 }
 
+namespace Virtex {
+    export class Events {
+        static LOADED: string = 'loaded';
+    }
+}
+
 (function(w) {
     if (!w.Virtex){
         w.Virtex = Virtex;
