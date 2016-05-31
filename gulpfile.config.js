@@ -6,7 +6,6 @@ var GulpConfig = (function () {
         // libs that must be included in a consuming app for this component to work
         this.deps = [
             'node_modules/base-component/dist/base-component.min.js',
-            'node_modules/base-component/node_modules/eventemitter2/lib/eventemitter2.js',
             'node_modules/three/three.min.js',
             'node_modules/three/examples/js/controls/VRControls.js',
             'node_modules/three/examples/js/effects/VREffect.js',

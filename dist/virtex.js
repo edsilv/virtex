@@ -561,7 +561,7 @@ var Virtex;
     }(Components.BaseComponent));
     Virtex.Viewport = Viewport;
 })(Virtex || (Virtex = {}));
-module.exports = (function (w) {
+(function (w) {
     if (!w.Virtex) {
         w.Virtex = Virtex;
     }

@@ -723,7 +723,7 @@ module Virtex {
     }
 }
 
-module.exports = (function(w) {
+(function(w) {
     if (!w.Virtex){
         w.Virtex = Virtex;
     }
