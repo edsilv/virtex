@@ -146,11 +146,10 @@ module Virtex {
                 showStats: false,
                 vrBackgroundColor: 0x000000,
                 webVRConfig: {
-                    /**
-                     * webvr-polyfill configuration
-                     */
+                    // Prevents the polyfill from initializing automatically.
+                    DEFER_INITIALIZATION: true,
                     // Forces availability of VR mode.
-                    //FORCE_ENABLE_VR: true, // Default: false.
+                    FORCE_ENABLE_VR: true, // Default: false.
                     //PREVENT_DISTORTION: true, // Default: false.
                     // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
                     //K_FILTER: 0.98, // Default: 0.98.
@@ -166,7 +165,7 @@ module Virtex {
                     // Scales the recommended buffer size reported by WebVR, which can improve
                     // performance. Making this very small can lower the effective resolution of
                     // your scene.
-                    //BUFFER_SCALE: 0.5, // default: 1.0
+                    BUFFER_SCALE: 0.5, // default: 1.0
                     // Allow VRDisplay.submitFrame to change gl bindings, which is more
                     // efficient if the application code will re-bind it's resources on the
                     // next frame anyway.
@@ -174,7 +173,7 @@ module Virtex {
                     // gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING,
                     // and gl.TEXTURE_BINDING_2D for texture unit 0
                     // Warning: enabling this might lead to rendering issues.
-                    //DIRTY_SUBMIT_FRAME_BINDINGS: true // default: false
+                    DIRTY_SUBMIT_FRAME_BINDINGS: true // default: false
                     //SHOW_EYE_CENTERS: false // Default: false.
                 },
                 zoomSpeed: 1
