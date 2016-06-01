@@ -218,7 +218,7 @@ var Virtex;
                 }
                 _this._objectGroup.add(obj);
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
-                _this.emitEvent(Virtex.Events.LOADED, [obj]);
+                _this._emit(Virtex.Events.LOADED, obj);
             }, function (e) {
                 if (e.lengthComputable) {
                     _this._loadProgress(e.loaded / e.total);

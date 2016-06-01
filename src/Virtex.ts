@@ -316,7 +316,7 @@ module Virtex {
                     this._objectGroup.add(obj);
                     this._$loading.fadeOut(this.options.fadeSpeed);
                     
-                    this.emitEvent(Events.LOADED, [obj]);
+                    this._emit(Events.LOADED, obj);
                 },
                 (e: ProgressEvent) => {
                     if (e.lengthComputable) {
