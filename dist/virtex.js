@@ -488,7 +488,7 @@ var Virtex;
         };
         Viewport.prototype._completeVRMode = function () {
             this._isVRMode = true;
-            this._hmd.requestPresent({ source: this._$viewport[0] });
+            this._hmd.requestPresent({ source: this._$viewport.find('canvas')[0] });
             this._createControls();
             this._createRenderer();
             // todo: point camera at object

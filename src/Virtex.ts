@@ -615,7 +615,7 @@ module Virtex {
         private _completeVRMode(): void {
             this._isVRMode = true;
             
-            this._hmd.requestPresent({source: this._$viewport[0]});
+            this._hmd.requestPresent({source: this._$viewport.find('canvas')[0]});
             
             this._createControls();
             this._createRenderer();
