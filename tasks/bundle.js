@@ -5,13 +5,12 @@ var gulp = require('gulp');
 var merge = require('merge2');
 var path = require('path');
 
-gulp.task('bundle:deps', function(cb) {
+gulp.task('bundle', function(cb) {
     return merge([
         gulp.src(config.deps.concat([path.join(config.dist, config.jsMinOut)]))
             .pipe(concat(config.jsBundleOut))
             .pipe(gulp.dest(config.dist)),
         gulp.src(config.cssSrc)
-            .pipe(gulp.dest(config.dist))
             .pipe(gulp.dest(config.dist))
     ]);
 });
