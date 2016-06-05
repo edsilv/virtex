@@ -6,7 +6,7 @@ var runSequence = require('run-sequence');
 var tasks = requireDir('./tasks');
 
 gulp.task('default', function(cb) {
-    runSequence('clean:dist', 'build', 'browserify', 'copy:css', 'minify', 'prependHeaders', 'sync', cb);
+    runSequence('clean:dist', 'build', 'browserify', 'minify', 'bundle:deps', 'bundle:typings', 'prependHeaders', 'sync', cb);
 });
 
-gulp.task('sync', ['copy:build' ,'copy:typings', 'copy:deps']);
+gulp.task('sync', ['copy:bundle' ,'copy:typings', 'copy:css']);

@@ -3,9 +3,9 @@ var metadata = require('./package');
 var GulpConfig = (function () {
     function GulpConfig() {
         this.name = 'virtex';
-        // libs that must be included in a consuming app for this component to work
+        // libs that MUST be included in a consuming app for this component to work
         this.deps = [
-            'node_modules/base-component/dist/base-component.min.js',
+            'node_modules/base-component/dist/base-component.js',
             'node_modules/three/three.min.js',
             'node_modules/three/examples/js/controls/VRControls.js',
             'node_modules/three/examples/js/effects/VREffect.js',
@@ -14,11 +14,12 @@ var GulpConfig = (function () {
             'node_modules/webvr-polyfill/build/webvr-polyfill.js',
             'node_modules/key-codes/dist/key-codes.js'
         ];
-        // libs used for testing purposes, but not needed in a consuming app
+        // libs that MAY be included in a consuming app but are used here for testing purposes
         this.testDeps = [
             
         ];
         this.testDepsDir = './test/js';
+        // ts definitions to copy to the typings dir
         this.typings = [
             'node_modules/base-component/dist/base-component.d.ts',
             'node_modules/key-codes/dist/key-codes.d.ts'
@@ -27,7 +28,10 @@ var GulpConfig = (function () {
         this.dist = './dist';
         this.header = '// ' + this.name + ' v' + metadata.version + ' ' + metadata.homepage + '\n';
         this.jsOut = this.name + '.js';
+        this.jsBundleOut = this.name + '.bundle.js';
+        this.jsMinOut = this.name + '.min.js';
         this.dtsOut = this.name + '.d.ts';
+        this.dtsBundleOut = this.name + '.bundle.d.ts';
         this.tsSrc = [
             'src/_references.ts',
             'src/*.ts',
@@ -45,6 +49,8 @@ var GulpConfig = (function () {
         };
         this.browserifySrc = this.dist;
         this.browserifyTarget = this.dist;
+        this.cssSrc = 'src/*.css';
+        this.testCSSDir = './test/css';
     }
     return GulpConfig;
 })();
