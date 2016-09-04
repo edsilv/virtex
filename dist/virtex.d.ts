@@ -1,7 +1,7 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
 
 declare module Virtex {
-    interface IVirtexOptions extends Components.IBaseComponentOptions {
+    interface IVirtexOptions extends _Components.IBaseComponentOptions {
         ambientLightColor?: number;
         cameraZ?: number;
         directionalLight1Color?: number;
@@ -32,7 +32,7 @@ declare var Stats: any;
 declare var VRDisplay: any;
 declare var requestAnimFrame: any;
 declare module Virtex {
-    class Viewport extends Components.BaseComponent {
+    class Viewport extends _Components.BaseComponent {
         options: IVirtexOptions;
         private _$viewport;
         private _$loading;

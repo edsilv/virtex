@@ -6,7 +6,7 @@ var path = require('path');
 
 gulp.task('minify', function(cb){
     Promise.all([
-        utils.minify(path.join(config.dist, config.jsOut), config.dist)
+        utils.minify(path.join(config.directories.dist, config.fileNames.jsOut), config.directories.dist)
     ]).then(function(){
         cb();
     });

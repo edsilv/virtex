@@ -576,7 +576,7 @@ var Virtex;
             }
         };
         return Viewport;
-    }(Components.BaseComponent));
+    }(_Components.BaseComponent));
     Virtex.Viewport = Viewport;
 })(Virtex || (Virtex = {}));
 var Virtex;

@@ -14,7 +14,7 @@ var requestAnimFrame = (function () {
 })();
 
 module Virtex {
-    export class Viewport extends Components.BaseComponent {
+    export class Viewport extends _Components.BaseComponent {
         
         public options: IVirtexOptions;
         

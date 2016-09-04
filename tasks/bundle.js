@@ -7,19 +7,17 @@ var path = require('path');
 
 gulp.task('bundle', function(cb) {
     return merge([
-        gulp.src(config.deps.concat([path.join(config.dist, config.jsMinOut)]))
-            .pipe(concat(config.jsBundleOut))
-            .pipe(gulp.dest(config.dist)),
-        gulp.src(config.cssSrc)
-            .pipe(gulp.dest(config.dist))
+        gulp.src(config.dependencies.libs.concat([path.join(config.directories.dist, config.fileNames.jsMinOut)]))
+            .pipe(concat(config.fileNames.jsBundleOut))
+            .pipe(gulp.dest(config.directories.dist))
     ]);
 });
 
 gulp.task('bundle:typings', function(cb) {
-    return gulp.src(config.typings.concat([
-            path.join(config.typingsDir, config.dtsOut), // include optional typings/name.d.ts for customisations
-            path.join(config.dist, config.dtsOut)
+    return gulp.src(config.dependencies.typings.concat([
+            path.join(config.directories.typings, config.fileNames.dtsOut), // include optional typings/name.d.ts for customisations
+            path.join(config.directories.dist, config.fileNames.dtsOut)
         ]))
-        .pipe(concat(config.dtsBundleOut))
-        .pipe(gulp.dest(config.dist));
+        .pipe(concat(config.fileNames.dtsBundleOut))
+        .pipe(gulp.dest(config.directories.dist));
 });
