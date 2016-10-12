@@ -184,6 +184,17 @@ var Virtex;
                 // Apply VR stereo rendering to renderer.
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
+                if (navigator.getVRDisplays) {
+                    navigator.getVRDisplays()
+                        .then(function (displays) {
+                        this._vrEffect.setVRDisplay(displays[0]);
+                        this._vrControls.setVRDisplay(displays[0]);
+                    })
+                        .catch(function () {
+                        // no displays
+                    });
+                    document.body.appendChild(WEBVR.getButton(this._vrEffect));
+                }
             }
             else {
                 this._renderer.setClearColor(this.options.vrBackgroundColor, 0);

@@ -13,7 +13,8 @@ var GulpConfig = (function () {
                 'node_modules/three/examples/js/effects/VREffect.js',
                 'node_modules/three/examples/js/libs/stats.min.js',
                 'node_modules/three/examples/js/Detector.js',
-                'node_modules/webvr-polyfill/build/webvr-polyfill.js',
+                // 'node_modules/webvr-polyfill/build/webvr-polyfill.js',
+                'node_modules/three/examples/js/WebVR.js',
                 'node_modules/key-codes/dist/key-codes.js'
             ],
             // libs that MAY be included in a consuming app but are used here for example purposes

@@ -1553,7 +1553,7 @@ CardboardVRDisplay.prototype.onDeviceParamsUpdated_ = function(newParams) {
   this.deviceInfo_.updateDeviceParams(newParams);
 
   if (this.distorter_) {
-    this.distorter.updateDeviceInfo(this.deviceInfo_);
+    this.distorter_.updateDeviceInfo(this.deviceInfo_);
   }
 };
 
@@ -4512,9 +4512,6 @@ module.exports = RotateInstructions;
  * limitations under the License.
  */
 
-/**
- * TODO: Fix up all "new THREE" instantiations to improve performance.
- */
 var SensorSample = _dereq_('./sensor-sample.js');
 var MathUtil = _dereq_('../math-util.js');
 var Util = _dereq_('../util.js');
@@ -4543,9 +4540,14 @@ function ComplementaryFilter(kFilter) {
   this.currentGyroMeasurement = new SensorSample();
   this.previousGyroMeasurement = new SensorSample();
 
-  // Set the quaternion to be looking in the -z direction by default.
-  this.filterQ = new MathUtil.Quaternion(1, 0, 0, 1);
+  // Set default look direction to be in the correct direction.
+  if (Util.isIOS()) {
+    this.filterQ = new MathUtil.Quaternion(-1, 0, 0, 1);
+  } else {
+    this.filterQ = new MathUtil.Quaternion(1, 0, 0, 1);
+  }
   this.previousFilterQ = new MathUtil.Quaternion();
+  this.previousFilterQ.copy(this.filterQ);
 
   // Orientation based on the accelerometer.
   this.accelQ = new MathUtil.Quaternion();
@@ -4924,6 +4926,7 @@ PosePredictor.prototype.getPrediction = function(currentQ, gyro, timestampS) {
   this.outQ.multiply(this.deltaQ);
 
   this.previousQ.copy(currentQ);
+  this.previousTimestampS = timestampS;
 
   return this.outQ;
 };
@@ -5619,6 +5622,18 @@ WebVRPolyfill.prototype.enablePolyfill = function() {
 
   // Provide the VRDisplay object.
   window.VRDisplay = VRDisplay;
+
+  // Provide navigator.vrEnabled.
+  var self = this;
+  Object.defineProperty(navigator, 'vrEnabled', {
+    get: function () {
+      return self.isCardboardCompatible() &&
+        (document.fullscreenEnabled ||
+          document.mozFullScreenEnabled ||
+          document.webkitFullscreenEnabled ||
+          false);
+    }
+  });
 };
 
 WebVRPolyfill.prototype.enableDeprecatedPolyfill = function() {

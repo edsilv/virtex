@@ -30,6 +30,7 @@ declare module Virtex {
 declare var Detector: any;
 declare var Stats: any;
 declare var VRDisplay: any;
+declare var WEBVR: any;
 declare var requestAnimFrame: any;
 declare module Virtex {
     class Viewport extends _Components.BaseComponent {
