@@ -346,19 +346,6 @@ var Virtex;
         Viewport.prototype.rotateY = function (radians) {
             var rotation = this._objectGroup.rotation.y + radians;
             this._objectGroup.rotation.y = rotation;
-            // var TAU: number = Math.PI * 2;
-            // if (rotation > TAU){
-            //     rotation = rotation - TAU;
-            //     this._applyTransform();
-            //     this._objectGroup.rotation.y = rotation;
-            // } else if (rotation < (TAU * -1)) {
-            //     rotation = (TAU * -1) - rotation;
-            //     this._applyTransform();
-            //     this._objectGroup.rotation.y = rotation;
-            // } else {
-            //     this._objectGroup.rotation.y = rotation;
-            // }
-            // console.log(rotation);
         };
         // private _applyTransform(): void{
         //     this._objectGroup.updateMatrix();

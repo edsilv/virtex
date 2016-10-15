@@ -451,22 +451,6 @@ module Virtex {
         public rotateY(radians: number): void {
             var rotation: number = this._objectGroup.rotation.y + radians;
             this._objectGroup.rotation.y = rotation;
-
-            // var TAU: number = Math.PI * 2;
-            
-            // if (rotation > TAU){
-            //     rotation = rotation - TAU;
-            //     this._applyTransform();
-            //     this._objectGroup.rotation.y = rotation;
-            // } else if (rotation < (TAU * -1)) {
-            //     rotation = (TAU * -1) - rotation;
-            //     this._applyTransform();
-            //     this._objectGroup.rotation.y = rotation;
-            // } else {
-            //     this._objectGroup.rotation.y = rotation;
-            // }
-
-            // console.log(rotation);
         }
         
         // private _applyTransform(): void{
@@ -588,12 +572,9 @@ module Virtex {
             }
         }
         
-        public enterFullscreen(): void {
-            
-            if (!this.options.fullscreenEnabled) return;
-            
+        public enterFullscreen(): void {            
+            if (!this.options.fullscreenEnabled) return;            
             var elem = this._$element[0];
-
             var requestFullScreen = this._getRequestFullScreen(elem);
 
             if (requestFullScreen){
