@@ -75,14 +75,6 @@ module Virtex {
                 return false;
             }
 
-            // window.addEventListener('vrdisplaypresentchange', function(e) {
-            //     console.log('onVRDisplayPresentChange', e);
-            // });
-            
-            // window.addEventListener('vrdisplaydeviceparamschange', function(e) {
-            //     console.log('onVRDisplayDeviceParamsChange', e);
-            // });
-
             this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
             this._$viewport = this._$element.find('.viewport');
             this._$loading = this._$element.find('.loading');
@@ -187,7 +179,6 @@ module Virtex {
                 this._renderer.setClearColor(this.options.vrBackgroundColor);
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
-
             } else {
                 this._renderer.setClearColor(this.options.vrBackgroundColor, 0);
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
@@ -341,7 +332,7 @@ module Virtex {
             event.preventDefault();
             event.stopPropagation();
 
-            var delta = 0;
+            var delta: number = 0;
 
             if (event.wheelDelta !== undefined) { // WebKit / Opera / Explorer 9
                 delta = event.wheelDelta;
@@ -358,7 +349,7 @@ module Virtex {
 
         private _onTouchStart(event: TouchEvent): void {
 
-            const touches = event.touches;
+            const touches: TouchList = event.touches;
 
             if (touches.length === 1) {
 
@@ -379,7 +370,7 @@ module Virtex {
             event.preventDefault();
             event.stopPropagation();
 
-            const touches = event.touches;
+            const touches: TouchList = event.touches;
 
             switch (touches.length) {
 
@@ -470,7 +461,7 @@ module Virtex {
                 this.rotateY((this._targetRotation.x - this._objectGroup.rotation.y) * 0.1);
 
                 // vertical rotation
-                var finalRotationY = (this._targetRotation.y - this._objectGroup.rotation.x);
+                var finalRotationY: number = (this._targetRotation.y - this._objectGroup.rotation.x);
 
                 if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
                     this._objectGroup.rotation.x += finalRotationY * 0.1;
@@ -483,7 +474,7 @@ module Virtex {
                     this._objectGroup.rotation.x = -1
                 }
 
-                var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
+                var zoomDelta: number = (this._targetZoom - this._camera.position.z) * 0.1;
                 
                 this._camera.position.z += zoomDelta;
             }
@@ -512,7 +503,7 @@ module Virtex {
         }
 
         public zoomIn(): void {
-            var t = this._camera.position.z - this.options.zoomSpeed;
+            var t: number = this._camera.position.z - this.options.zoomSpeed;
             if (t > this.options.minZoom){
                 this._targetZoom = t;
             } else {
@@ -521,7 +512,7 @@ module Virtex {
         }
 
         public zoomOut(): void {
-            var t = this._camera.position.z + this.options.zoomSpeed;
+            var t: number = this._camera.position.z + this.options.zoomSpeed;
             if (t < this.options.maxZoom){
                 this._targetZoom = t;
             } else {

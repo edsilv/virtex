@@ -53,12 +53,6 @@ var Virtex;
                 this._$oldie.appendTo(this._$element);
                 return false;
             }
-            // window.addEventListener('vrdisplaypresentchange', function(e) {
-            //     console.log('onVRDisplayPresentChange', e);
-            // });
-            // window.addEventListener('vrdisplaydeviceparamschange', function(e) {
-            //     console.log('onVRDisplayDeviceParamsChange', e);
-            // });
             this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
             this._$viewport = this._$element.find('.viewport');
             this._$loading = this._$element.find('.loading');
