@@ -1,4 +1,4 @@
-// base-component v1.0.2 https://github.com/viewdir/base-component#readme
+// base-component v1.0.1 https://github.com/viewdir/base-component#readme
 interface Window {
     _Components: any;
 }
@@ -13,7 +13,7 @@ declare namespace _Components {
         protected _getDefaultOptions(): IBaseComponentOptions;
         protected _emit(event: string, ...args: any[]): void;
         protected _resize(): void;
-        databind(data?: any): void;
+        databind(data: any): void;
     }
     function applyMixins(derivedCtor: any, baseCtors: any[]): void;
 }
@@ -21,7 +21,7 @@ declare namespace _Components {
 declare namespace _Components {
     interface IBaseComponent {
         options: IBaseComponentOptions;
-        databind(data?: any): void;
+        databind(data: any): void;
     }
 }
 
@@ -207,11 +207,7 @@ declare module KeyCodes.KeyPress {
 }
 
 interface Window{
-    WebVRConfig: any;
-}
 
-interface VRDisplay{
-    requestPresent: (options: any) => void;
 }
 
 interface Document{
@@ -219,10 +215,6 @@ interface Document{
     msFullscreenElement: any;
     msExitFullscreen: any;
     mozCancelFullScreen: any;
-}
-
-interface Navigator{
-    getVRDisplays: () => Promise<VRDisplay[]>
 }
 
 declare module Virtex {
@@ -247,14 +239,12 @@ declare module Virtex {
         shininess?: number;
         showStats?: boolean;
         vrBackgroundColor: number;
-        webVRConfig: any;
         zoomSpeed?: number;
     }
 }
 
 declare var Detector: any;
 declare var Stats: any;
-declare var VRDisplay: any;
 declare var WEBVR: any;
 declare var requestAnimFrame: any;
 declare module Virtex {
@@ -272,7 +262,6 @@ declare module Virtex {
         private _stats;
         private _viewportHalfX;
         private _viewportHalfY;
-        private _hmd;
         private _isFullscreen;
         private _isMouseDown;
         private _isVRMode;
@@ -311,15 +300,15 @@ declare module Virtex {
         private _onTouchStart(event);
         private _onTouchMove(event);
         private _onTouchEnd(event);
-        private _draw();
+        private _tick();
         rotateY(radians: number): void;
-        private _render();
+        private _update();
+        private _draw();
         private _getWidth();
         private _getHeight();
         zoomIn(): void;
         zoomOut(): void;
         enterVRMode(): void;
-        private _completeVRMode();
         exitVRMode(): void;
         enterFullscreen(): void;
         exitFullscreen(): void;

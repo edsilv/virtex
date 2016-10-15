@@ -41,7 +41,7 @@ var Virtex;
             var success = this._init();
             this._resize();
             if (success) {
-                this._draw();
+                this._tick();
             }
         }
         Viewport.prototype._init = function () {
@@ -55,10 +55,6 @@ var Virtex;
                 this._$oldie = $('#oldie');
                 this._$oldie.appendTo(this._$element);
                 return false;
-            }
-            window.WebVRConfig = this.options.webVRConfig; // for webVR polyfill
-            if (!this.options.fullscreenEnabled) {
-                this._vrEnabled = false;
             }
             // window.addEventListener('vrdisplaypresentchange', function(e) {
             //     console.log('onVRDisplayPresentChange', e);
@@ -109,36 +105,6 @@ var Virtex;
                 shininess: 1,
                 showStats: false,
                 vrBackgroundColor: 0x000000,
-                webVRConfig: {
-                    // Prevents the polyfill from initializing automatically.
-                    DEFER_INITIALIZATION: true,
-                    // Forces availability of VR mode.
-                    FORCE_ENABLE_VR: true,
-                    //PREVENT_DISTORTION: true, // Default: false.
-                    // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
-                    //K_FILTER: 0.98, // Default: 0.98.
-                    // How far into the future to predict during fast motion.
-                    //PREDICTION_TIME_S: 0.040, // Default: 0.040 (in seconds).
-                    // Flag to disable touch panner. In case you have your own touch controls
-                    //TOUCH_PANNER_DISABLED: true, // Default: false.
-                    // Enable yaw panning only, disabling roll and pitch. This can be useful for
-                    // panoramas with nothing interesting above or below.
-                    //YAW_ONLY: true, // Default: false.
-                    // Enable the deprecated version of the API (navigator.getVRDevices).
-                    //ENABLE_DEPRECATED_API: true, // Default: false.
-                    // Scales the recommended buffer size reported by WebVR, which can improve
-                    // performance. Making this very small can lower the effective resolution of
-                    // your scene.
-                    BUFFER_SCALE: 0.5,
-                    // Allow VRDisplay.submitFrame to change gl bindings, which is more
-                    // efficient if the application code will re-bind it's resources on the
-                    // next frame anyway.
-                    // Dirty bindings include: gl.FRAMEBUFFER_BINDING, gl.CURRENT_PROGRAM,
-                    // gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING,
-                    // and gl.TEXTURE_BINDING_2D for texture unit 0
-                    // Warning: enabling this might lead to rendering issues.
-                    DIRTY_SUBMIT_FRAME_BINDINGS: true // default: false
-                },
                 zoomSpeed: 1
             };
         };
@@ -184,17 +150,6 @@ var Virtex;
                 // Apply VR stereo rendering to renderer.
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
-                if (navigator.getVRDisplays) {
-                    navigator.getVRDisplays()
-                        .then(function (displays) {
-                        this._vrEffect.setVRDisplay(displays[0]);
-                        this._vrControls.setVRDisplay(displays[0]);
-                    })
-                        .catch(function () {
-                        // no displays
-                    });
-                    document.body.appendChild(WEBVR.getButton(this._vrEffect));
-                }
             }
             else {
                 this._renderer.setClearColor(this.options.vrBackgroundColor, 0);
@@ -276,7 +231,7 @@ var Virtex;
         Viewport.prototype._fullscreenChanged = function () {
             if (this._isFullscreen) {
                 this.exitFullscreen();
-                this.exitVRMode();
+                //this.exitVRMode();
                 this._$element.width(this._lastWidth);
                 this._$element.height(this._lastHeight);
             }
@@ -379,10 +334,11 @@ var Virtex;
         Viewport.prototype._onTouchEnd = function (event) {
             this._isMouseDown = false;
         };
-        Viewport.prototype._draw = function () {
+        Viewport.prototype._tick = function () {
             var _this = this;
-            requestAnimFrame(function () { return _this._draw(); });
-            this._render();
+            requestAnimFrame(function () { return _this._tick(); });
+            this._update();
+            this._draw();
             if (this.options.showStats) {
                 this._stats.update();
             }
@@ -412,20 +368,13 @@ var Virtex;
         //     this._objectGroup.scale.set( 1, 1, 1 );
         //     this._objectGroup.updateMatrix();
         // }
-        Viewport.prototype._render = function () {
+        Viewport.prototype._update = function () {
             if (this._isVRMode) {
-                if (this._isMouseDown) {
-                    this.rotateY(0.1);
-                }
+                // if (this._isMouseDown) {
+                //     this.rotateY(0.1);
+                // }
                 // Update VR headset position and apply to camera.
                 this._vrControls.update();
-                // Scene may be an array of two scenes, one for each eye.
-                if (this._scene instanceof Array) {
-                    this._vrEffect.render(this._scene[0], this._camera);
-                }
-                else {
-                    this._vrEffect.render(this._scene, this._camera);
-                }
             }
             else {
                 // horizontal rotation
@@ -444,6 +393,13 @@ var Virtex;
                 }
                 var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
                 this._camera.position.z += zoomDelta;
+            }
+        };
+        Viewport.prototype._draw = function () {
+            if (this._isVRMode) {
+                this._vrEffect.render(this._scene, this._camera);
+            }
+            else {
                 this._renderer.render(this._scene, this._camera);
             }
         };
@@ -481,30 +437,16 @@ var Virtex;
             var _this = this;
             if (!this._vrEnabled)
                 return;
-            // get the hmd if not already set
-            if (!this._hmd) {
-                this._getVRDisplay().then(function (display) {
-                    if (!display) {
-                        console.warn("hmd not found");
-                    }
-                    else {
-                        _this._hmd = display;
-                        _this._completeVRMode();
-                    }
-                });
-            }
-            else {
-                this._completeVRMode();
-            }
-        };
-        Viewport.prototype._completeVRMode = function () {
             this._isVRMode = true;
-            this._hmd.requestPresent({ source: this._$viewport.find('canvas')[0] });
             this._createControls();
             this._createRenderer();
-            // todo: point camera at object
-            //this._camera.lookAt(this._objectGroup.position);
-            this.enterFullscreen();
+            this._getVRDisplay().then(function (display) {
+                if (display) {
+                    _this._vrEffect.setVRDisplay(display);
+                    _this._vrControls.setVRDisplay(display);
+                    _this._vrEffect.setFullScreen(true);
+                }
+            });
         };
         Viewport.prototype.exitVRMode = function () {
             if (!this._vrEnabled)

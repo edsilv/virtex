@@ -20,7 +20,6 @@ module Virtex{
         shininess?: number;
         showStats?: boolean;
         vrBackgroundColor: number;
-        webVRConfig: any;
         zoomSpeed?: number;
     }
 }

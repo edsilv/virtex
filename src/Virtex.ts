@@ -1,6 +1,5 @@
 declare var Detector: any;
 declare var Stats: any;
-declare var VRDisplay: any;
 declare var WEBVR: any;
 
 var requestAnimFrame = (function () {
@@ -33,7 +32,6 @@ module Virtex {
         private _viewportHalfX: number;
         private _viewportHalfY: number;
 
-        private _hmd: VRDisplay;
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
         private _isVRMode: boolean = false;
@@ -62,7 +60,7 @@ module Virtex {
             this._resize();
 
             if (success){
-                this._draw();
+                this._tick();
             }
         }
 
@@ -80,12 +78,6 @@ module Virtex {
                 this._$oldie = $('#oldie');
                 this._$oldie.appendTo(this._$element);
                 return false;
-            }
-            
-            window.WebVRConfig = this.options.webVRConfig; // for webVR polyfill
-
-            if (!this.options.fullscreenEnabled){
-                this._vrEnabled = false;
             }
 
             // window.addEventListener('vrdisplaypresentchange', function(e) {
@@ -146,37 +138,6 @@ module Virtex {
                 shininess: 1,
                 showStats: false,
                 vrBackgroundColor: 0x000000,
-                webVRConfig: {
-                    // Prevents the polyfill from initializing automatically.
-                    DEFER_INITIALIZATION: true,
-                    // Forces availability of VR mode.
-                    FORCE_ENABLE_VR: true, // Default: false.
-                    //PREVENT_DISTORTION: true, // Default: false.
-                    // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
-                    //K_FILTER: 0.98, // Default: 0.98.
-                    // How far into the future to predict during fast motion.
-                    //PREDICTION_TIME_S: 0.040, // Default: 0.040 (in seconds).
-                    // Flag to disable touch panner. In case you have your own touch controls
-                    //TOUCH_PANNER_DISABLED: true, // Default: false.
-                    // Enable yaw panning only, disabling roll and pitch. This can be useful for
-                    // panoramas with nothing interesting above or below.
-                    //YAW_ONLY: true, // Default: false.
-                    // Enable the deprecated version of the API (navigator.getVRDevices).
-                    //ENABLE_DEPRECATED_API: true, // Default: false.
-                    // Scales the recommended buffer size reported by WebVR, which can improve
-                    // performance. Making this very small can lower the effective resolution of
-                    // your scene.
-                    BUFFER_SCALE: 0.5, // default: 1.0
-                    // Allow VRDisplay.submitFrame to change gl bindings, which is more
-                    // efficient if the application code will re-bind it's resources on the
-                    // next frame anyway.
-                    // Dirty bindings include: gl.FRAMEBUFFER_BINDING, gl.CURRENT_PROGRAM,
-                    // gl.ARRAY_BUFFER_BINDING, gl.ELEMENT_ARRAY_BUFFER_BINDING,
-                    // and gl.TEXTURE_BINDING_2D for texture unit 0
-                    // Warning: enabling this might lead to rendering issues.
-                    DIRTY_SUBMIT_FRAME_BINDINGS: true // default: false
-                    //SHOW_EYE_CENTERS: false // Default: false.
-                },
                 zoomSpeed: 1
             }
         }
@@ -235,18 +196,6 @@ module Virtex {
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
 
-                if (navigator.getVRDisplays) {
-					navigator.getVRDisplays()
-						.then( function ( displays ) {
-							this._vrEffect.setVRDisplay( displays[ 0 ] );
-							this._vrControls.setVRDisplay( displays[ 0 ] );
-						} )
-						.catch( function () {
-							// no displays
-						} );
-					document.body.appendChild(WEBVR.getButton(this._vrEffect));
-				}
-                
             } else {
                 this._renderer.setClearColor(this.options.vrBackgroundColor, 0);
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
@@ -351,7 +300,7 @@ module Virtex {
         private _fullscreenChanged(): void {
             if (this._isFullscreen) { // exiting fullscreen
                 this.exitFullscreen();
-                this.exitVRMode();
+                //this.exitVRMode();
                 this._$element.width(this._lastWidth);
                 this._$element.height(this._lastHeight);
             } else { // entering fullscreen
@@ -490,9 +439,10 @@ module Virtex {
             this._isMouseDown = false;
         }
 
-        private _draw(): void {
-            requestAnimFrame(() => this._draw());
-            this._render();
+        private _tick(): void {
+            requestAnimFrame(() => this._tick());
+            this._update();
+            this._draw();
             if (this.options.showStats) {
                 this._stats.update();
             }
@@ -530,24 +480,14 @@ module Virtex {
         //     this._objectGroup.updateMatrix();
         // }
 
-        private _render(): void {
-
+        private _update(): void {
             if (this._isVRMode){
-                
-                if (this._isMouseDown) {
-                    this.rotateY(0.1);
-                }
-                
+                // if (this._isMouseDown) {
+                //     this.rotateY(0.1);
+                // }
+
                 // Update VR headset position and apply to camera.
-                this._vrControls.update();
-                
-                // Scene may be an array of two scenes, one for each eye.
-                if (this._scene instanceof Array) {
-                    this._vrEffect.render(this._scene[0], this._camera);
-                } else {
-                    this._vrEffect.render(this._scene, this._camera);
-                }
-                
+                this._vrControls.update();  
             } else {
                 // horizontal rotation
                 this.rotateY((this._targetRotationX - this._objectGroup.rotation.y) * 0.1);
@@ -569,7 +509,13 @@ module Virtex {
                 var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
                 
                 this._camera.position.z += zoomDelta;
-                
+            }
+        }
+
+        private _draw(): void {
+            if (this._isVRMode){
+                this._vrEffect.render(this._scene, this._camera);                
+            } else {
                 this._renderer.render(this._scene, this._camera);
             }
         }
@@ -610,33 +556,22 @@ module Virtex {
             
             if (!this._vrEnabled) return;
 
-            // get the hmd if not already set
-            if (!this._hmd){
-                this._getVRDisplay().then((display) => {
-                    if (!display){
-                        console.warn("hmd not found");
-                    } else {
-                        this._hmd = display;
-                        this._completeVRMode();
-                    }
-                });
-            } else {
-                this._completeVRMode();
-            }
-        }
-        
-        private _completeVRMode(): void {
             this._isVRMode = true;
-            
-            this._hmd.requestPresent({source: this._$viewport.find('canvas')[0]});
-            
+
             this._createControls();
             this._createRenderer();
-            
-            // todo: point camera at object
-            //this._camera.lookAt(this._objectGroup.position);
-            
-            this.enterFullscreen();
+
+            this._getVRDisplay().then((display) => {
+                if (display) {
+                    this._vrEffect.setVRDisplay(display);
+                    this._vrControls.setVRDisplay(display);
+                    this._vrEffect.setFullScreen(true);
+                    //document.body.appendChild(WEBVR.getButton(this._vrEffect));
+
+                    // todo: point camera at object?
+                    //this._camera.lookAt(this._objectGroup.position);
+                }
+            });
         }
         
         public exitVRMode(): void {

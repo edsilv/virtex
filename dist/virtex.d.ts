@@ -22,14 +22,12 @@ declare module Virtex {
         shininess?: number;
         showStats?: boolean;
         vrBackgroundColor: number;
-        webVRConfig: any;
         zoomSpeed?: number;
     }
 }
 
 declare var Detector: any;
 declare var Stats: any;
-declare var VRDisplay: any;
 declare var WEBVR: any;
 declare var requestAnimFrame: any;
 declare module Virtex {
@@ -47,7 +45,6 @@ declare module Virtex {
         private _stats;
         private _viewportHalfX;
         private _viewportHalfY;
-        private _hmd;
         private _isFullscreen;
         private _isMouseDown;
         private _isVRMode;
@@ -86,15 +83,15 @@ declare module Virtex {
         private _onTouchStart(event);
         private _onTouchMove(event);
         private _onTouchEnd(event);
-        private _draw();
+        private _tick();
         rotateY(radians: number): void;
-        private _render();
+        private _update();
+        private _draw();
         private _getWidth();
         private _getHeight();
         zoomIn(): void;
         zoomOut(): void;
         enterVRMode(): void;
-        private _completeVRMode();
         exitVRMode(): void;
         enterFullscreen(): void;
         exitFullscreen(): void;
