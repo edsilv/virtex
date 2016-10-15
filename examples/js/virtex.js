@@ -25,18 +25,15 @@ var Virtex;
         __extends(Viewport, _super);
         function Viewport(options) {
             _super.call(this, options);
+            this._viewportCenter = new THREE.Vector2();
             this._isFullscreen = false;
             this._isMouseDown = false;
             this._isVRMode = false;
-            this._mouseX = 0;
-            this._mouseXOnMouseDown = 0;
-            this._mouseY = 0;
-            this._mouseYOnMouseDown = 0;
+            this._mousePos = new THREE.Vector2();
+            this._mousePosOnMouseDown = new THREE.Vector2();
             this._pinchStart = new THREE.Vector2();
-            this._targetRotationOnMouseDownX = 0;
-            this._targetRotationOnMouseDownY = 0;
-            this._targetRotationX = 0;
-            this._targetRotationY = 0;
+            this._targetRotationOnMouseDown = new THREE.Vector2();
+            this._targetRotation = new THREE.Vector2();
             this._vrEnabled = true;
             var success = this._init();
             this._resize();
@@ -119,7 +116,7 @@ var Virtex;
                     }
                     resolve(null);
                 }, function () {
-                    // No devices are found.
+                    // No devices found
                     resolve(null);
                 });
             });
@@ -147,7 +144,6 @@ var Virtex;
             });
             if (this._isVRMode) {
                 this._renderer.setClearColor(this.options.vrBackgroundColor);
-                // Apply VR stereo rendering to renderer.
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
             }
@@ -220,7 +216,7 @@ var Virtex;
                 }
             }, function (e) {
                 // error
-                console.log(e);
+                console.error(e);
             });
         };
         Viewport.prototype._loadProgress = function (progress) {
@@ -230,12 +226,13 @@ var Virtex;
         };
         Viewport.prototype._fullscreenChanged = function () {
             if (this._isFullscreen) {
+                // exiting fullscreen
                 this.exitFullscreen();
-                //this.exitVRMode();
                 this._$element.width(this._lastWidth);
                 this._$element.height(this._lastHeight);
             }
             else {
+                // entering fullscreen
                 this._lastWidth = this._getWidth();
                 this._lastHeight = this._getHeight();
             }
@@ -245,17 +242,17 @@ var Virtex;
         Viewport.prototype._onMouseDown = function (event) {
             event.preventDefault();
             this._isMouseDown = true;
-            this._mouseXOnMouseDown = event.clientX - this._viewportHalfX;
-            this._targetRotationOnMouseDownX = this._targetRotationX;
-            this._mouseYOnMouseDown = event.clientY - this._viewportHalfY;
-            this._targetRotationOnMouseDownY = this._targetRotationY;
+            this._mousePosOnMouseDown.x = event.clientX - this._viewportCenter.x;
+            this._targetRotationOnMouseDown.x = this._targetRotation.x;
+            this._mousePosOnMouseDown.y = event.clientY - this._viewportCenter.y;
+            this._targetRotationOnMouseDown.y = this._targetRotation.y;
         };
         Viewport.prototype._onMouseMove = function (event) {
-            this._mouseX = event.clientX - this._viewportHalfX;
-            this._mouseY = event.clientY - this._viewportHalfY;
+            this._mousePos.x = event.clientX - this._viewportCenter.x;
+            this._mousePos.y = event.clientY - this._viewportCenter.y;
             if (this._isMouseDown) {
-                this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.02;
-                this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.02;
+                this._targetRotation.y = this._targetRotationOnMouseDown.y + (this._mousePos.y - this._mousePosOnMouseDown.y) * 0.02;
+                this._targetRotation.x = this._targetRotationOnMouseDown.x + (this._mousePos.x - this._mousePosOnMouseDown.x) * 0.02;
             }
         };
         Viewport.prototype._onMouseUp = function (event) {
@@ -286,10 +283,10 @@ var Virtex;
             if (touches.length === 1) {
                 this._isMouseDown = true;
                 event.preventDefault();
-                this._mouseXOnMouseDown = touches[0].pageX - this._viewportHalfX;
-                this._targetRotationOnMouseDownX = this._targetRotationX;
-                this._mouseYOnMouseDown = touches[0].pageY - this._viewportHalfY;
-                this._targetRotationOnMouseDownY = this._targetRotationY;
+                this._mousePosOnMouseDown.x = touches[0].pageX - this._viewportCenter.x;
+                this._targetRotationOnMouseDown.x = this._targetRotation.x;
+                this._mousePosOnMouseDown.y = touches[0].pageY - this._viewportCenter.y;
+                this._targetRotationOnMouseDown.y = this._targetRotation.y;
             }
         };
         Viewport.prototype._onTouchMove = function (event) {
@@ -299,10 +296,10 @@ var Virtex;
             switch (touches.length) {
                 case 1:
                     event.preventDefault();
-                    this._mouseX = touches[0].pageX - this._viewportHalfX;
-                    this._targetRotationX = this._targetRotationOnMouseDownX + (this._mouseX - this._mouseXOnMouseDown) * 0.05;
-                    this._mouseY = touches[0].pageY - this._viewportHalfY;
-                    this._targetRotationY = this._targetRotationOnMouseDownY + (this._mouseY - this._mouseYOnMouseDown) * 0.05;
+                    this._mousePos.x = touches[0].pageX - this._viewportCenter.x;
+                    this._targetRotation.x = this._targetRotationOnMouseDown.x + (this._mousePos.x - this._mousePosOnMouseDown.x) * 0.05;
+                    this._mousePos.y = touches[0].pageY - this._viewportCenter.y;
+                    this._targetRotation.y = this._targetRotationOnMouseDown.y + (this._mousePos.y - this._mousePosOnMouseDown.y) * 0.05;
                     break;
                 case 2:
                     var dx = touches[0].pageX - touches[1].pageX;
@@ -365,9 +362,9 @@ var Virtex;
             }
             else {
                 // horizontal rotation
-                this.rotateY((this._targetRotationX - this._objectGroup.rotation.y) * 0.1);
+                this.rotateY((this._targetRotation.x - this._objectGroup.rotation.y) * 0.1);
                 // vertical rotation
-                var finalRotationY = (this._targetRotationY - this._objectGroup.rotation.x);
+                var finalRotationY = (this._targetRotation.y - this._objectGroup.rotation.x);
                 if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
                     this._objectGroup.rotation.x += finalRotationY * 0.1;
                 }
@@ -503,8 +500,8 @@ var Virtex;
                 this._$element.height(this._getHeight());
                 this._$viewport.width(this._getWidth());
                 this._$viewport.height(this._getHeight());
-                this._viewportHalfX = this._$viewport.width() / 2;
-                this._viewportHalfY = this._$viewport.height() / 2;
+                this._viewportCenter.x = this._$viewport.width() / 2;
+                this._viewportCenter.y = this._$viewport.height() / 2;
                 this._camera.aspect = this._$viewport.width() / this._$viewport.height();
                 this._camera.updateProjectionMatrix();
                 if (this._isVRMode) {
@@ -514,8 +511,8 @@ var Virtex;
                     this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
                 }
                 this._$loading.css({
-                    left: (this._viewportHalfX) - (this._$loading.width() / 2),
-                    top: (this._viewportHalfY) - (this._$loading.height() / 2)
+                    left: (this._viewportCenter.x) - (this._$loading.width() / 2),
+                    top: (this._viewportCenter.y) - (this._$loading.height() / 2)
                 });
             }
             else if (this._$oldie) {
