@@ -433,7 +433,7 @@ var Virtex;
                 this._targetZoom = this.options.maxZoom;
             }
         };
-        Viewport.prototype.enterVRMode = function () {
+        Viewport.prototype.enterVR = function () {
             var _this = this;
             if (!this._vrEnabled)
                 return;
@@ -448,12 +448,22 @@ var Virtex;
                 }
             });
         };
-        Viewport.prototype.exitVRMode = function () {
+        Viewport.prototype.exitVR = function () {
             if (!this._vrEnabled)
                 return;
             this._isVRMode = false;
             this._createCamera();
             this._createRenderer();
+        };
+        Viewport.prototype.toggleVR = function () {
+            if (!this._vrEnabled)
+                return;
+            if (!this._isVRMode) {
+                this.enterVR();
+            }
+            else {
+                this.exitVR();
+            }
         };
         Viewport.prototype.enterFullscreen = function () {
             if (!this.options.fullscreenEnabled)

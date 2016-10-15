@@ -91,8 +91,9 @@ declare module Virtex {
         private _getHeight();
         zoomIn(): void;
         zoomOut(): void;
-        enterVRMode(): void;
-        exitVRMode(): void;
+        enterVR(): void;
+        exitVR(): void;
+        toggleVR(): void;
         enterFullscreen(): void;
         exitFullscreen(): void;
         private _getRequestFullScreen(elem);

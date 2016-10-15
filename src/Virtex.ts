@@ -552,10 +552,8 @@ module Virtex {
             }
         }
         
-        public enterVRMode(): void {
-            
+        public enterVR(): void {            
             if (!this._vrEnabled) return;
-
             this._isVRMode = true;
 
             this._createControls();
@@ -566,7 +564,6 @@ module Virtex {
                     this._vrEffect.setVRDisplay(display);
                     this._vrControls.setVRDisplay(display);
                     this._vrEffect.setFullScreen(true);
-                    //document.body.appendChild(WEBVR.getButton(this._vrEffect));
 
                     // todo: point camera at object?
                     //this._camera.lookAt(this._objectGroup.position);
@@ -574,14 +571,21 @@ module Virtex {
             });
         }
         
-        public exitVRMode(): void {
-            
-            if (!this._vrEnabled) return;
-            
-            this._isVRMode = false;
-            
+        public exitVR(): void {            
+            if (!this._vrEnabled) return;            
+            this._isVRMode = false;            
             this._createCamera();            
             this._createRenderer();
+        }
+
+        public toggleVR(): void {
+            if (!this._vrEnabled) return;
+
+            if (!this._isVRMode) {
+                this.enterVR();
+            } else {
+                this.exitVR();
+            }
         }
         
         public enterFullscreen(): void {
