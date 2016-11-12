@@ -50,7 +50,7 @@ module Virtex {
             
             super(options);
 
-            var success: boolean = this._init();
+            const success: boolean = this._init();
 
             this._resize();
 
@@ -61,7 +61,7 @@ module Virtex {
 
         protected _init(): boolean {
 
-            var success: boolean = super._init();
+            const success: boolean = super._init();
 
             if (!success){
                 console.error("Virtex failed to initialise");
