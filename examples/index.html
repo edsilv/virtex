@@ -60,12 +60,16 @@
         
         var objects = {
             ecorche: {
-                file: "objects/threejs/ecorche.json",
-                type: new Virtex.FileType("application/vnd.threejs+json")
+                file: "objects/gltf/ecorche.gltf",
+                type: new Virtex.FileType("model/gltf+json")
+            },
+            henry: {
+                file: "objects/gltf/henry.gltf",
+                type: new Virtex.FileType("model/gltf+json")
             },
             thekiss: {
-                file: "objects/gltf/the_kiss.gltf",
-                type: new Virtex.FileType("model/gltf+json")
+                file: "objects/threejs/thekiss.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
             },
             monster: {
                 file: "objects/gltf/monster.gltf",
@@ -84,8 +88,8 @@
 
             viewport = new Virtex.Viewport({
                 element: "#viewer",
-                file: objects.thekiss.file,
-                type: objects.thekiss.type,
+                file: objects.ecorche.file,
+                type: objects.ecorche.type,
                 fullscreenEnabled: true,
                 showStats: false
             });
