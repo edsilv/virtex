@@ -12,8 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
     <script src="js/base-component.bundle.js"></script>
     <script src="js/three.min.js"></script>
+    <script src="js/GLTFLoader.js"></script>
     <script src="js/virtex.js"></script>
-    <script src="js/three.min.js"></script>
     <script src="js/WebVR.js"></script>
     <script src="js/VRControls.js"></script>
     <script src="js/VREffect.js"></script>
@@ -59,8 +59,18 @@
         var viewport;
         
         var objects = {
-            ecorche: 'objects/ecorche.json',
-            thekiss: 'objects/thekiss.json'
+            ecorche: {
+                file: "objects/threejs/ecorche.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
+            },
+            thekiss: {
+                file: "objects/gltf/the_kiss.gltf",
+                type: new Virtex.FileType("model/gltf+json")
+            },
+            monster: {
+                file: "objects/gltf/monster.gltf",
+                type: new Virtex.FileType("model/gltf+json")
+            }
         };
 
         // test cross origin
@@ -74,7 +84,8 @@
 
             viewport = new Virtex.Viewport({
                 element: "#viewer",
-                object: objects.thekiss,
+                file: objects.ecorche.file,
+                type: objects.ecorche.type,
                 fullscreenEnabled: true,
                 showStats: false
             });

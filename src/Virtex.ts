@@ -1,6 +1,5 @@
 declare var Detector: any;
 declare var Stats: any;
-declare var WEBVR: any;
 
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
@@ -13,7 +12,7 @@ var requestAnimFrame = (function () {
         };
 })();
 
-module Virtex {
+namespace Virtex {
     export class Viewport extends _Components.BaseComponent {
         
         public options: IVirtexOptions;
@@ -91,7 +90,7 @@ module Virtex {
             this._createRenderer();
             this._createEventListeners();
 
-            this._loadObject(this.options.object);
+            this._loadObject(this.options.file);
             
             // STATS //
 
@@ -116,6 +115,7 @@ module Virtex {
                 doubleSided: true,
                 fadeSpeed: 1750,
                 far: 10000,
+                file: null,
                 fov: 45,
                 maxZoom: 10,
                 minZoom: 2,
@@ -124,6 +124,7 @@ module Virtex {
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
+                type: FileType.THREEJS,
                 vrBackgroundColor: 0x000000,
                 zoomSpeed: 1
             }
@@ -245,19 +246,34 @@ module Virtex {
         private _loadObject(object: string): void {
             this._$loading.show();
 
-            var loader: THREE.ObjectLoader = new THREE.ObjectLoader();
+            let loader: any;
+            
+            switch (this.options.type.toString()) {
+                case Virtex.FileType.GLTF.toString() :
+                    loader = new THREE.GLTFLoader();
+                    break;
+                default :
+                    loader = new THREE.ObjectLoader();
+                    break;
+            }
+            
             loader.setCrossOrigin('anonymous');
 
             loader.load(object,
-                (obj: THREE.Object3D) => {
+                (obj: any) => {
 
-                    if (this.options.doubleSided){
-                        obj.traverse((child: any) => {
-                            if (child.material) child.material.side = THREE.DoubleSide;
-                        });
+                    if (this.options.type.toString() === FileType.GLTF.toString()) {
+                        this._objectGroup.add(obj.scene);
+                    } else {
+                        if (this.options.doubleSided) {
+                            obj.traverse((child: any) => {
+                                if (child.material) child.material.side = THREE.DoubleSide;
+                            });
+                        }
+
+                        this._objectGroup.add(obj);
                     }
 
-                    this._objectGroup.add(obj);
                     this._$loading.fadeOut(this.options.fadeSpeed);
                     
                     this._emit(Events.LOADED, obj);

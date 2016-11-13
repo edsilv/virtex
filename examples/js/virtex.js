@@ -1,6 +1,43 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.virtex = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Virtex;
+(function (Virtex) {
+    var StringValue = (function () {
+        function StringValue(value) {
+            this.value = "";
+            if (value) {
+                this.value = value.toLowerCase();
+            }
+        }
+        StringValue.prototype.toString = function () {
+            return this.value;
+        };
+        return StringValue;
+    }());
+    Virtex.StringValue = StringValue;
+})(Virtex || (Virtex = {}));
 
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var Virtex;
+(function (Virtex) {
+    var FileType = (function (_super) {
+        __extends(FileType, _super);
+        function FileType() {
+            _super.apply(this, arguments);
+        }
+        FileType.GLTF = new FileType("model/gltf+json");
+        FileType.THREEJS = new FileType("application/vnd.threejs+json");
+        return FileType;
+    }(Virtex.StringValue));
+    Virtex.FileType = FileType;
+})(Virtex || (Virtex = {}));
+
+/// <reference path="./StringValue.ts" />
+/// <reference path="./FileType.ts" /> 
 
 
 
@@ -66,7 +103,7 @@ var Virtex;
             this._createControls();
             this._createRenderer();
             this._createEventListeners();
-            this._loadObject(this.options.object);
+            this._loadObject(this.options.file);
             // STATS //
             if (this.options.showStats) {
                 this._stats = new Stats();
@@ -87,6 +124,7 @@ var Virtex;
                 doubleSided: true,
                 fadeSpeed: 1750,
                 far: 10000,
+                file: null,
                 fov: 45,
                 maxZoom: 10,
                 minZoom: 2,
@@ -95,6 +133,7 @@ var Virtex;
                 shading: THREE.SmoothShading,
                 shininess: 1,
                 showStats: false,
+                type: Virtex.FileType.THREEJS,
                 vrBackgroundColor: 0x000000,
                 zoomSpeed: 1
             };
@@ -192,16 +231,29 @@ var Virtex;
         Viewport.prototype._loadObject = function (object) {
             var _this = this;
             this._$loading.show();
-            var loader = new THREE.ObjectLoader();
+            var loader;
+            switch (this.options.type.toString()) {
+                case Virtex.FileType.GLTF.toString():
+                    loader = new THREE.GLTFLoader();
+                    break;
+                default:
+                    loader = new THREE.ObjectLoader();
+                    break;
+            }
             loader.setCrossOrigin('anonymous');
             loader.load(object, function (obj) {
-                if (_this.options.doubleSided) {
-                    obj.traverse(function (child) {
-                        if (child.material)
-                            child.material.side = THREE.DoubleSide;
-                    });
+                if (_this.options.type.toString() === Virtex.FileType.GLTF.toString()) {
+                    _this._objectGroup.add(obj.scene);
                 }
-                _this._objectGroup.add(obj);
+                else {
+                    if (_this.options.doubleSided) {
+                        obj.traverse(function (child) {
+                            if (child.material)
+                                child.material.side = THREE.DoubleSide;
+                        });
+                    }
+                    _this._objectGroup.add(obj);
+                }
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
                 _this._emit(Virtex.Events.LOADED, obj);
             }, function (e) {

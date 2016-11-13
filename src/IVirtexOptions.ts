@@ -1,4 +1,4 @@
-module Virtex{
+namespace Virtex{
     export interface IVirtexOptions extends _Components.IBaseComponentOptions {
         ambientLightColor?: number;
         cameraZ?: number;
@@ -10,15 +10,16 @@ module Virtex{
         element?: string;
         fadeSpeed?: number;
         far?: number;
+        file: string;
         fov?: number;
         fullscreenEnabled?: boolean;
         maxZoom?: number;
         minZoom?: number;
         near?: number;
-        object?: string;
         shading?: THREE.Shading;
         shininess?: number;
         showStats?: boolean;
+        type: FileType;
         vrBackgroundColor: number;
         zoomSpeed?: number;
     }

@@ -217,7 +217,35 @@ interface Document{
     mozCancelFullScreen: any;
 }
 
-declare module Virtex {
+declare module THREE {
+    export class GLTFLoader {
+        constructor(manager?: LoadingManager);
+
+        manager: LoadingManager;
+
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+    }
+}
+declare namespace Virtex {
+    class StringValue {
+        value: string;
+        constructor(value?: string);
+        toString(): string;
+    }
+}
+
+declare namespace Virtex {
+    class FileType extends StringValue {
+        static GLTF: FileType;
+        static THREEJS: FileType;
+    }
+}
+
+/// <reference path="StringValue.d.ts" />
+/// <reference path="FileType.d.ts" />
+
+declare namespace Virtex {
     interface IVirtexOptions extends _Components.IBaseComponentOptions {
         ambientLightColor?: number;
         cameraZ?: number;
@@ -229,15 +257,16 @@ declare module Virtex {
         element?: string;
         fadeSpeed?: number;
         far?: number;
+        file: string;
         fov?: number;
         fullscreenEnabled?: boolean;
         maxZoom?: number;
         minZoom?: number;
         near?: number;
-        object?: string;
         shading?: THREE.Shading;
         shininess?: number;
         showStats?: boolean;
+        type: FileType;
         vrBackgroundColor: number;
         zoomSpeed?: number;
     }
@@ -245,9 +274,8 @@ declare module Virtex {
 
 declare var Detector: any;
 declare var Stats: any;
-declare var WEBVR: any;
 declare var requestAnimFrame: any;
-declare module Virtex {
+declare namespace Virtex {
     class Viewport extends _Components.BaseComponent {
         options: IVirtexOptions;
         private _$viewport;
