@@ -232,18 +232,28 @@ var Virtex;
             var _this = this;
             this._$loading.show();
             var loader;
-            switch (this.options.type.toString()) {
-                case Virtex.FileType.GLTF.toString():
-                    loader = new THREE.GLTFLoader();
-                    break;
-                default:
-                    loader = new THREE.ObjectLoader();
-                    break;
+            if (this._isGLTF()) {
+                loader = new THREE.GLTFLoader();
+            }
+            else {
+                loader = new THREE.ObjectLoader();
             }
             loader.setCrossOrigin('anonymous');
             loader.load(object, function (obj) {
-                if (_this.options.type.toString() === Virtex.FileType.GLTF.toString()) {
+                if (_this._isGLTF()) {
                     _this._objectGroup.add(obj.scene);
+                    if (obj.animations) {
+                        var animations = obj.animations;
+                        for (var i = 0, l = animations.length; i < l; i++) {
+                            var animation = animations[i];
+                            animation.loop = true;
+                            animation.play();
+                        }
+                    }
+                    _this._scene = obj.scene;
+                    if (obj.cameras && obj.cameras.length) {
+                        _this._camera = obj.cameras[0];
+                    }
                 }
                 else {
                     if (_this.options.doubleSided) {
@@ -264,6 +274,12 @@ var Virtex;
                 // error
                 console.error(e);
             });
+        };
+        Viewport.prototype._isGLTF = function () {
+            return this.options.type.toString() === Virtex.FileType.GLTF.toString();
+        };
+        Viewport.prototype._isThreeJs = function () {
+            return this.options.type.toString() === Virtex.FileType.THREEJS.toString();
         };
         Viewport.prototype._loadProgress = function (progress) {
             var fullWidth = this._$loading.width();
@@ -399,6 +415,10 @@ var Virtex;
         //     this._objectGroup.updateMatrix();
         // }
         Viewport.prototype._update = function () {
+            if (this._isGLTF()) {
+                THREE.GLTFLoader.Animations.update();
+                THREE.GLTFLoader.Shaders.update(this._scene, this._camera);
+            }
             if (this._isVRMode) {
                 // if (this._isMouseDown) {
                 //     this.rotateY(0.1);
@@ -468,6 +488,8 @@ var Virtex;
             if (!this._vrEnabled)
                 return;
             this._isVRMode = true;
+            this._prevCameraPosition = this._camera.position.clone();
+            this._prevCameraRotation = this._camera.rotation.clone();
             this._createControls();
             this._createRenderer();
             this._getVRDisplay().then(function (display) {
@@ -482,7 +504,8 @@ var Virtex;
             if (!this._vrEnabled)
                 return;
             this._isVRMode = false;
-            this._createCamera();
+            this._camera.position.copy(this._prevCameraPosition);
+            this._camera.rotation.copy(this._prevCameraRotation);
             this._createRenderer();
         };
         Viewport.prototype.toggleVR = function () {

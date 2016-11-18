@@ -225,8 +225,12 @@ declare module THREE {
 
         load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
         setCrossOrigin(crossOrigin: string): void;
+
+        static Animations: any;
+        static Shaders: any;
     }
 }
+
 declare namespace Virtex {
     class StringValue {
         value: string;
@@ -285,6 +289,8 @@ declare namespace Virtex {
         private _camera;
         private _lightGroup;
         private _objectGroup;
+        private _prevCameraPosition;
+        private _prevCameraRotation;
         private _renderer;
         private _scene;
         private _stats;
@@ -313,6 +319,8 @@ declare namespace Virtex {
         private _createControls();
         private _createEventListeners();
         private _loadObject(object);
+        private _isGLTF();
+        private _isThreeJs();
         private _loadProgress(progress);
         private _fullscreenChanged();
         private _onMouseDown(event);

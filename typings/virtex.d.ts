@@ -17,5 +17,8 @@ declare module THREE {
 
         load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
         setCrossOrigin(crossOrigin: string): void;
+
+        static Animations: any;
+        static Shaders: any;
     }
 }

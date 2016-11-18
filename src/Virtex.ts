@@ -25,6 +25,8 @@ namespace Virtex {
         private _camera: THREE.PerspectiveCamera;
         private _lightGroup: THREE.Group;
         private _objectGroup: THREE.Group;
+        private _prevCameraPosition: any;
+        private _prevCameraRotation: any;
         private _renderer: THREE.WebGLRenderer;
         private _scene: THREE.Scene;
         private _stats: any;
@@ -248,13 +250,10 @@ namespace Virtex {
 
             let loader: any;
             
-            switch (this.options.type.toString()) {
-                case Virtex.FileType.GLTF.toString() :
-                    loader = new THREE.GLTFLoader();
-                    break;
-                default :
-                    loader = new THREE.ObjectLoader();
-                    break;
+            if (this._isGLTF()) {
+                loader = new THREE.GLTFLoader();
+            } else {
+                loader = new THREE.ObjectLoader();
             }
             
             loader.setCrossOrigin('anonymous');
@@ -262,9 +261,27 @@ namespace Virtex {
             loader.load(object,
                 (obj: any) => {
 
-                    if (this.options.type.toString() === FileType.GLTF.toString()) {
+                    if (this._isGLTF()) {
                         this._objectGroup.add(obj.scene);
+
+                        if (obj.animations) {
+                            var animations = obj.animations;
+
+                            for ( var i = 0, l = animations.length; i < l; i++ ) {
+                                var animation = animations[ i ];
+                                animation.loop = true;
+                                animation.play();
+                            }
+                        }
+
+                        this._scene = obj.scene;
+
+                        if (obj.cameras && obj.cameras.length) {
+                            this._camera = obj.cameras[0];
+                        }
+
                     } else {
+
                         if (this.options.doubleSided) {
                             obj.traverse((child: any) => {
                                 if (child.material) child.material.side = THREE.DoubleSide;
@@ -290,9 +307,17 @@ namespace Virtex {
             );
         }
 
+        private _isGLTF(): boolean {
+            return this.options.type.toString() === FileType.GLTF.toString()
+        }
+
+        private _isThreeJs(): boolean {
+            return this.options.type.toString() === FileType.THREEJS.toString()
+        }
+
         private _loadProgress(progress: number): void {
-            var fullWidth = this._$loading.width();
-            var width = Math.floor(fullWidth * progress);
+            var fullWidth: number = this._$loading.width();
+            var width: number = Math.floor(fullWidth * progress);
             this._$loadingBar.width(width);
         }
 
@@ -465,6 +490,12 @@ namespace Virtex {
         // }
 
         private _update(): void {
+            
+            if (this._isGLTF()) {
+                THREE.GLTFLoader.Animations.update();
+			    THREE.GLTFLoader.Shaders.update(this._scene, this._camera);
+            }
+            
             if (this._isVRMode){
                 // if (this._isMouseDown) {
                 //     this.rotateY(0.1);
@@ -540,6 +571,9 @@ namespace Virtex {
             if (!this._vrEnabled) return;
             this._isVRMode = true;
 
+            this._prevCameraPosition = this._camera.position.clone();
+            this._prevCameraRotation = this._camera.rotation.clone();
+
             this._createControls();
             this._createRenderer();
 
@@ -558,7 +592,8 @@ namespace Virtex {
         public exitVR(): void {            
             if (!this._vrEnabled) return;            
             this._isVRMode = false;            
-            this._createCamera();            
+            this._camera.position.copy(this._prevCameraPosition);
+            this._camera.rotation.copy(this._prevCameraRotation);
             this._createRenderer();
         }
 

@@ -57,6 +57,8 @@ declare namespace Virtex {
         private _camera;
         private _lightGroup;
         private _objectGroup;
+        private _prevCameraPosition;
+        private _prevCameraRotation;
         private _renderer;
         private _scene;
         private _stats;
@@ -85,6 +87,8 @@ declare namespace Virtex {
         private _createControls();
         private _createEventListeners();
         private _loadObject(object);
+        private _isGLTF();
+        private _isThreeJs();
         private _loadProgress(progress);
         private _fullscreenChanged();
         private _onMouseDown(event);
