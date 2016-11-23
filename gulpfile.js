@@ -22,10 +22,7 @@ tasks.init({
     examples: [],
     // ts definitions to copy to the 'typings' dir
     typings: [
-        'node_modules/base-component/dist/base-component.d.ts',
-        'node_modules/key-codes/dist/key-codes.d.ts',
-        'node_modules/base-component/typings/corejs.d.ts',
-        'node_modules/base-component/typings/jquery.d.ts',
-        'node_modules/base-component/typings/node.d.ts'
+        'node_modules/base-component/dist/base-component.bundle.d.ts',
+        'node_modules/key-codes/dist/key-codes.d.ts'
     ]
 });

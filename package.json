@@ -14,8 +14,9 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "base-component": "viewdir/base-component#v1.0.7",
     "gulp": "^3.8.7",
-    "gulp-tasks": "viewdir/gulp-tasks#v1.0.1",
+    "gulp-tasks": "viewdir/gulp-tasks#v1.0.2",
     "key-codes": "edsilv/key-codes",
     "three": "mrdoob/three.js#dev"
   },
