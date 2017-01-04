@@ -11,6 +11,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
     <script src="js/base-component.bundle.js"></script>
+    <!--<script src="js/three.js"></script>-->
     <script src="js/three.min.js"></script>
     <script src="js/GLTFLoader.js"></script>
     <script src="js/virtex.js"></script>
@@ -61,18 +62,18 @@
             //     file: "models/gltf/ecorche.gltf",
             //     type: new Virtex.FileType("model/gltf+json")
             // },
-            henry: {
-                file: "models/gltf/henry.gltf",
-                type: new Virtex.FileType("model/gltf+json")
+            thekiss: {
+                file: "models/threejs/thekiss.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
+            },
+            bone: {
+                file: "models/threejs/hc941fm6529.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
             },
             // thekiss: {
-            //     file: "models/threejs/thekiss.json",
-            //     type: new Virtex.FileType("application/vnd.threejs+json")
+            //     file: "models/gltf/the_kiss.gltf",
+            //     type: new Virtex.FileType("model/gltf+json")
             // },
-            thekiss: {
-                file: "models/gltf/the_kiss.gltf",
-                type: new Virtex.FileType("model/gltf+json")
-            },
             vc: {
                 file: "models/gltf/vc.gltf",
                 type: new Virtex.FileType("model/gltf+json")
@@ -94,10 +95,16 @@
 
             viewport = new Virtex.Viewport({
                 element: "#viewer",
-                file: objects.ecorche.file,
-                type: objects.ecorche.type, // defaults to threejs
+                file: objects.bone.file,
+                type: objects.bone.type, // defaults to threejs
                 fullscreenEnabled: true,
                 showStats: false
+                // ambientLightColor: 0xd0d0d0,
+                // ambientLightIntensity: 1,
+                // directionalLight1Color: 0xff0000,
+                // directionalLight1Intensity: 2.75,
+                // directionalLight2Color: 0x002958,
+                // directionalLight2Intensity: 2.5
             });
             
             viewport.on('loaded', function(args) {

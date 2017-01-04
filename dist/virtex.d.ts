@@ -20,12 +20,12 @@ declare namespace Virtex {
 declare namespace Virtex {
     interface IVirtexOptions extends _Components.IBaseComponentOptions {
         ambientLightColor?: number;
+        ambientLightIntensity?: number;
         cameraZ?: number;
         directionalLight1Color?: number;
         directionalLight1Intensity?: number;
         directionalLight2Color?: number;
         directionalLight2Intensity?: number;
-        doubleSided?: boolean;
         element?: string;
         fadeSpeed?: number;
         far?: number;

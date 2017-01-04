@@ -109,6 +109,7 @@ namespace Virtex {
         protected _getDefaultOptions(): IVirtexOptions {
             return <IVirtexOptions>{
                 ambientLightColor: 0xd0d0d0,
+                ambientLightIntensity: 1,
                 cameraZ: 4.5,
                 directionalLight1Color: 0xffffff,
                 directionalLight1Intensity: 0.75,
@@ -162,7 +163,7 @@ namespace Virtex {
             light2.position.set(-1, -1, -1);
             this._lightGroup.add(light2);
 
-            const ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
+            const ambientLight = new THREE.AmbientLight(this.options.ambientLightColor); // todo add ambientLightIntensity to constructor definition
             this._lightGroup.add(ambientLight);
         }
 
@@ -267,8 +268,8 @@ namespace Virtex {
                         if (obj.animations) {
                             var animations = obj.animations;
 
-                            for ( var i = 0, l = animations.length; i < l; i++ ) {
-                                var animation = animations[ i ];
+                            for (var i = 0, l = animations.length; i < l; i++) {
+                                var animation = animations[i];
                                 animation.loop = true;
                                 animation.play();
                             }
@@ -282,12 +283,13 @@ namespace Virtex {
 
                     } else {
 
-                        if (this.options.doubleSided) {
-                            obj.traverse((child: any) => {
-                                if (child.material) child.material.side = THREE.DoubleSide;
-                            });
-                        }
-
+                        // use the three.js setting in Blender's material tab
+                        // if (this.options.doubleSided) {
+                        //     obj.traverse((child: any) => {
+                        //         if (child.material) child.material.side = THREE.DoubleSide;
+                        //     });
+                        // }
+                        
                         this._objectGroup.add(obj);
                     }
 

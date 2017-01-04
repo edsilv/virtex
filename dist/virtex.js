@@ -116,6 +116,7 @@ var Virtex;
         Viewport.prototype._getDefaultOptions = function () {
             return {
                 ambientLightColor: 0xd0d0d0,
+                ambientLightIntensity: 1,
                 cameraZ: 4.5,
                 directionalLight1Color: 0xffffff,
                 directionalLight1Intensity: 0.75,
@@ -163,7 +164,7 @@ var Virtex;
             var light2 = new THREE.DirectionalLight(this.options.directionalLight2Color, this.options.directionalLight2Intensity);
             light2.position.set(-1, -1, -1);
             this._lightGroup.add(light2);
-            var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor);
+            var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor); // todo add ambientLightIntensity to constructor definition
             this._lightGroup.add(ambientLight);
         };
         Viewport.prototype._createCamera = function () {
@@ -256,12 +257,12 @@ var Virtex;
                     }
                 }
                 else {
-                    if (_this.options.doubleSided) {
-                        obj.traverse(function (child) {
-                            if (child.material)
-                                child.material.side = THREE.DoubleSide;
-                        });
-                    }
+                    // use the three.js setting in Blender's material tab
+                    // if (this.options.doubleSided) {
+                    //     obj.traverse((child: any) => {
+                    //         if (child.material) child.material.side = THREE.DoubleSide;
+                    //     });
+                    // }
                     _this._objectGroup.add(obj);
                 }
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
