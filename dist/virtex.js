@@ -126,6 +126,7 @@ var Virtex;
                 fadeSpeed: 1750,
                 far: 10000,
                 file: null,
+                fitFovToObject: true,
                 fov: 45,
                 maxZoom: 10,
                 minZoom: 2,
@@ -168,7 +169,7 @@ var Virtex;
             this._lightGroup.add(ambientLight);
         };
         Viewport.prototype._createCamera = function () {
-            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
+            this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
             this._camera.position.z = this._targetZoom = this.options.cameraZ;
         };
         Viewport.prototype._createRenderer = function () {
@@ -264,6 +265,7 @@ var Virtex;
                     //     });
                     // }
                     _this._objectGroup.add(obj);
+                    _this._createCamera();
                 }
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
                 _this._emit(Virtex.Events.LOADED, obj);
@@ -275,6 +277,25 @@ var Virtex;
                 // error
                 console.error(e);
             });
+        };
+        Viewport.prototype._getBoundingBox = function () {
+            return new THREE.Box3().setFromObject(this._objectGroup);
+        };
+        Viewport.prototype._getDistanceToObject = function () {
+            return this._camera.position.distanceTo(this._objectGroup.position);
+        };
+        Viewport.prototype._getFov = function () {
+            if (this.options.fitFovToObject && this._camera) {
+                var dist = this._getDistanceToObject();
+                var box = this._getBoundingBox();
+                var width = box.size().x;
+                var height = box.size().y; // todo: use getSize and update definition
+                dist -= width;
+                var fov = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
+                //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
+                return fov;
+            }
+            return this.options.fov;
         };
         Viewport.prototype._isGLTF = function () {
             return this.options.type.toString() === Virtex.FileType.GLTF.toString();
@@ -564,6 +585,9 @@ var Virtex;
             }
             return false;
         };
+        Viewport.prototype._getAspectRatio = function () {
+            return this._$viewport.width() / this._$viewport.height();
+        };
         Viewport.prototype._resize = function () {
             if (this._$element && this._$viewport) {
                 this._$element.width(this._getWidth());
@@ -572,7 +596,7 @@ var Virtex;
                 this._$viewport.height(this._getHeight());
                 this._viewportCenter.x = this._$viewport.width() / 2;
                 this._viewportCenter.y = this._$viewport.height() / 2;
-                this._camera.aspect = this._$viewport.width() / this._$viewport.height();
+                this._camera.aspect = this._getAspectRatio();
                 this._camera.updateProjectionMatrix();
                 if (this._isVRMode) {
                     this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());

@@ -119,6 +119,7 @@ namespace Virtex {
                 fadeSpeed: 1750,
                 far: 10000,
                 file: null,
+                fitFovToObject: true,
                 fov: 45,
                 maxZoom: 10,
                 minZoom: 2,
@@ -168,7 +169,7 @@ namespace Virtex {
         }
 
         private _createCamera(): void {
-            this._camera = new THREE.PerspectiveCamera(this.options.fov, this._getWidth() / this._getHeight(), this.options.near, this.options.far);
+            this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
             this._camera.position.z = this._targetZoom = this.options.cameraZ;
         }
 
@@ -289,8 +290,10 @@ namespace Virtex {
                         //         if (child.material) child.material.side = THREE.DoubleSide;
                         //     });
                         // }
-                        
+
                         this._objectGroup.add(obj);
+
+                        this._createCamera();
                     }
 
                     this._$loading.fadeOut(this.options.fadeSpeed);
@@ -307,6 +310,31 @@ namespace Virtex {
                     console.error(e);
                 }
             );
+        }
+
+        private _getBoundingBox(): THREE.Box3 {
+            return new THREE.Box3().setFromObject(this._objectGroup);
+        }
+
+        private _getDistanceToObject(): number {
+            return this._camera.position.distanceTo(this._objectGroup.position);
+        }
+
+        private _getFov(): number {
+            if (this.options.fitFovToObject && this._camera) {
+                let dist: number = this._getDistanceToObject();
+                const box: THREE.Box3 = this._getBoundingBox();
+                const width: number = box.size().x;
+                const height: number = box.size().y; // todo: use getSize and update definition
+                dist -= width;
+
+                let fov: number = 2 * Math.atan(height / (2 * dist) ) * (180 / Math.PI);
+                //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
+
+                return fov;
+            }
+
+            return this.options.fov;
         }
 
         private _isGLTF(): boolean {
@@ -655,6 +683,10 @@ namespace Virtex {
             return false;
         }
 
+        private _getAspectRatio(): number {
+            return this._$viewport.width() / this._$viewport.height();
+        }
+
         protected _resize(): void {
 
             if (this._$element && this._$viewport){
@@ -668,7 +700,7 @@ namespace Virtex {
                 this._viewportCenter.x = this._$viewport.width() / 2;
                 this._viewportCenter.y = this._$viewport.height() / 2;
 
-                this._camera.aspect = this._$viewport.width() / this._$viewport.height();
+                this._camera.aspect = this._getAspectRatio();
                 this._camera.updateProjectionMatrix();
                 
                 if (this._isVRMode){

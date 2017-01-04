@@ -11,6 +11,7 @@ namespace Virtex{
         fadeSpeed?: number;
         far?: number;
         file: string;
+        fitFovToObject?: boolean;
         fov?: number;
         fullscreenEnabled?: boolean;
         maxZoom?: number;

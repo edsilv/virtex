@@ -8621,6 +8621,7 @@ declare namespace Virtex {
         fadeSpeed?: number;
         far?: number;
         file: string;
+        fitFovToObject?: boolean;
         fov?: number;
         fullscreenEnabled?: boolean;
         maxZoom?: number;
@@ -8678,6 +8679,9 @@ declare namespace Virtex {
         private _createControls();
         private _createEventListeners();
         private _loadObject(object);
+        private _getBoundingBox();
+        private _getDistanceToObject();
+        private _getFov();
         private _isGLTF();
         private _isThreeJs();
         private _loadProgress(progress);
@@ -8705,6 +8709,7 @@ declare namespace Virtex {
         exitFullscreen(): void;
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
+        private _getAspectRatio();
         protected _resize(): void;
     }
 }
