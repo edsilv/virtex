@@ -37,7 +37,6 @@ declare namespace Virtex {
         minZoom?: number;
         near?: number;
         shading?: THREE.Shading;
-        shininess?: number;
         showStats?: boolean;
         type: FileType;
         vrBackgroundColor: number;
@@ -89,7 +88,10 @@ declare namespace Virtex {
         private _createEventListeners();
         private _loadObject(object);
         private _getBoundingBox();
+        private _getBoundingWidth();
+        private _getBoundingHeight();
         private _getDistanceToObject();
+        private _getCameraZ();
         private _getFov();
         private _isGLTF();
         private _isThreeJs();
@@ -109,6 +111,9 @@ declare namespace Virtex {
         private _draw();
         private _getWidth();
         private _getHeight();
+        private _getZoomSpeed();
+        private _getMaxZoom();
+        private _getMinZoom();
         zoomIn(): void;
         zoomOut(): void;
         enterVR(): void;

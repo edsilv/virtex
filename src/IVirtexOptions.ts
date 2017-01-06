@@ -18,7 +18,6 @@ namespace Virtex{
         minZoom?: number;
         near?: number;
         shading?: THREE.Shading;
-        shininess?: number;
         showStats?: boolean;
         type: FileType;
         vrBackgroundColor: number;

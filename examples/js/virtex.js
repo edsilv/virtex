@@ -128,12 +128,11 @@ var Virtex;
                 file: null,
                 fitFovToObject: true,
                 fov: 45,
+                fullscreenEnabled: true,
                 maxZoom: 10,
                 minZoom: 2,
-                near: 0.1,
-                fullscreenEnabled: true,
+                near: 0.05,
                 shading: THREE.SmoothShading,
-                shininess: 1,
                 showStats: false,
                 type: Virtex.FileType.THREEJS,
                 vrBackgroundColor: 0x000000,
@@ -170,7 +169,9 @@ var Virtex;
         };
         Viewport.prototype._createCamera = function () {
             this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
-            this._camera.position.z = this._targetZoom = this.options.cameraZ;
+            var cameraZ = this._getCameraZ();
+            console.log(cameraZ);
+            this._camera.position.z = this._targetZoom = cameraZ; //this.options.cameraZ;
         };
         Viewport.prototype._createRenderer = function () {
             this._renderer = new THREE.WebGLRenderer({
@@ -281,16 +282,24 @@ var Virtex;
         Viewport.prototype._getBoundingBox = function () {
             return new THREE.Box3().setFromObject(this._objectGroup);
         };
+        Viewport.prototype._getBoundingWidth = function () {
+            return this._getBoundingBox().getSize().x;
+        };
+        Viewport.prototype._getBoundingHeight = function () {
+            return this._getBoundingBox().getSize().y;
+        };
         Viewport.prototype._getDistanceToObject = function () {
             return this._camera.position.distanceTo(this._objectGroup.position);
         };
+        Viewport.prototype._getCameraZ = function () {
+            return this._getBoundingWidth() * this.options.cameraZ;
+        };
         Viewport.prototype._getFov = function () {
             if (this.options.fitFovToObject && this._camera) {
-                var dist = this._getDistanceToObject();
-                var box = this._getBoundingBox();
-                var width = box.size().x;
-                var height = box.size().y; // todo: use getSize and update definition
-                dist -= width;
+                var width = this._getBoundingWidth();
+                var height = this._getBoundingHeight(); // todo: use getSize and update definition
+                var dist = this._getCameraZ() - width;
+                //http://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
                 var fov = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
                 //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
                 return fov;
@@ -487,22 +496,31 @@ var Virtex;
             }
             return this._$element.height();
         };
+        Viewport.prototype._getZoomSpeed = function () {
+            return this._getBoundingWidth() * this.options.zoomSpeed;
+        };
+        Viewport.prototype._getMaxZoom = function () {
+            return this._getBoundingWidth() * this.options.maxZoom;
+        };
+        Viewport.prototype._getMinZoom = function () {
+            return this._getBoundingWidth() * this.options.minZoom;
+        };
         Viewport.prototype.zoomIn = function () {
-            var t = this._camera.position.z - this.options.zoomSpeed;
-            if (t > this.options.minZoom) {
-                this._targetZoom = t;
+            var targetZoom = this._camera.position.z - this._getZoomSpeed();
+            if (targetZoom > this._getMinZoom()) {
+                this._targetZoom = targetZoom;
             }
             else {
-                this._targetZoom = this.options.minZoom;
+                this._targetZoom = this._getMinZoom();
             }
         };
         Viewport.prototype.zoomOut = function () {
-            var t = this._camera.position.z + this.options.zoomSpeed;
-            if (t < this.options.maxZoom) {
-                this._targetZoom = t;
+            var targetZoom = this._camera.position.z + this._getZoomSpeed();
+            if (targetZoom < this._getMaxZoom()) {
+                this._targetZoom = targetZoom;
             }
             else {
-                this._targetZoom = this.options.maxZoom;
+                this._targetZoom = this._getMaxZoom();
             }
         };
         Viewport.prototype.enterVR = function () {

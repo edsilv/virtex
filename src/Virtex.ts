@@ -110,7 +110,7 @@ namespace Virtex {
             return <IVirtexOptions>{
                 ambientLightColor: 0xd0d0d0,
                 ambientLightIntensity: 1,
-                cameraZ: 4.5,
+                cameraZ: 4.5, // multiply the width of the object by this number
                 directionalLight1Color: 0xffffff,
                 directionalLight1Intensity: 0.75,
                 directionalLight2Color: 0x002958,
@@ -121,12 +121,11 @@ namespace Virtex {
                 file: null,
                 fitFovToObject: true,
                 fov: 45,
+                fullscreenEnabled: true,
                 maxZoom: 10,
                 minZoom: 2,
-                near: 0.1,
-                fullscreenEnabled: true,
+                near: 0.05,
                 shading: THREE.SmoothShading,
-                shininess: 1,
                 showStats: false,
                 type: FileType.THREEJS,
                 vrBackgroundColor: 0x000000,
@@ -156,21 +155,23 @@ namespace Virtex {
             this._lightGroup = new THREE.Object3D();
             this._scene.add(this._lightGroup);
             
-            const light1 = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
+            const light1: THREE.DirectionalLight = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
             light1.position.set(1, 1, 1);
             this._lightGroup.add(light1);
 
-            const light2 = new THREE.DirectionalLight(this.options.directionalLight2Color, this.options.directionalLight2Intensity);
+            const light2: THREE.DirectionalLight = new THREE.DirectionalLight(this.options.directionalLight2Color, this.options.directionalLight2Intensity);
             light2.position.set(-1, -1, -1);
             this._lightGroup.add(light2);
 
-            const ambientLight = new THREE.AmbientLight(this.options.ambientLightColor); // todo add ambientLightIntensity to constructor definition
+            const ambientLight: THREE.AmbientLight = new THREE.AmbientLight(this.options.ambientLightColor); // todo add ambientLightIntensity to constructor definition
             this._lightGroup.add(ambientLight);
         }
 
         private _createCamera(): void {
             this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
-            this._camera.position.z = this._targetZoom = this.options.cameraZ;
+            const cameraZ: number = this._getCameraZ();
+            console.log(cameraZ);
+            this._camera.position.z = this._targetZoom = cameraZ; //this.options.cameraZ;
         }
 
         private _createRenderer(): void {
@@ -267,10 +268,10 @@ namespace Virtex {
                         this._objectGroup.add(obj.scene);
 
                         if (obj.animations) {
-                            var animations = obj.animations;
+                            const animations = obj.animations;
 
                             for (var i = 0, l = animations.length; i < l; i++) {
-                                var animation = animations[i];
+                                const animation = animations[i];
                                 animation.loop = true;
                                 animation.play();
                             }
@@ -316,17 +317,27 @@ namespace Virtex {
             return new THREE.Box3().setFromObject(this._objectGroup);
         }
 
+        private _getBoundingWidth(): number {
+            return this._getBoundingBox().getSize().x;
+        }
+
+        private _getBoundingHeight(): number {
+            return this._getBoundingBox().getSize().y;
+        }
+
         private _getDistanceToObject(): number {
             return this._camera.position.distanceTo(this._objectGroup.position);
         }
 
+        private _getCameraZ(): number {
+            return this._getBoundingWidth() * this.options.cameraZ;
+        }
+
         private _getFov(): number {
             if (this.options.fitFovToObject && this._camera) {
-                let dist: number = this._getDistanceToObject();
-                const box: THREE.Box3 = this._getBoundingBox();
-                const width: number = box.size().x;
-                const height: number = box.size().y; // todo: use getSize and update definition
-                dist -= width;
+                const width: number = this._getBoundingWidth();
+                const height: number = this._getBoundingHeight(); // todo: use getSize and update definition
+                const dist: number = this._getCameraZ() - width;
 
                 //http://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
                 let fov: number = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
@@ -347,8 +358,8 @@ namespace Virtex {
         }
 
         private _loadProgress(progress: number): void {
-            var fullWidth: number = this._$loading.width();
-            var width: number = Math.floor(fullWidth * progress);
+            const fullWidth: number = this._$loading.width();
+            const width: number = Math.floor(fullWidth * progress);
             this._$loadingBar.width(width);
         }
 
@@ -404,7 +415,7 @@ namespace Virtex {
             event.preventDefault();
             event.stopPropagation();
 
-            var delta: number = 0;
+            let delta: number = 0;
 
             if (event.wheelDelta !== undefined) { // WebKit / Opera / Explorer 9
                 delta = event.wheelDelta;
@@ -458,12 +469,12 @@ namespace Virtex {
                     break;
 
                 case 2: // two-fingered touch: zoom
-                    var dx = touches[0].pageX - touches[1].pageX;
-                    var dy = touches[0].pageY - touches[1].pageY;
-                    var distance = Math.sqrt(dx * dx + dy * dy);
+                    const dx: number = touches[0].pageX - touches[1].pageX;
+                    const dy: number = touches[0].pageY - touches[1].pageY;
+                    const distance: number = Math.sqrt(dx * dx + dy * dy);
 
-                    var pinchEnd = new THREE.Vector2(0, distance);
-                    var pinchDelta = new THREE.Vector2();
+                    const pinchEnd: THREE.Vector2 = new THREE.Vector2(0, distance);
+                    const pinchDelta: THREE.Vector2 = new THREE.Vector2();
                     pinchDelta.subVectors(pinchEnd, this._pinchStart);
 
                     if (pinchDelta.y > 0) {
@@ -505,7 +516,7 @@ namespace Virtex {
         }
 
         public rotateY(radians: number): void {
-            var rotation: number = this._objectGroup.rotation.y + radians;
+            const rotation: number = this._objectGroup.rotation.y + radians;
             this._objectGroup.rotation.y = rotation;
         }
         
@@ -539,7 +550,7 @@ namespace Virtex {
                 this.rotateY((this._targetRotation.x - this._objectGroup.rotation.y) * 0.1);
 
                 // vertical rotation
-                var finalRotationY: number = (this._targetRotation.y - this._objectGroup.rotation.x);
+                const finalRotationY: number = (this._targetRotation.y - this._objectGroup.rotation.x);
 
                 if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
                     this._objectGroup.rotation.x += finalRotationY * 0.1;
@@ -552,8 +563,7 @@ namespace Virtex {
                     this._objectGroup.rotation.x = -1
                 }
 
-                var zoomDelta: number = (this._targetZoom - this._camera.position.z) * 0.1;
-                
+                const zoomDelta: number = (this._targetZoom - this._camera.position.z) * 0.1;
                 this._camera.position.z += zoomDelta;
             }
         }
@@ -580,26 +590,39 @@ namespace Virtex {
             return this._$element.height();
         }
 
+        private _getZoomSpeed(): number {
+            return this._getBoundingWidth() * this.options.zoomSpeed;
+        }
+
+        private _getMaxZoom(): number {
+            return this._getBoundingWidth() * this.options.maxZoom;
+        }
+
+        private _getMinZoom(): number {
+            return this._getBoundingWidth() * this.options.minZoom;
+        }
+
         public zoomIn(): void {
-            var t: number = this._camera.position.z - this.options.zoomSpeed;
-            if (t > this.options.minZoom){
-                this._targetZoom = t;
+            const targetZoom: number = this._camera.position.z - this._getZoomSpeed();
+            if (targetZoom > this._getMinZoom()){
+                this._targetZoom = targetZoom;
             } else {
-                this._targetZoom = this.options.minZoom;
+                this._targetZoom = this._getMinZoom();
             }
         }
 
         public zoomOut(): void {
-            var t: number = this._camera.position.z + this.options.zoomSpeed;
-            if (t < this.options.maxZoom){
-                this._targetZoom = t;
+            const targetZoom: number = this._camera.position.z + this._getZoomSpeed();
+            if (targetZoom < this._getMaxZoom()){
+                this._targetZoom = targetZoom;
             } else {
-                this._targetZoom = this.options.maxZoom;
+                this._targetZoom = this._getMaxZoom();
             }
         }
         
         public enterVR(): void {            
             if (!this._vrEnabled) return;
+
             this._isVRMode = true;
 
             this._prevCameraPosition = this._camera.position.clone();
@@ -613,9 +636,6 @@ namespace Virtex {
                     this._vrEffect.setVRDisplay(display);
                     this._vrControls.setVRDisplay(display);
                     this._vrEffect.setFullScreen(true);
-
-                    // todo: point camera at object?
-                    //this._camera.lookAt(this._objectGroup.position);
                 }
             });
         }
@@ -640,8 +660,8 @@ namespace Virtex {
         
         public enterFullscreen(): void {            
             if (!this.options.fullscreenEnabled) return;            
-            var elem = this._$element[0];
-            var requestFullScreen = this._getRequestFullScreen(elem);
+            const elem: HTMLElement = this._$element[0];
+            const requestFullScreen: any = this._getRequestFullScreen(elem);
 
             if (requestFullScreen){
                 requestFullScreen.call(elem);
@@ -649,14 +669,14 @@ namespace Virtex {
         }
         
         public exitFullscreen(): void {
-            var exitFullScreen = this._getExitFullScreen();
+            const exitFullScreen: any = this._getExitFullScreen();
 
             if (exitFullScreen) {
                 exitFullScreen.call(document);
             }
         }
         
-        private _getRequestFullScreen(elem) {
+        private _getRequestFullScreen(elem): any {
 
             if (elem.requestFullscreen) {
                 return elem.requestFullscreen;
@@ -670,7 +690,7 @@ namespace Virtex {
             return false;
         }
 
-        private _getExitFullScreen() {
+        private _getExitFullScreen(): any {
 
             if (document.exitFullscreen) {
                 return document.exitFullscreen;
@@ -690,7 +710,7 @@ namespace Virtex {
 
         protected _resize(): void {
 
-            if (this._$element && this._$viewport){
+            if (this._$element && this._$viewport) {
                 
                 this._$element.width(this._getWidth());
                 this._$element.height(this._getHeight());
