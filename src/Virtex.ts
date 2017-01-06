@@ -328,7 +328,8 @@ namespace Virtex {
                 const height: number = box.size().y; // todo: use getSize and update definition
                 dist -= width;
 
-                let fov: number = 2 * Math.atan(height / (2 * dist) ) * (180 / Math.PI);
+                //http://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
+                let fov: number = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
                 //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
 
                 return fov;
