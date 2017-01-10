@@ -16,14 +16,9 @@ tasks.init({
         'node_modules/three/examples/js/libs/stats.min.js',
         'node_modules/three/examples/js/loaders/GLTFLoader.js',
         'node_modules/three/examples/js/Detector.js',
-        'node_modules/three/examples/js/WebVR.js',
+        'node_modules/three/examples/js/vr/WebVR.js',
         'node_modules/key-codes/dist/key-codes.js'
     ],
     // libs that MAY be included in a consuming app but are used here for example purposes
-    examples: [],
-    // ts definitions to copy to the 'typings' dir
-    typings: [
-        'node_modules/base-component/dist/base-component.bundle.d.ts',
-        'node_modules/key-codes/dist/key-codes.d.ts'
-    ]
+    examples: []
 });

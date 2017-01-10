@@ -1,4 +1,21 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
+interface Document {
+    mozFullScreen: boolean;
+    msFullscreenElement: any;
+    msExitFullscreen: any;
+    mozCancelFullScreen: any;
+}
+declare module THREE {
+    class GLTFLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+        static Animations: any;
+        static Shaders: any;
+    }
+}
+
 declare namespace Virtex {
     class StringValue {
         value: string;
@@ -13,9 +30,6 @@ declare namespace Virtex {
         static THREEJS: FileType;
     }
 }
-
-/// <reference path="StringValue.d.ts" />
-/// <reference path="FileType.d.ts" />
 
 declare namespace Virtex {
     interface IVirtexOptions extends _Components.IBaseComponentOptions {

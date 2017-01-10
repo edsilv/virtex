@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "declaration": true
+    },
+    "files": [
+        "src/Definitions.ts",
+        "src/StringValue.ts",
+        "src/FileType.ts"
+    ],
+    "include": [
+        "src/**/*",
+        "typings/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

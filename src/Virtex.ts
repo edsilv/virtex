@@ -6,7 +6,7 @@ var requestAnimFrame = (function () {
         (<any>window).webkitRequestAnimationFrame ||
         (<any>window).mozRequestAnimationFrame ||
         (<any>window).oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
+        (<any>window).msRequestAnimationFrame ||
         function (callback) {
             window.setTimeout(callback, 1000 / 200);
         };
@@ -64,7 +64,7 @@ namespace Virtex {
 
             const success: boolean = super._init();
 
-            if (!success){
+            if (!success) {
                 console.error("Virtex failed to initialise");
                 return false;
             }
@@ -170,8 +170,7 @@ namespace Virtex {
         private _createCamera(): void {
             this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
             const cameraZ: number = this._getCameraZ();
-            console.log(cameraZ);
-            this._camera.position.z = this._targetZoom = cameraZ; //this.options.cameraZ;
+            this._camera.position.z = this._targetZoom = cameraZ;
         }
 
         private _createRenderer(): void {
@@ -181,7 +180,7 @@ namespace Virtex {
                 alpha: true
             });
 
-            if (this._isVRMode){
+            if (this._isVRMode) {
                 this._renderer.setClearColor(this.options.vrBackgroundColor);
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
@@ -604,7 +603,7 @@ namespace Virtex {
 
         public zoomIn(): void {
             const targetZoom: number = this._camera.position.z - this._getZoomSpeed();
-            if (targetZoom > this._getMinZoom()){
+            if (targetZoom > this._getMinZoom()) {
                 this._targetZoom = targetZoom;
             } else {
                 this._targetZoom = this._getMinZoom();
@@ -613,7 +612,7 @@ namespace Virtex {
 
         public zoomOut(): void {
             const targetZoom: number = this._camera.position.z + this._getZoomSpeed();
-            if (targetZoom < this._getMaxZoom()){
+            if (targetZoom < this._getMaxZoom()) {
                 this._targetZoom = targetZoom;
             } else {
                 this._targetZoom = this._getMaxZoom();
@@ -751,7 +750,7 @@ namespace Virtex {
     }
 }
 
-(function(w) {
+(function(w: any) {
     if (!w.Virtex){
         w.Virtex = Virtex;
     }

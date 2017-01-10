@@ -1,7 +1,3 @@
-interface Window{
-
-}
-
 interface Document{
     mozFullScreen: boolean;
     msFullscreenElement: any;

@@ -1,5 +1,6 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.virtex = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+
 var Virtex;
 (function (Virtex) {
     var StringValue = (function () {
@@ -27,18 +28,14 @@ var Virtex;
     var FileType = (function (_super) {
         __extends(FileType, _super);
         function FileType() {
-            _super.apply(this, arguments);
+            return _super.apply(this, arguments) || this;
         }
-        FileType.GLTF = new FileType("model/gltf+json");
-        FileType.THREEJS = new FileType("application/vnd.threejs+json");
         return FileType;
     }(Virtex.StringValue));
+    FileType.GLTF = new FileType("model/gltf+json");
+    FileType.THREEJS = new FileType("application/vnd.threejs+json");
     Virtex.FileType = FileType;
 })(Virtex || (Virtex = {}));
-
-/// <reference path="./StringValue.ts" />
-/// <reference path="./FileType.ts" /> 
-
 
 
 var __extends = (this && this.__extends) || function (d, b) {
@@ -61,22 +58,23 @@ var Virtex;
     var Viewport = (function (_super) {
         __extends(Viewport, _super);
         function Viewport(options) {
-            _super.call(this, options);
-            this._viewportCenter = new THREE.Vector2();
-            this._isFullscreen = false;
-            this._isMouseDown = false;
-            this._isVRMode = false;
-            this._mousePos = new THREE.Vector2();
-            this._mousePosOnMouseDown = new THREE.Vector2();
-            this._pinchStart = new THREE.Vector2();
-            this._targetRotationOnMouseDown = new THREE.Vector2();
-            this._targetRotation = new THREE.Vector2();
-            this._vrEnabled = true;
-            var success = this._init();
-            this._resize();
+            var _this = _super.call(this, options) || this;
+            _this._viewportCenter = new THREE.Vector2();
+            _this._isFullscreen = false;
+            _this._isMouseDown = false;
+            _this._isVRMode = false;
+            _this._mousePos = new THREE.Vector2();
+            _this._mousePosOnMouseDown = new THREE.Vector2();
+            _this._pinchStart = new THREE.Vector2();
+            _this._targetRotationOnMouseDown = new THREE.Vector2();
+            _this._targetRotation = new THREE.Vector2();
+            _this._vrEnabled = true;
+            var success = _this._init();
+            _this._resize();
             if (success) {
-                this._tick();
+                _this._tick();
             }
+            return _this;
         }
         Viewport.prototype._init = function () {
             var success = _super.prototype._init.call(this);
@@ -170,8 +168,7 @@ var Virtex;
         Viewport.prototype._createCamera = function () {
             this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
             var cameraZ = this._getCameraZ();
-            console.log(cameraZ);
-            this._camera.position.z = this._targetZoom = cameraZ; //this.options.cameraZ;
+            this._camera.position.z = this._targetZoom = cameraZ;
         };
         Viewport.prototype._createRenderer = function () {
             this._renderer = new THREE.WebGLRenderer({
@@ -638,14 +635,13 @@ var Virtex;
     }(_Components.BaseComponent));
     Virtex.Viewport = Viewport;
 })(Virtex || (Virtex = {}));
-var Virtex;
 (function (Virtex) {
     var Events = (function () {
         function Events() {
         }
-        Events.LOADED = 'loaded';
         return Events;
     }());
+    Events.LOADED = 'loaded';
     Virtex.Events = Events;
 })(Virtex || (Virtex = {}));
 (function (w) {

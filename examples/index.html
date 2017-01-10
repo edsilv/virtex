@@ -20,6 +20,7 @@
     <script src="js/stats.min.js"></script>
     <script src="js/Detector.js"></script>
     <script src="js/key-codes.js"></script>
+    <script src="js/WebVR.js"></script>
 
     <style>
         body {
@@ -134,6 +135,10 @@
 
                 viewport.toggleVR();
             });
+
+            if (!WEBVR.isAvailable()) {
+				$('#vr').hide();
+			}
         });
     </script>
 
