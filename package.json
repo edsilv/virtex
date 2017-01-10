@@ -18,10 +18,11 @@
     "gulp": "^3.8.7",
     "gulp-tasks": "viewdir/gulp-tasks#tsupdate",
     "key-codes": "edsilv/key-codes",
-    "three": "mrdoob/three.js#dev"
+    "three": "mrdoob/three.js#dev",
+    "typings": "^2.1.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "typings install"
   },
   "repository": {
     "type": "git",
