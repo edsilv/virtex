@@ -14,28 +14,15 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "deamdify": "^0.1.1",
-    "del": "^1.2.0",
-    "event-stream": "^3.1.7",
+    "base-component": "viewdir/base-component#v1.0.7",
     "gulp": "^3.8.7",
-    "gulp-browserify": "^0.5.0",
-    "gulp-bump": "^0.3.1",
-    "gulp-concat": "^2.4.1",
-    "gulp-connect": "^2.2.0",
-    "gulp-insert": "^0.4.0",
-    "gulp-rename": "^1.2.0",
-    "gulp-typescript": "^2.2.1",
-    "gulp-uglify": "^0.3.1",
-    "jquery": "^2.2.3",
-    "merge2": "^0.3.6",
-    "path": "^0.11.14",
-    "require-dir": "^0.3.0",
-    "run-sequence": "^1.0.1",
-    "three": "^0.76.1",
-    "yargs": "^3.12.0"
+    "gulp-tasks": "viewdir/gulp-tasks#tsupdate",
+    "key-codes": "edsilv/key-codes",
+    "three": "mrdoob/three.js#dev",
+    "typings": "^2.1.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "typings install"
   },
   "repository": {
     "type": "git",

@@ -10,11 +10,12 @@ Clone the repo then run:
 
     npm install
     gulp
-    gulp test
+    gulp examples
 
 ##Examples
 
-- [Universal Viewer 3D Extension](http://universalviewer.io/examples/?manifest=http%3A%2F%2Ffiles.universalviewer.io%2Fmanifests%2Ffoundobjects%2Fthekiss.json)
+- http://edsilv.github.io/virtex/examples/
+- [Universal Viewer 3D Extension](http://universalviewer.io/examples/?manifest=http%3A%2F%2Ffiles.universalviewer.io%2Fmanifests%2Fnelis%2Fecorche.json)
  
 ##Guides
 

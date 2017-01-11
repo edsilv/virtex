@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>virtex: test</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="css/virtex.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
+    <script src="js/base-component.bundle.js"></script>
+    <!--<script src="js/three.js"></script>-->
+    <script src="js/three.min.js"></script>
+    <script src="js/GLTFLoader.js"></script>
+    <script src="js/virtex.js"></script>
+    <script src="js/VRControls.js"></script>
+    <script src="js/VREffect.js"></script>
+    <script src="js/stats.min.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/key-codes.js"></script>
+    <script src="js/WebVR.js"></script>
+
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        #buttons button{
+            font-size: 30px;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div id="buttons">
+        <button id="zoomIn">+</button>
+        <button id="zoomOut">-</button>
+        <button id="fullscreen">fs</button>
+        <button id="vr">vr</button>
+    </div>
+
+    <div id="viewer" class="virtex" style="width: 800px; height: 600px"></div>
+
+    <script>
+        
+        var viewport;
+        
+        var objects = {
+            ecorche: {
+                file: "models/threejs/ecorche.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
+            },
+            // ecorche: {
+            //     file: "models/gltf/ecorche.gltf",
+            //     type: new Virtex.FileType("model/gltf+json")
+            // },
+            thekiss: {
+                file: "models/threejs/thekiss.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
+            },
+            bone: {
+                file: "models/threejs/hc941fm6529.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
+            },
+            // thekiss: {
+            //     file: "models/gltf/the_kiss.gltf",
+            //     type: new Virtex.FileType("model/gltf+json")
+            // },
+            vc: {
+                file: "models/gltf/vc.gltf",
+                type: new Virtex.FileType("model/gltf+json")
+            },
+            monster: {
+                file: "models/gltf/monster.gltf",
+                type: new Virtex.FileType("model/gltf+json")
+            }
+        };
+
+        // test cross origin
+        //    var objects = {
+        //        animalskull: 'http://files.universalviewer.io/manifests/nelis/animal-skull/animal-skull.json',
+        //        ecorche: 'http://files.universalviewer.io/manifests/nelis/ecorche/ecorche.json',
+        //        thekiss: 'http://files.universalviewer.io/manifests/foundobjects/thekiss/thekiss.json'
+        //    };
+        
+        $(function() {
+
+            viewport = new Virtex.Viewport({
+                element: "#viewer",
+                file: objects.bone.file,
+                type: objects.bone.type, // defaults to threejs
+                fullscreenEnabled: true,
+                showStats: false
+                //ambientLightColor: 0xd0d0d0,
+                //ambientLightIntensity: 1,
+                //directionalLight1Color: 0xff0000,
+                //directionalLight1Intensity: 2.75,
+                //directionalLight2Color: 0x002958,
+                //directionalLight2Intensity: 2.5
+            });
+            
+            viewport.on('loaded', function(args) {
+                //alert(args);
+            });
+
+            $('#zoomIn').on('click', function(e){
+                e.preventDefault();
+
+                viewport.zoomIn();
+            });
+
+            $('#zoomOut').on('click', function(e){
+                e.preventDefault();
+
+                viewport.zoomOut();
+            });
+            
+            $('#fullscreen').on('click', function(e){
+                e.preventDefault();
+
+                viewport.enterFullscreen();
+            });
+            
+            $('#vr').on('click', function(e){
+                e.preventDefault();
+
+                viewport.toggleVR();
+            });
+
+            if (!WEBVR.isAvailable()) {
+				$('#vr').hide();
+			}
+        });
+    </script>
+
+</body>
+</html>
