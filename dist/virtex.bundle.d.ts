@@ -44,7 +44,6 @@ declare namespace Virtex {
         far?: number;
         file: string;
         fitFovToObject?: boolean;
-        fov?: number;
         fullscreenEnabled?: boolean;
         maxZoom?: number;
         minZoom?: number;
@@ -59,7 +58,7 @@ declare namespace Virtex {
 
 declare var Detector: any;
 declare var Stats: any;
-declare var requestAnimFrame: any;
+declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare namespace Virtex {
     class Viewport extends _Components.BaseComponent {
         options: IVirtexOptions;
@@ -103,21 +102,19 @@ declare namespace Virtex {
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();
-        private _getDistanceToObject();
         private _getCameraZ();
         private _getFov();
         private _isGLTF();
-        private _isThreeJs();
         private _loadProgress(progress);
         private _fullscreenChanged();
         private _onMouseDown(event);
         private _onMouseMove(event);
-        private _onMouseUp(event);
-        private _onMouseOut(event);
+        private _onMouseUp();
+        private _onMouseOut();
         private _onMouseWheel(event);
         private _onTouchStart(event);
         private _onTouchMove(event);
-        private _onTouchEnd(event);
+        private _onTouchEnd();
         private _tick();
         rotateY(radians: number): void;
         private _update();

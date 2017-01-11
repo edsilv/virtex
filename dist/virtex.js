@@ -123,9 +123,8 @@ var Virtex;
                 doubleSided: true,
                 fadeSpeed: 1750,
                 far: 10000,
-                file: null,
+                file: "",
                 fitFovToObject: true,
-                fov: 45,
                 fullscreenEnabled: true,
                 maxZoom: 10,
                 minZoom: 2,
@@ -138,7 +137,7 @@ var Virtex;
             };
         };
         Viewport.prototype._getVRDisplay = function () {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 navigator.getVRDisplays().then(function (devices) {
                     for (var i = 0; i < devices.length; i++) {
                         if (devices[i] instanceof VRDisplay) {
@@ -146,10 +145,10 @@ var Virtex;
                             break;
                         }
                     }
-                    resolve(null);
+                    resolve(undefined);
                 }, function () {
                     // No devices found
-                    resolve(null);
+                    resolve(undefined);
                 });
             });
         };
@@ -162,7 +161,7 @@ var Virtex;
             var light2 = new THREE.DirectionalLight(this.options.directionalLight2Color, this.options.directionalLight2Intensity);
             light2.position.set(-1, -1, -1);
             this._lightGroup.add(light2);
-            var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor); // todo add ambientLightIntensity to constructor definition
+            var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor, this.options.ambientLightIntensity);
             this._lightGroup.add(ambientLight);
         };
         Viewport.prototype._createCamera = function () {
@@ -195,7 +194,7 @@ var Virtex;
         Viewport.prototype._createEventListeners = function () {
             var _this = this;
             if (this.options.fullscreenEnabled) {
-                $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function (e) {
+                $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function () {
                     _this._fullscreenChanged();
                 });
             }
@@ -205,11 +204,11 @@ var Virtex;
             this._$element.on('mousemove', function (e) {
                 _this._onMouseMove(e.originalEvent);
             });
-            this._$element.on('mouseup', function (e) {
-                _this._onMouseUp(e.originalEvent);
+            this._$element.on('mouseup', function () {
+                _this._onMouseUp();
             });
-            this._$element.on('mouseout', function (e) {
-                _this._onMouseOut(e.originalEvent);
+            this._$element.on('mouseout', function () {
+                _this._onMouseOut();
             });
             this._$element.on('mousewheel', function (e) {
                 _this._onMouseWheel(e.originalEvent);
@@ -223,8 +222,8 @@ var Virtex;
             this._$element.on('touchmove', function (e) {
                 _this._onTouchMove(e.originalEvent);
             });
-            this._$element.on('touchend', function (e) {
-                _this._onTouchEnd(e.originalEvent);
+            this._$element.on('touchend', function () {
+                _this._onTouchEnd();
             });
             window.addEventListener('resize', function () { return _this._resize(); }, false);
         };
@@ -285,30 +284,29 @@ var Virtex;
         Viewport.prototype._getBoundingHeight = function () {
             return this._getBoundingBox().getSize().y;
         };
-        Viewport.prototype._getDistanceToObject = function () {
-            return this._camera.position.distanceTo(this._objectGroup.position);
-        };
+        // private _getDistanceToObject(): number {
+        //     return this._camera.position.distanceTo(this._objectGroup.position);
+        // }
         Viewport.prototype._getCameraZ = function () {
             return this._getBoundingWidth() * this.options.cameraZ;
         };
         Viewport.prototype._getFov = function () {
-            if (this.options.fitFovToObject && this._camera) {
-                var width = this._getBoundingWidth();
-                var height = this._getBoundingHeight(); // todo: use getSize and update definition
-                var dist = this._getCameraZ() - width;
-                //http://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
-                var fov = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
-                //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
-                return fov;
-            }
-            return this.options.fov;
+            if (!this._camera)
+                return 1;
+            var width = this._getBoundingWidth();
+            var height = this._getBoundingHeight(); // todo: use getSize and update definition
+            var dist = this._getCameraZ() - width;
+            //http://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
+            var fov = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
+            //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
+            return fov;
         };
         Viewport.prototype._isGLTF = function () {
             return this.options.type.toString() === Virtex.FileType.GLTF.toString();
         };
-        Viewport.prototype._isThreeJs = function () {
-            return this.options.type.toString() === Virtex.FileType.THREEJS.toString();
-        };
+        // private _isThreeJs(): boolean {
+        //     return this.options.type.toString() === FileType.THREEJS.toString()
+        // }
         Viewport.prototype._loadProgress = function (progress) {
             var fullWidth = this._$loading.width();
             var width = Math.floor(fullWidth * progress);
@@ -345,10 +343,10 @@ var Virtex;
                 this._targetRotation.x = this._targetRotationOnMouseDown.x + (this._mousePos.x - this._mousePosOnMouseDown.x) * 0.02;
             }
         };
-        Viewport.prototype._onMouseUp = function (event) {
+        Viewport.prototype._onMouseUp = function () {
             this._isMouseDown = false;
         };
-        Viewport.prototype._onMouseOut = function (event) {
+        Viewport.prototype._onMouseOut = function () {
             this._isMouseDown = false;
         };
         Viewport.prototype._onMouseWheel = function (event) {
@@ -418,7 +416,7 @@ var Virtex;
                     break;
             }
         };
-        Viewport.prototype._onTouchEnd = function (event) {
+        Viewport.prototype._onTouchEnd = function () {
             this._isMouseDown = false;
         };
         Viewport.prototype._tick = function () {
