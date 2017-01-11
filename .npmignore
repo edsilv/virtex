@@ -1,9 +1,8 @@
 .idea
+.vscode
 node_modules
 src
-tasks
-test
 typings
-gulpfile.config.js
 gulpfile.js
 npm-debug.log
+examples
