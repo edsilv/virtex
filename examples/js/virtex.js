@@ -124,7 +124,6 @@ var Virtex;
                 fadeSpeed: 1750,
                 far: 10000,
                 file: "",
-                fitFovToObject: true,
                 fullscreenEnabled: true,
                 maxZoom: 10,
                 minZoom: 2,
