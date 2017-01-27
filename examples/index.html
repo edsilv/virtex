@@ -88,6 +88,10 @@
             throw: {
                 file: "models/draco/throw_14.drc",
                 type: new Virtex.FileType("application/octet-stream")
+            },
+            bone2: {
+                file: "models/draco/hc941fm6529.drc",
+                type: new Virtex.FileType("application/octet-stream")
             }
         };
 
@@ -102,8 +106,8 @@
 
             viewport = new Virtex.Viewport({
                 element: "#viewer",
-                file: objects.throw.file,
-                type: objects.throw.type, // defaults to threejs
+                file: objects.bone2.file,
+                type: objects.bone2.type, // defaults to threejs
                 fullscreenEnabled: true,
                 showStats: false
                 //ambientLightColor: 0xd0d0d0,
