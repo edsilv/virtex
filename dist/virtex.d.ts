@@ -14,6 +14,12 @@ declare module THREE {
         static Animations: any;
         static Shaders: any;
     }
+    class DRACOLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+    }
 }
 
 declare namespace Virtex {
@@ -26,6 +32,7 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class FileType extends StringValue {
+        static DRACO: FileType;
         static GLTF: FileType;
         static THREEJS: FileType;
     }
@@ -105,6 +112,7 @@ declare namespace Virtex {
         private _getCameraZ();
         private _getFov();
         private _isGLTF();
+        private _isDRACO();
         private _loadProgress(progress);
         private _fullscreenChanged();
         private _onMouseDown(event);

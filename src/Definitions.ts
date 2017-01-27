@@ -17,4 +17,13 @@ declare module THREE {
         static Animations: any;
         static Shaders: any;
     }
+
+    export class DRACOLoader {
+        constructor(manager?: LoadingManager);
+
+        manager: LoadingManager;
+
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+    }
 }

@@ -18,7 +18,7 @@
     "gulp": "^3.8.7",
     "gulp-tasks": "viewdir/gulp-tasks#tsupdate",
     "key-codes": "edsilv/key-codes",
-    "three": "mrdoob/three.js#dev",
+    "three": "edsilv/three.js#draco",
     "typings": "^2.1.0"
   },
   "scripts": {
