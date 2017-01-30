@@ -38,6 +38,90 @@ var Virtex;
     Virtex.FileType = FileType;
 })(Virtex || (Virtex = {}));
 
+var Virtex;
+(function (Virtex) {
+    var DRACOFileTypeHandler = (function () {
+        function DRACOFileTypeHandler() {
+        }
+        DRACOFileTypeHandler.setup = function (viewport, obj) {
+            var bufferGeometry = obj;
+            var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.VertexColors });
+            var geometry;
+            // Point cloud does not have face indices.
+            if (bufferGeometry.index == null) {
+                geometry = new THREE.Points(bufferGeometry, material);
+            }
+            else {
+                bufferGeometry.computeVertexNormals();
+                geometry = new THREE.Mesh(bufferGeometry, material);
+            }
+            // Compute range of the geometry coordinates for proper rendering.
+            bufferGeometry.computeBoundingBox();
+            var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
+            var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
+            var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
+            var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
+            var scale = 1.0 / diagonalSize;
+            var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
+            var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
+            var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
+            geometry.scale.multiplyScalar(scale);
+            geometry.position.x = -midX * scale;
+            geometry.position.y = -midY * scale;
+            geometry.position.z = -midZ * scale;
+            geometry.castShadow = true;
+            geometry.receiveShadow = true;
+            obj = geometry;
+            viewport.objectGroup.add(obj);
+            viewport.createCamera();
+        };
+        return DRACOFileTypeHandler;
+    }());
+    Virtex.DRACOFileTypeHandler = DRACOFileTypeHandler;
+})(Virtex || (Virtex = {}));
+
+var Virtex;
+(function (Virtex) {
+    var glTFFileTypeHandler = (function () {
+        function glTFFileTypeHandler() {
+        }
+        glTFFileTypeHandler.setup = function (viewport, obj) {
+            viewport.objectGroup.add(obj.scene);
+            if (obj.animations) {
+                var animations = obj.animations;
+                for (var i = 0, l = animations.length; i < l; i++) {
+                }
+            }
+            viewport.scene = obj.scene;
+            if (obj.cameras && obj.cameras.length) {
+                viewport.camera = obj.cameras[0];
+            }
+        };
+        return glTFFileTypeHandler;
+    }());
+    Virtex.glTFFileTypeHandler = glTFFileTypeHandler;
+})(Virtex || (Virtex = {}));
+
+
+var Virtex;
+(function (Virtex) {
+    var ThreeJSFileTypeHandler = (function () {
+        function ThreeJSFileTypeHandler() {
+        }
+        ThreeJSFileTypeHandler.setup = function (viewport, obj) {
+            // use the three.js setting in Blender's material tab
+            // if (this.options.doubleSided) {
+            //     obj.traverse((child: any) => {
+            //         if (child.material) child.material.side = THREE.DoubleSide;
+            //     });
+            // }
+            viewport.objectGroup.add(obj);
+            viewport.createCamera();
+        };
+        return ThreeJSFileTypeHandler;
+    }());
+    Virtex.ThreeJSFileTypeHandler = ThreeJSFileTypeHandler;
+})(Virtex || (Virtex = {}));
 
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -94,11 +178,11 @@ var Virtex;
             this._$loading = this._$element.find('.loading');
             this._$loadingBar = this._$loading.find('.bar');
             this._$loading.hide();
-            this._scene = new THREE.Scene();
-            this._objectGroup = new THREE.Object3D();
-            this._scene.add(this._objectGroup);
+            this.scene = new THREE.Scene();
+            this.objectGroup = new THREE.Object3D();
+            this.scene.add(this.objectGroup);
             this._createLights();
-            this._createCamera();
+            this.createCamera();
             this._createControls();
             this._createRenderer();
             this._createEventListeners();
@@ -154,7 +238,7 @@ var Virtex;
         };
         Viewport.prototype._createLights = function () {
             this._lightGroup = new THREE.Object3D();
-            this._scene.add(this._lightGroup);
+            this.scene.add(this._lightGroup);
             var light1 = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
             light1.position.set(1, 1, 1);
             this._lightGroup.add(light1);
@@ -164,10 +248,10 @@ var Virtex;
             var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor, this.options.ambientLightIntensity);
             this._lightGroup.add(ambientLight);
         };
-        Viewport.prototype._createCamera = function () {
-            this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
+        Viewport.prototype.createCamera = function () {
+            this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
             var cameraZ = this._getCameraZ();
-            this._camera.position.z = this._targetZoom = cameraZ;
+            this.camera.position.z = this._targetZoom = cameraZ;
         };
         Viewport.prototype._createRenderer = function () {
             this._renderer = new THREE.WebGLRenderer({
@@ -188,7 +272,7 @@ var Virtex;
         Viewport.prototype._createControls = function () {
             if (this._isVRMode) {
                 // Apply VR headset positional data to camera.
-                this._vrControls = new THREE.VRControls(this._camera);
+                this._vrControls = new THREE.VRControls(this.camera);
             }
         };
         Viewport.prototype._createEventListeners = function () {
@@ -231,72 +315,31 @@ var Virtex;
             var _this = this;
             this._$loading.show();
             var loader;
-            if (this._isDRACO()) {
-                loader = new THREE.DRACOLoader();
+            switch (this.options.type.toString()) {
+                case Virtex.FileType.DRACO.toString():
+                    loader = new THREE.DRACOLoader();
+                    break;
+                case Virtex.FileType.GLTF.toString():
+                    loader = new THREE.GLTFLoader();
+                    break;
+                case Virtex.FileType.THREEJS.toString():
+                    loader = new THREE.ObjectLoader();
+                    break;
             }
-            else if (this._isGLTF()) {
-                loader = new THREE.GLTFLoader();
+            if (loader.setCrossOrigin) {
+                loader.setCrossOrigin('anonymous');
             }
-            else {
-                loader = new THREE.ObjectLoader();
-            }
-            //loader.setCrossOrigin('anonymous');
             loader.load(object, function (obj) {
-                if (_this._isDRACO()) {
-                    var bufferGeometry = obj;
-                    var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.VertexColors });
-                    var geometry = void 0;
-                    // Point cloud does not have face indices.
-                    if (bufferGeometry.index == null) {
-                        geometry = new THREE.Points(bufferGeometry, material);
-                    }
-                    else {
-                        bufferGeometry.computeVertexNormals();
-                        geometry = new THREE.Mesh(bufferGeometry, material);
-                    }
-                    // Compute range of the geometry coordinates for proper rendering.
-                    bufferGeometry.computeBoundingBox();
-                    var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
-                    var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
-                    var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
-                    var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
-                    var scale = 1.0 / diagonalSize;
-                    var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
-                    var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
-                    var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
-                    geometry.scale.multiplyScalar(scale);
-                    geometry.position.x = -midX * scale;
-                    geometry.position.y = -midY * scale;
-                    geometry.position.z = -midZ * scale;
-                    geometry.castShadow = true;
-                    geometry.receiveShadow = true;
-                    _this._objectGroup.add(geometry);
-                    _this._createCamera();
-                }
-                else if (_this._isGLTF()) {
-                    _this._objectGroup.add(obj.scene);
-                    if (obj.animations) {
-                        var animations = obj.animations;
-                        for (var i = 0, l = animations.length; i < l; i++) {
-                            var animation = animations[i];
-                            animation.loop = true;
-                            animation.play();
-                        }
-                    }
-                    _this._scene = obj.scene;
-                    if (obj.cameras && obj.cameras.length) {
-                        _this._camera = obj.cameras[0];
-                    }
-                }
-                else {
-                    // use the three.js setting in Blender's material tab
-                    // if (this.options.doubleSided) {
-                    //     obj.traverse((child: any) => {
-                    //         if (child.material) child.material.side = THREE.DoubleSide;
-                    //     });
-                    // }
-                    _this._objectGroup.add(obj);
-                    _this._createCamera();
+                switch (_this.options.type.toString()) {
+                    case Virtex.FileType.DRACO.toString():
+                        Virtex.DRACOFileTypeHandler.setup(_this, obj);
+                        break;
+                    case Virtex.FileType.GLTF.toString():
+                        Virtex.glTFFileTypeHandler.setup(_this, obj);
+                        break;
+                    case Virtex.FileType.THREEJS.toString():
+                        Virtex.ThreeJSFileTypeHandler.setup(_this, obj);
+                        break;
                 }
                 _this._$loading.fadeOut(_this.options.fadeSpeed);
                 _this._emit(Virtex.Events.LOADED, obj);
@@ -310,7 +353,7 @@ var Virtex;
             });
         };
         Viewport.prototype._getBoundingBox = function () {
-            return new THREE.Box3().setFromObject(this._objectGroup);
+            return new THREE.Box3().setFromObject(this.objectGroup);
         };
         Viewport.prototype._getBoundingWidth = function () {
             return this._getBoundingBox().getSize().x;
@@ -319,13 +362,13 @@ var Virtex;
             return this._getBoundingBox().getSize().y;
         };
         // private _getDistanceToObject(): number {
-        //     return this._camera.position.distanceTo(this._objectGroup.position);
+        //     return this.camera.position.distanceTo(this.objectGroup.position);
         // }
         Viewport.prototype._getCameraZ = function () {
             return this._getBoundingWidth() * this.options.cameraZ;
         };
         Viewport.prototype._getFov = function () {
-            if (!this._camera)
+            if (!this.camera)
                 return 1;
             var width = this._getBoundingWidth();
             var height = this._getBoundingHeight(); // todo: use getSize and update definition
@@ -335,15 +378,6 @@ var Virtex;
             //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
             return fov;
         };
-        Viewport.prototype._isGLTF = function () {
-            return this.options.type.toString() === Virtex.FileType.GLTF.toString();
-        };
-        Viewport.prototype._isDRACO = function () {
-            return this.options.type.toString() === Virtex.FileType.DRACO.toString();
-        };
-        // private _isThreeJs(): boolean {
-        //     return this.options.type.toString() === FileType.THREEJS.toString()
-        // }
         Viewport.prototype._loadProgress = function (progress) {
             var fullWidth = this._$loading.width();
             var width = Math.floor(fullWidth * progress);
@@ -466,21 +500,27 @@ var Virtex;
             }
         };
         Viewport.prototype.rotateY = function (radians) {
-            var rotation = this._objectGroup.rotation.y + radians;
-            this._objectGroup.rotation.y = rotation;
+            var rotation = this.objectGroup.rotation.y + radians;
+            this.objectGroup.rotation.y = rotation;
         };
         // private _applyTransform(): void{
-        //     this._objectGroup.updateMatrix();
-        //     //this._objectGroup.geometry.applyMatrix( this._objectGroup.matrix );
-        //     this._objectGroup.position.set( 0, 0, 0 );
-        //     this._objectGroup.rotation.set( 0, 0, 0 );
-        //     this._objectGroup.scale.set( 1, 1, 1 );
-        //     this._objectGroup.updateMatrix();
+        //     this.objectGroup.updateMatrix();
+        //     //this.objectGroup.geometry.applyMatrix( this.objectGroup.matrix );
+        //     this.objectGroup.position.set( 0, 0, 0 );
+        //     this.objectGroup.rotation.set( 0, 0, 0 );
+        //     this.objectGroup.scale.set( 1, 1, 1 );
+        //     this.objectGroup.updateMatrix();
         // }
         Viewport.prototype._update = function () {
-            if (this._isGLTF()) {
-                THREE.GLTFLoader.Animations.update();
-                THREE.GLTFLoader.Shaders.update(this._scene, this._camera);
+            switch (this.options.type.toString()) {
+                case Virtex.FileType.DRACO.toString():
+                    break;
+                case Virtex.FileType.GLTF.toString():
+                    //THREE.GLTFLoader.Animations.update();
+                    THREE.GLTFLoader.Shaders.update(this.scene, this.camera);
+                    break;
+                case Virtex.FileType.THREEJS.toString():
+                    break;
             }
             if (this._isVRMode) {
                 // if (this._isMouseDown) {
@@ -491,29 +531,29 @@ var Virtex;
             }
             else {
                 // horizontal rotation
-                this.rotateY((this._targetRotation.x - this._objectGroup.rotation.y) * 0.1);
+                this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
                 // vertical rotation
-                var finalRotationY = (this._targetRotation.y - this._objectGroup.rotation.x);
-                if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
-                    this._objectGroup.rotation.x += finalRotationY * 0.1;
+                var finalRotationY = (this._targetRotation.y - this.objectGroup.rotation.x);
+                if (this.objectGroup.rotation.x <= 1 && this.objectGroup.rotation.x >= -1) {
+                    this.objectGroup.rotation.x += finalRotationY * 0.1;
                 }
                 // limit vertical rotation 
-                if (this._objectGroup.rotation.x > 1) {
-                    this._objectGroup.rotation.x = 1;
+                if (this.objectGroup.rotation.x > 1) {
+                    this.objectGroup.rotation.x = 1;
                 }
-                else if (this._objectGroup.rotation.x < -1) {
-                    this._objectGroup.rotation.x = -1;
+                else if (this.objectGroup.rotation.x < -1) {
+                    this.objectGroup.rotation.x = -1;
                 }
-                var zoomDelta = (this._targetZoom - this._camera.position.z) * 0.1;
-                this._camera.position.z += zoomDelta;
+                var zoomDelta = (this._targetZoom - this.camera.position.z) * 0.1;
+                this.camera.position.z += zoomDelta;
             }
         };
         Viewport.prototype._draw = function () {
             if (this._isVRMode) {
-                this._vrEffect.render(this._scene, this._camera);
+                this._vrEffect.render(this.scene, this.camera);
             }
             else {
-                this._renderer.render(this._scene, this._camera);
+                this._renderer.render(this.scene, this.camera);
             }
         };
         Viewport.prototype._getWidth = function () {
@@ -538,7 +578,7 @@ var Virtex;
             return this._getBoundingWidth() * this.options.minZoom;
         };
         Viewport.prototype.zoomIn = function () {
-            var targetZoom = this._camera.position.z - this._getZoomSpeed();
+            var targetZoom = this.camera.position.z - this._getZoomSpeed();
             if (targetZoom > this._getMinZoom()) {
                 this._targetZoom = targetZoom;
             }
@@ -547,7 +587,7 @@ var Virtex;
             }
         };
         Viewport.prototype.zoomOut = function () {
-            var targetZoom = this._camera.position.z + this._getZoomSpeed();
+            var targetZoom = this.camera.position.z + this._getZoomSpeed();
             if (targetZoom < this._getMaxZoom()) {
                 this._targetZoom = targetZoom;
             }
@@ -560,8 +600,8 @@ var Virtex;
             if (!this._vrEnabled)
                 return;
             this._isVRMode = true;
-            this._prevCameraPosition = this._camera.position.clone();
-            this._prevCameraRotation = this._camera.rotation.clone();
+            this._prevCameraPosition = this.camera.position.clone();
+            this._prevCameraRotation = this.camera.rotation.clone();
             this._createControls();
             this._createRenderer();
             this._getVRDisplay().then(function (display) {
@@ -576,8 +616,8 @@ var Virtex;
             if (!this._vrEnabled)
                 return;
             this._isVRMode = false;
-            this._camera.position.copy(this._prevCameraPosition);
-            this._camera.rotation.copy(this._prevCameraRotation);
+            this.camera.position.copy(this._prevCameraPosition);
+            this.camera.rotation.copy(this._prevCameraRotation);
             this._createRenderer();
         };
         Viewport.prototype.toggleVR = function () {
@@ -646,8 +686,8 @@ var Virtex;
                 this._$viewport.height(this._getHeight());
                 this._viewportCenter.x = this._$viewport.width() / 2;
                 this._viewportCenter.y = this._$viewport.height() / 2;
-                this._camera.aspect = this._getAspectRatio();
-                this._camera.updateProjectionMatrix();
+                this.camera.aspect = this._getAspectRatio();
+                this.camera.updateProjectionMatrix();
                 if (this._isVRMode) {
                     this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
                 }

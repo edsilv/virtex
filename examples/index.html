@@ -92,6 +92,10 @@
             bone2: {
                 file: "models/draco/hc941fm6529.drc",
                 type: new Virtex.FileType("application/octet-stream")
+            },
+            bone3: {
+                file: "models/draco/hc941fm6529_2.drc",
+                type: new Virtex.FileType("application/octet-stream")
             }
         };
 
@@ -106,8 +110,8 @@
 
             viewport = new Virtex.Viewport({
                 element: "#viewer",
-                file: objects.bone2.file,
-                type: objects.bone2.type, // defaults to threejs
+                file: objects.thekiss.file,
+                type: objects.thekiss.type, // defaults to threejs
                 fullscreenEnabled: true,
                 showStats: false
                 //ambientLightColor: 0xd0d0d0,

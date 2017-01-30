@@ -38,6 +38,18 @@ declare namespace Virtex {
 }
 
 declare namespace Virtex {
+    class DRACOFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
+    }
+}
+
+declare namespace Virtex {
+    class glTFFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
+    }
+}
+
+declare namespace Virtex {
     interface IVirtexOptions extends _Components.IBaseComponentOptions {
         ambientLightColor?: number;
         ambientLightIntensity?: number;
@@ -62,6 +74,12 @@ declare namespace Virtex {
     }
 }
 
+declare namespace Virtex {
+    class ThreeJSFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
+    }
+}
+
 declare var Detector: any;
 declare var Stats: any;
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
@@ -72,15 +90,15 @@ declare namespace Virtex {
         private _$loading;
         private _$loadingBar;
         private _$oldie;
-        private _camera;
         private _lightGroup;
-        private _objectGroup;
         private _prevCameraPosition;
         private _prevCameraRotation;
         private _renderer;
-        private _scene;
         private _stats;
         private _viewportCenter;
+        camera: THREE.PerspectiveCamera;
+        objectGroup: THREE.Group;
+        scene: THREE.Scene;
         private _isFullscreen;
         private _isMouseDown;
         private _isVRMode;
@@ -100,7 +118,7 @@ declare namespace Virtex {
         protected _getDefaultOptions(): IVirtexOptions;
         private _getVRDisplay();
         private _createLights();
-        private _createCamera();
+        createCamera(): void;
         private _createRenderer();
         private _createControls();
         private _createEventListeners();
@@ -110,8 +128,6 @@ declare namespace Virtex {
         private _getBoundingHeight();
         private _getCameraZ();
         private _getFov();
-        private _isGLTF();
-        private _isDRACO();
         private _loadProgress(progress);
         private _fullscreenChanged();
         private _onMouseDown(event);

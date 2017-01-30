@@ -22,15 +22,15 @@ namespace Virtex {
         private _$loadingBar: JQuery;
         private _$oldie: JQuery;
 
-        private _camera: THREE.PerspectiveCamera;
         private _lightGroup: THREE.Group;
-        private _objectGroup: THREE.Group;
         private _prevCameraPosition: any;
         private _prevCameraRotation: any;
         private _renderer: THREE.WebGLRenderer;
-        private _scene: THREE.Scene;
         private _stats: any;
         private _viewportCenter: THREE.Vector2 = new THREE.Vector2();
+        public camera: THREE.PerspectiveCamera;
+        public objectGroup: THREE.Group;
+        public scene: THREE.Scene;
 
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
@@ -82,12 +82,12 @@ namespace Virtex {
             this._$loadingBar = this._$loading.find('.bar');
             this._$loading.hide();
 
-            this._scene = new THREE.Scene();
-            this._objectGroup = new THREE.Object3D();
-            this._scene.add(this._objectGroup);
+            this.scene = new THREE.Scene();
+            this.objectGroup = new THREE.Object3D();
+            this.scene.add(this.objectGroup);
 
             this._createLights();
-            this._createCamera();
+            this.createCamera();
             this._createControls();
             this._createRenderer();
             this._createEventListeners();
@@ -151,7 +151,7 @@ namespace Virtex {
         private _createLights(): void {
             
             this._lightGroup = new THREE.Object3D();
-            this._scene.add(this._lightGroup);
+            this.scene.add(this._lightGroup);
             
             const light1: THREE.DirectionalLight = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
             light1.position.set(1, 1, 1);
@@ -165,10 +165,10 @@ namespace Virtex {
             this._lightGroup.add(ambientLight);
         }
 
-        private _createCamera(): void {
-            this._camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
+        public createCamera(): void {
+            this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
             const cameraZ: number = this._getCameraZ();
-            this._camera.position.z = this._targetZoom = cameraZ;
+            this.camera.position.z = this._targetZoom = cameraZ;
         }
 
         private _createRenderer(): void {
@@ -194,7 +194,7 @@ namespace Virtex {
 
             if (this._isVRMode) {
                 // Apply VR headset positional data to camera.
-                this._vrControls = new THREE.VRControls(this._camera);                
+                this._vrControls = new THREE.VRControls(this.camera);                
             }
         }
 
@@ -250,83 +250,35 @@ namespace Virtex {
 
             let loader: any;
             
-            if (this._isDRACO()) {
-                loader = new THREE.DRACOLoader();
-                //const bufferGeometry = dracoLoader.decodeDracoFile(object);
-            } else if (this._isGLTF()) {
-                loader = new THREE.GLTFLoader();
-            } else {
-                loader = new THREE.ObjectLoader();
+            switch (this.options.type.toString()) {
+                case FileType.DRACO.toString() :
+                    loader = new THREE.DRACOLoader();
+                    break;
+                case FileType.GLTF.toString() :
+                    loader = new THREE.GLTFLoader();
+                    break;
+                case FileType.THREEJS.toString() :
+                    loader = new THREE.ObjectLoader();
+                    break;
             }
             
-            //loader.setCrossOrigin('anonymous');
+            if (loader.setCrossOrigin) {
+                loader.setCrossOrigin('anonymous');
+            }
 
             loader.load(object,
                 (obj: any) => {
 
-                    if (this._isDRACO()) {
-                        const bufferGeometry = obj;
-                        const material = new THREE.MeshStandardMaterial({vertexColors: THREE.VertexColors});
-                        let geometry;
-                        // Point cloud does not have face indices.
-                        if (bufferGeometry.index == null) {
-                            geometry = new THREE.Points(bufferGeometry, material);
-                        } else {
-                            bufferGeometry.computeVertexNormals();
-                            geometry = new THREE.Mesh(bufferGeometry, material);
-                        }
-                        // Compute range of the geometry coordinates for proper rendering.
-                        bufferGeometry.computeBoundingBox();
-                        const sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
-                        const sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
-                        const sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
-                        const diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
-                        const scale = 1.0 / diagonalSize;
-                        const midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
-                        const midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
-                        const midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
-
-                        geometry.scale.multiplyScalar(scale);
-                        geometry.position.x = -midX * scale;
-                        geometry.position.y = -midY * scale;
-                        geometry.position.z = -midZ * scale;
-                        geometry.castShadow = true;
-                        geometry.receiveShadow = true;
-
-                        this._objectGroup.add(geometry);
-
-                        this._createCamera();
-                    } else if (this._isGLTF()) {
-                        this._objectGroup.add(obj.scene);
-
-                        if (obj.animations) {
-                            const animations = obj.animations;
-
-                            for (var i = 0, l = animations.length; i < l; i++) {
-                                const animation = animations[i];
-                                animation.loop = true;
-                                animation.play();
-                            }
-                        }
-
-                        this._scene = obj.scene;
-
-                        if (obj.cameras && obj.cameras.length) {
-                            this._camera = obj.cameras[0];
-                        }
-
-                    } else {
-
-                        // use the three.js setting in Blender's material tab
-                        // if (this.options.doubleSided) {
-                        //     obj.traverse((child: any) => {
-                        //         if (child.material) child.material.side = THREE.DoubleSide;
-                        //     });
-                        // }
-
-                        this._objectGroup.add(obj);
-
-                        this._createCamera();
+                    switch (this.options.type.toString()) {
+                        case FileType.DRACO.toString() :
+                            DRACOFileTypeHandler.setup(this, obj);
+                            break;
+                        case FileType.GLTF.toString() :
+                            glTFFileTypeHandler.setup(this, obj);
+                            break;
+                        case FileType.THREEJS.toString() :
+                            ThreeJSFileTypeHandler.setup(this, obj);
+                            break;
                     }
 
                     this._$loading.fadeOut(this.options.fadeSpeed);
@@ -346,7 +298,7 @@ namespace Virtex {
         }
 
         private _getBoundingBox(): THREE.Box3 {
-            return new THREE.Box3().setFromObject(this._objectGroup);
+            return new THREE.Box3().setFromObject(this.objectGroup);
         }
 
         private _getBoundingWidth(): number {
@@ -358,7 +310,7 @@ namespace Virtex {
         }
 
         // private _getDistanceToObject(): number {
-        //     return this._camera.position.distanceTo(this._objectGroup.position);
+        //     return this.camera.position.distanceTo(this.objectGroup.position);
         // }
 
         private _getCameraZ(): number {
@@ -367,7 +319,7 @@ namespace Virtex {
 
         private _getFov(): number {
 
-            if (!this._camera) return 1;
+            if (!this.camera) return 1;
 
             const width: number = this._getBoundingWidth();
             const height: number = this._getBoundingHeight(); // todo: use getSize and update definition
@@ -379,18 +331,6 @@ namespace Virtex {
 
             return fov;
         }
-
-        private _isGLTF(): boolean {
-            return this.options.type.toString() === FileType.GLTF.toString()
-        }
-
-        private _isDRACO(): boolean {
-            return this.options.type.toString() === FileType.DRACO.toString()
-        }
-
-        // private _isThreeJs(): boolean {
-        //     return this.options.type.toString() === FileType.THREEJS.toString()
-        // }
 
         private _loadProgress(progress: number): void {
             const fullWidth: number = this._$loading.width();
@@ -551,27 +491,33 @@ namespace Virtex {
         }
 
         public rotateY(radians: number): void {
-            const rotation: number = this._objectGroup.rotation.y + radians;
-            this._objectGroup.rotation.y = rotation;
+            const rotation: number = this.objectGroup.rotation.y + radians;
+            this.objectGroup.rotation.y = rotation;
         }
         
         // private _applyTransform(): void{
-        //     this._objectGroup.updateMatrix();
+        //     this.objectGroup.updateMatrix();
 
-        //     //this._objectGroup.geometry.applyMatrix( this._objectGroup.matrix );
+        //     //this.objectGroup.geometry.applyMatrix( this.objectGroup.matrix );
 
-        //     this._objectGroup.position.set( 0, 0, 0 );
-        //     this._objectGroup.rotation.set( 0, 0, 0 );
-        //     this._objectGroup.scale.set( 1, 1, 1 );
-        //     this._objectGroup.updateMatrix();
+        //     this.objectGroup.position.set( 0, 0, 0 );
+        //     this.objectGroup.rotation.set( 0, 0, 0 );
+        //     this.objectGroup.scale.set( 1, 1, 1 );
+        //     this.objectGroup.updateMatrix();
         // }
 
         private _update(): void {
             
-            if (this._isGLTF()) {
-                THREE.GLTFLoader.Animations.update();
-			    THREE.GLTFLoader.Shaders.update(this._scene, this._camera);
-            }
+            // switch (this.options.type.toString()) {
+            //     case FileType.DRACO.toString() :
+            //         break;
+            //     case FileType.GLTF.toString() :
+            //         //THREE.GLTFLoader.Animations.update();
+			//         THREE.GLTFLoader.Shaders.update(this.scene, this.camera);
+            //         break;
+            //     case FileType.THREEJS.toString() :
+            //         break;
+            // }
             
             if (this._isVRMode){
                 // if (this._isMouseDown) {
@@ -582,32 +528,32 @@ namespace Virtex {
                 this._vrControls.update();  
             } else {
                 // horizontal rotation
-                this.rotateY((this._targetRotation.x - this._objectGroup.rotation.y) * 0.1);
+                this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
 
                 // vertical rotation
-                const finalRotationY: number = (this._targetRotation.y - this._objectGroup.rotation.x);
+                const finalRotationY: number = (this._targetRotation.y - this.objectGroup.rotation.x);
 
-                if (this._objectGroup.rotation.x <= 1 && this._objectGroup.rotation.x >= -1) {
-                    this._objectGroup.rotation.x += finalRotationY * 0.1;
+                if (this.objectGroup.rotation.x <= 1 && this.objectGroup.rotation.x >= -1) {
+                    this.objectGroup.rotation.x += finalRotationY * 0.1;
                 }
 
                 // limit vertical rotation 
-                if (this._objectGroup.rotation.x > 1) {
-                    this._objectGroup.rotation.x = 1
-                } else if (this._objectGroup.rotation.x < -1) {
-                    this._objectGroup.rotation.x = -1
+                if (this.objectGroup.rotation.x > 1) {
+                    this.objectGroup.rotation.x = 1
+                } else if (this.objectGroup.rotation.x < -1) {
+                    this.objectGroup.rotation.x = -1
                 }
 
-                const zoomDelta: number = (this._targetZoom - this._camera.position.z) * 0.1;
-                this._camera.position.z += zoomDelta;
+                const zoomDelta: number = (this._targetZoom - this.camera.position.z) * 0.1;
+                this.camera.position.z += zoomDelta;
             }
         }
 
         private _draw(): void {
             if (this._isVRMode){
-                this._vrEffect.render(this._scene, this._camera);                
+                this._vrEffect.render(this.scene, this.camera);                
             } else {
-                this._renderer.render(this._scene, this._camera);
+                this._renderer.render(this.scene, this.camera);
             }
         }
 
@@ -638,7 +584,7 @@ namespace Virtex {
         }
 
         public zoomIn(): void {
-            const targetZoom: number = this._camera.position.z - this._getZoomSpeed();
+            const targetZoom: number = this.camera.position.z - this._getZoomSpeed();
             if (targetZoom > this._getMinZoom()) {
                 this._targetZoom = targetZoom;
             } else {
@@ -647,7 +593,7 @@ namespace Virtex {
         }
 
         public zoomOut(): void {
-            const targetZoom: number = this._camera.position.z + this._getZoomSpeed();
+            const targetZoom: number = this.camera.position.z + this._getZoomSpeed();
             if (targetZoom < this._getMaxZoom()) {
                 this._targetZoom = targetZoom;
             } else {
@@ -660,8 +606,8 @@ namespace Virtex {
 
             this._isVRMode = true;
 
-            this._prevCameraPosition = this._camera.position.clone();
-            this._prevCameraRotation = this._camera.rotation.clone();
+            this._prevCameraPosition = this.camera.position.clone();
+            this._prevCameraRotation = this.camera.rotation.clone();
 
             this._createControls();
             this._createRenderer();
@@ -678,8 +624,8 @@ namespace Virtex {
         public exitVR(): void {            
             if (!this._vrEnabled) return;            
             this._isVRMode = false;            
-            this._camera.position.copy(this._prevCameraPosition);
-            this._camera.rotation.copy(this._prevCameraRotation);
+            this.camera.position.copy(this._prevCameraPosition);
+            this.camera.rotation.copy(this._prevCameraRotation);
             this._createRenderer();
         }
 
@@ -756,8 +702,8 @@ namespace Virtex {
                 this._viewportCenter.x = this._$viewport.width() / 2;
                 this._viewportCenter.y = this._$viewport.height() / 2;
 
-                this._camera.aspect = this._getAspectRatio();
-                this._camera.updateProjectionMatrix();
+                this.camera.aspect = this._getAspectRatio();
+                this.camera.updateProjectionMatrix();
                 
                 if (this._isVRMode) {
                     this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());                    
