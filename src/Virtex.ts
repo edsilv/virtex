@@ -732,8 +732,8 @@ namespace Virtex {
     }
 }
 
-(function(w: any) {
-    if (!w.Virtex){
-        w.Virtex = Virtex;
+(function(g: any) {
+    if (!g.Virtex){
+        g.Virtex = Virtex;
     }
-})(window);
+})(global);
