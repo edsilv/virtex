@@ -1,3 +1,5 @@
+declare var global: any;
+
 interface Document{
     mozFullScreen: boolean;
     msFullscreenElement: any;

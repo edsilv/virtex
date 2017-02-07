@@ -1,4 +1,5 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
+declare var global: any;
 interface Document {
     mozFullScreen: boolean;
     msFullscreenElement: any;
@@ -51,7 +52,7 @@ declare namespace Virtex {
 }
 
 declare namespace Virtex {
-    interface IVirtexOptions extends _Components.IBaseComponentOptions {
+    interface IVirtexData {
         ambientLightColor?: number;
         ambientLightIntensity?: number;
         cameraZ?: number;
@@ -86,7 +87,7 @@ declare var Stats: any;
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare namespace Virtex {
     class Viewport extends _Components.BaseComponent {
-        options: IVirtexOptions;
+        options: _Components.IBaseComponentOptions;
         private _$viewport;
         private _$loading;
         private _$loadingBar;
@@ -114,9 +115,9 @@ declare namespace Virtex {
         private _vrControls;
         private _vrEffect;
         private _vrEnabled;
-        constructor(options: IVirtexOptions);
+        constructor(options: _Components.IBaseComponentOptions);
         protected _init(): boolean;
-        protected _getDefaultOptions(): IVirtexOptions;
+        data(): IVirtexData;
         private _getVRDisplay();
         private _createLights();
         createCamera(): void;

@@ -187,9 +187,9 @@ var Virtex;
             this._createControls();
             this._createRenderer();
             this._createEventListeners();
-            this._loadObject(this.options.file);
+            this._loadObject(this.options.data.file);
             // STATS //
-            if (this.options.showStats) {
+            if (this.options.data.showStats) {
                 this._stats = new Stats();
                 this._stats.domElement.style.position = 'absolute';
                 this._stats.domElement.style.top = '0px';
@@ -197,7 +197,7 @@ var Virtex;
             }
             return true;
         };
-        Viewport.prototype._getDefaultOptions = function () {
+        Viewport.prototype.data = function () {
             return {
                 ambientLightColor: 0xd0d0d0,
                 ambientLightIntensity: 1,
@@ -240,17 +240,17 @@ var Virtex;
         Viewport.prototype._createLights = function () {
             this._lightGroup = new THREE.Object3D();
             this.scene.add(this._lightGroup);
-            var light1 = new THREE.DirectionalLight(this.options.directionalLight1Color, this.options.directionalLight1Intensity);
+            var light1 = new THREE.DirectionalLight(this.options.data.directionalLight1Color, this.options.data.directionalLight1Intensity);
             light1.position.set(1, 1, 1);
             this._lightGroup.add(light1);
-            var light2 = new THREE.DirectionalLight(this.options.directionalLight2Color, this.options.directionalLight2Intensity);
+            var light2 = new THREE.DirectionalLight(this.options.data.directionalLight2Color, this.options.data.directionalLight2Intensity);
             light2.position.set(-1, -1, -1);
             this._lightGroup.add(light2);
-            var ambientLight = new THREE.AmbientLight(this.options.ambientLightColor, this.options.ambientLightIntensity);
+            var ambientLight = new THREE.AmbientLight(this.options.data.ambientLightColor, this.options.data.ambientLightIntensity);
             this._lightGroup.add(ambientLight);
         };
         Viewport.prototype.createCamera = function () {
-            this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.near, this.options.far);
+            this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);
             var cameraZ = this._getCameraZ();
             this.camera.position.z = this._targetZoom = cameraZ;
         };
@@ -260,12 +260,12 @@ var Virtex;
                 alpha: true
             });
             if (this._isVRMode) {
-                this._renderer.setClearColor(this.options.vrBackgroundColor);
+                this._renderer.setClearColor(this.options.data.vrBackgroundColor);
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
             }
             else {
-                this._renderer.setClearColor(this.options.vrBackgroundColor, 0);
+                this._renderer.setClearColor(this.options.data.vrBackgroundColor, 0);
                 this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
             }
             this._$viewport.empty().append(this._renderer.domElement);
@@ -278,7 +278,7 @@ var Virtex;
         };
         Viewport.prototype._createEventListeners = function () {
             var _this = this;
-            if (this.options.fullscreenEnabled) {
+            if (this.options.data.fullscreenEnabled) {
                 $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function () {
                     _this._fullscreenChanged();
                 });
@@ -316,7 +316,7 @@ var Virtex;
             var _this = this;
             this._$loading.show();
             var loader;
-            switch (this.options.type.toString()) {
+            switch (this.options.data.type.toString()) {
                 case Virtex.FileType.DRACO.toString():
                     loader = new THREE.DRACOLoader();
                     break;
@@ -331,7 +331,7 @@ var Virtex;
                 loader.setCrossOrigin('anonymous');
             }
             loader.load(object, function (obj) {
-                switch (_this.options.type.toString()) {
+                switch (_this.options.data.type.toString()) {
                     case Virtex.FileType.DRACO.toString():
                         Virtex.DRACOFileTypeHandler.setup(_this, obj);
                         break;
@@ -342,8 +342,8 @@ var Virtex;
                         Virtex.ThreeJSFileTypeHandler.setup(_this, obj);
                         break;
                 }
-                _this._$loading.fadeOut(_this.options.fadeSpeed);
-                _this._emit(Virtex.Events.LOADED, obj);
+                _this._$loading.fadeOut(_this.options.data.fadeSpeed);
+                _this.fire(Virtex.Events.LOADED, obj);
             }, function (e) {
                 if (e.lengthComputable) {
                     _this._loadProgress(e.loaded / e.total);
@@ -366,7 +366,7 @@ var Virtex;
         //     return this.camera.position.distanceTo(this.objectGroup.position);
         // }
         Viewport.prototype._getCameraZ = function () {
-            return this._getBoundingWidth() * this.options.cameraZ;
+            return this._getBoundingWidth() * this.options.data.cameraZ;
         };
         Viewport.prototype._getFov = function () {
             if (!this.camera)
@@ -496,7 +496,7 @@ var Virtex;
             requestAnimFrame(function () { return _this._tick(); });
             this._update();
             this._draw();
-            if (this.options.showStats) {
+            if (this.options.data.showStats) {
                 this._stats.update();
             }
         };
@@ -513,7 +513,7 @@ var Virtex;
         //     this.objectGroup.updateMatrix();
         // }
         Viewport.prototype._update = function () {
-            // switch (this.options.type.toString()) {
+            // switch (this.options.data.type.toString()) {
             //     case FileType.DRACO.toString() :
             //         break;
             //     case FileType.GLTF.toString() :
@@ -570,13 +570,13 @@ var Virtex;
             return this._$element.height();
         };
         Viewport.prototype._getZoomSpeed = function () {
-            return this._getBoundingWidth() * this.options.zoomSpeed;
+            return this._getBoundingWidth() * this.options.data.zoomSpeed;
         };
         Viewport.prototype._getMaxZoom = function () {
-            return this._getBoundingWidth() * this.options.maxZoom;
+            return this._getBoundingWidth() * this.options.data.maxZoom;
         };
         Viewport.prototype._getMinZoom = function () {
-            return this._getBoundingWidth() * this.options.minZoom;
+            return this._getBoundingWidth() * this.options.data.minZoom;
         };
         Viewport.prototype.zoomIn = function () {
             var targetZoom = this.camera.position.z - this._getZoomSpeed();
@@ -632,7 +632,7 @@ var Virtex;
             }
         };
         Viewport.prototype.enterFullscreen = function () {
-            if (!this.options.fullscreenEnabled)
+            if (!this.options.data.fullscreenEnabled)
                 return;
             var elem = this._$element[0];
             var requestFullScreen = this._getRequestFullScreen(elem);

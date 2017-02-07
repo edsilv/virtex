@@ -1,6 +1,9 @@
 {
+  "name": "virtex",
   "globalDependencies": {
-    "base-component": "github:viewdir/base-component/dist/base-component.bundle.d.ts",
+    "base-component": "github:viewdir/base-component/dist/base-component.d.ts#tsupdate",
+    "core-js": "registry:dt/core-js#0.9.7+20161130133742",
+    "jquery": "registry:dt/jquery#1.10.0+20170123093700",
     "key-codes": "github:edsilv/key-codes/dist/key-codes.d.ts",
     "three": "registry:dt/three#0.81.0+20161229235626",
     "three-vrcontrols": "registry:dt/three-vrcontrols#0.0.0+20161028135557",

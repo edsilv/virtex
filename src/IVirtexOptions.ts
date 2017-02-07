@@ -1,5 +1,5 @@
 namespace Virtex{
-    export interface IVirtexOptions extends _Components.IBaseComponentOptions {
+    export interface IVirtexData {
         ambientLightColor?: number;
         ambientLightIntensity?: number;
         cameraZ?: number;

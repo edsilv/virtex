@@ -14,7 +14,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "base-component": "viewdir/base-component#v1.0.7",
+    "base-component": "viewdir/base-component#tsupdate",
     "gulp": "^3.8.7",
     "gulp-tasks": "viewdir/gulp-tasks#tsupdate",
     "key-codes": "edsilv/key-codes",
