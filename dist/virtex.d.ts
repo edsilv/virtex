@@ -165,5 +165,3 @@ declare namespace Virtex {
         static LOADED: string;
     }
 }
-declare namespace Virtex {
-}
