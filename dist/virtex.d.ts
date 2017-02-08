@@ -161,9 +161,9 @@ declare namespace Virtex {
         private _getAspectRatio();
         protected _resize(): void;
     }
-}
-declare namespace Virtex {
     class Events {
         static LOADED: string;
     }
+}
+declare namespace Virtex {
 }

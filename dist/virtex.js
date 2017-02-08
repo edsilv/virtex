@@ -343,7 +343,7 @@ var Virtex;
                         break;
                 }
                 _this._$loading.fadeOut(_this.options.data.fadeSpeed);
-                _this.fire(Virtex.Events.LOADED, obj);
+                _this.fire(Events.LOADED, obj);
             }, function (e) {
                 if (e.lengthComputable) {
                     _this._loadProgress(e.loaded / e.total);
@@ -710,8 +710,6 @@ var Virtex;
         return Viewport;
     }(_Components.BaseComponent));
     Virtex.Viewport = Viewport;
-})(Virtex || (Virtex = {}));
-(function (Virtex) {
     var Events = (function () {
         function Events() {
         }
