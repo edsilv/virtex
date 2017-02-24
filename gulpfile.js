@@ -8,7 +8,7 @@ tasks.init({
     metadata: metadata,
     // libs that MUST be included in a consuming app for this component to work
     libs: [
-        'node_modules/base-component/dist/base-component.bundle.js',
+        'node_modules/base-component/dist/base-component.js',
         //'node_modules/three/build/three.js',
         'node_modules/three/build/three.min.js',
         'node_modules/three/examples/js/controls/VRControls.js',

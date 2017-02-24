@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
-    <script src="js/base-component.bundle.js"></script>
+    <script src="js/base-component.js"></script>
     <!--<script src="js/three.js"></script>-->
     <script src="js/three.min.js"></script>
     <script src="js/GLTFLoader.js"></script>
@@ -57,26 +57,10 @@
         var viewport;
         
         var objects = {
-            ecorche: {
-                file: "models/threejs/ecorche.json",
-                type: new Virtex.FileType("application/vnd.threejs+json")
-            },
-            // ecorche: {
-            //     file: "models/gltf/ecorche.gltf",
-            //     type: new Virtex.FileType("model/gltf+json")
-            // },
-            thekiss: {
-                file: "models/threejs/thekiss.json",
-                type: new Virtex.FileType("application/vnd.threejs+json")
-            },
             bone: {
                 file: "models/threejs/hc941fm6529.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
             },
-            // thekiss: {
-            //     file: "models/gltf/the_kiss.gltf",
-            //     type: new Virtex.FileType("model/gltf+json")
-            // },
             vc: {
                 file: "models/gltf/vc.gltf",
                 type: new Virtex.FileType("model/gltf+json")
@@ -85,16 +69,8 @@
                 file: "models/gltf/monster.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             },
-            throw: {
-                file: "models/draco/throw_14.drc",
-                type: new Virtex.FileType("application/octet-stream")
-            },
             bone2: {
                 file: "models/draco/hc941fm6529.drc",
-                type: new Virtex.FileType("application/octet-stream")
-            },
-            bone3: {
-                file: "models/draco/hc941fm6529_2.drc",
                 type: new Virtex.FileType("application/octet-stream")
             }
         };
@@ -111,8 +87,8 @@
             viewport = new Virtex.Viewport({
                 target: document.querySelector('#viewer'),
                 data: {
-                    file: objects.thekiss.file,
-                    type: objects.thekiss.type, // defaults to threejs
+                    file: objects.bone.file,
+                    type: objects.bone.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,

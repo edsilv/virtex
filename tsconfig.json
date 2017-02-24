@@ -8,7 +8,8 @@
         "moduleResolution": "node",
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "lib": ["es6"]
     },
     "files": [
         "src/Definitions.ts",

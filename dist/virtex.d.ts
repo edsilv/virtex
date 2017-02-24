@@ -1,4 +1,6 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
+/// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
+/// <reference types="three" />
 declare var global: any;
 interface Document {
     mozFullScreen: boolean;
@@ -51,6 +53,7 @@ declare namespace Virtex {
     }
 }
 
+/// <reference types="three" />
 declare namespace Virtex {
     interface IVirtexData {
         ambientLightColor?: number;
@@ -82,6 +85,7 @@ declare namespace Virtex {
     }
 }
 
+/// <reference types="three" />
 declare var Detector: any;
 declare var Stats: any;
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
