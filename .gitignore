@@ -4,3 +4,5 @@ npm-debug.log
 Thumbs.db
 debug.log
 typings
+examples/models/**
+!examples/models/threejs/hc941fm6529*
