@@ -61,6 +61,10 @@
                 file: "models/threejs/hc941fm6529.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
             },
+            pointillist: {
+                file: "models/threejs/pointillist.json",
+                type: new Virtex.FileType("application/vnd.threejs+json")
+            },
             vc: {
                 file: "models/gltf/vc.gltf",
                 type: new Virtex.FileType("model/gltf+json")
@@ -87,8 +91,8 @@
             viewport = new Virtex.Viewport({
                 target: document.querySelector('#viewer'),
                 data: {
-                    file: objects.bone.file,
-                    type: objects.bone.type, // defaults to threejs
+                    file: objects.pointillist.file,
+                    type: objects.pointillist.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
