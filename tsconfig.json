@@ -9,7 +9,8 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "strictNullChecks": true,
-        "lib": ["es6"]
+        "lib": ["es6"],
+        "types": ["jquery", "three", "webvr-api"]
     },
     "files": [
         "src/Definitions.ts",

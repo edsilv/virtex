@@ -1,4 +1,3 @@
-declare var Detector: any;
 declare var Stats: any;
 
 var requestAnimFrame = (function () {

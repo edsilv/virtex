@@ -86,7 +86,6 @@ declare namespace Virtex {
 }
 
 /// <reference types="three" />
-declare var Detector: any;
 declare var Stats: any;
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare namespace Virtex {
