@@ -9,9 +9,7 @@
     "viewer"
   ],
   "main": "gulpfile.js",
-  "directories": {
-    "test": "test"
-  },
+  "types": "./dist/virtex.d.ts",
   "dependencies": {
     "@types/three": "^0.83.4",
     "@types/webvr-api": "0.0.31"
