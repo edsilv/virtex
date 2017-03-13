@@ -1,4 +1,3 @@
-declare var Stats: any;
 
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||

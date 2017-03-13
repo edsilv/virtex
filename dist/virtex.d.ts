@@ -2,6 +2,7 @@
 /// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
 /// <reference types="three" />
 declare var global: any;
+declare var Stats: any;
 interface Document {
     mozFullScreen: boolean;
     msFullscreenElement: any;
@@ -86,7 +87,6 @@ declare namespace Virtex {
 }
 
 /// <reference types="three" />
-declare var Stats: any;
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare namespace Virtex {
     class Viewport extends _Components.BaseComponent {
