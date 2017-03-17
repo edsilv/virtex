@@ -693,6 +693,9 @@ var Virtex;
         Viewport.prototype._getAspectRatio = function () {
             return this._$viewport.width() / this._$viewport.height();
         };
+        Viewport.prototype.resize = function () {
+            this._resize();
+        };
         Viewport.prototype._resize = function () {
             if (this._$element && this._$viewport) {
                 this._$element.width(this._getWidth());

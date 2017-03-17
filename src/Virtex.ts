@@ -687,6 +687,10 @@ namespace Virtex {
             return this._$viewport.width() / this._$viewport.height();
         }
 
+        public resize(): void {
+            this._resize();
+        }
+
         protected _resize(): void {
 
             if (this._$element && this._$viewport) {

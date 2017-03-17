@@ -162,6 +162,7 @@ declare namespace Virtex {
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
         private _getAspectRatio();
+        resize(): void;
         protected _resize(): void;
     }
     class Events {
