@@ -31,4 +31,13 @@ declare module THREE {
         load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
         setCrossOrigin(crossOrigin: string): void;
     }
+
+    export class OBJLoader {
+        constructor(manager?: LoadingManager);
+
+        manager: LoadingManager;
+
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+    }
 }

@@ -4020,6 +4020,750 @@ THREE.GLTFLoader = ( function () {
 } )();
 
 /**
+ * @author mrdoob / http://mrdoob.com/
+ */
+
+THREE.OBJLoader = function ( manager ) {
+
+	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+
+	this.materials = null;
+
+	this.regexp = {
+		// v float float float
+		vertex_pattern           : /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+		// vn float float float
+		normal_pattern           : /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+		// vt float float
+		uv_pattern               : /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+		// f vertex vertex vertex
+		face_vertex              : /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
+		// f vertex/uv vertex/uv vertex/uv
+		face_vertex_uv           : /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
+		// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+		face_vertex_uv_normal    : /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
+		// f vertex//normal vertex//normal vertex//normal
+		face_vertex_normal       : /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
+		// o object_name | g group_name
+		object_pattern           : /^[og]\s*(.+)?/,
+		// s boolean
+		smoothing_pattern        : /^s\s+(\d+|on|off)/,
+		// mtllib file_reference
+		material_library_pattern : /^mtllib /,
+		// usemtl material_name
+		material_use_pattern     : /^usemtl /
+	};
+
+};
+
+THREE.OBJLoader.prototype = {
+
+	constructor: THREE.OBJLoader,
+
+	load: function ( url, onLoad, onProgress, onError ) {
+
+		var scope = this;
+
+		var loader = new THREE.FileLoader( scope.manager );
+		loader.setPath( this.path );
+		loader.load( url, function ( text ) {
+
+			onLoad( scope.parse( text ) );
+
+		}, onProgress, onError );
+
+	},
+
+	setPath: function ( value ) {
+
+		this.path = value;
+
+	},
+
+	setMaterials: function ( materials ) {
+
+		this.materials = materials;
+
+	},
+
+	_createParserState : function () {
+
+		var state = {
+			objects  : [],
+			object   : {},
+
+			vertices : [],
+			normals  : [],
+			uvs      : [],
+
+			materialLibraries : [],
+
+			startObject: function ( name, fromDeclaration ) {
+
+				// If the current object (initial from reset) is not from a g/o declaration in the parsed
+				// file. We need to use it for the first parsed g/o to keep things in sync.
+				if ( this.object && this.object.fromDeclaration === false ) {
+
+					this.object.name = name;
+					this.object.fromDeclaration = ( fromDeclaration !== false );
+					return;
+
+				}
+
+				var previousMaterial = ( this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined );
+
+				if ( this.object && typeof this.object._finalize === 'function' ) {
+
+					this.object._finalize( true );
+
+				}
+
+				this.object = {
+					name : name || '',
+					fromDeclaration : ( fromDeclaration !== false ),
+
+					geometry : {
+						vertices : [],
+						normals  : [],
+						uvs      : []
+					},
+					materials : [],
+					smooth : true,
+
+					startMaterial : function( name, libraries ) {
+
+						var previous = this._finalize( false );
+
+						// New usemtl declaration overwrites an inherited material, except if faces were declared
+						// after the material, then it must be preserved for proper MultiMaterial continuation.
+						if ( previous && ( previous.inherited || previous.groupCount <= 0 ) ) {
+
+							this.materials.splice( previous.index, 1 );
+
+						}
+
+						var material = {
+							index      : this.materials.length,
+							name       : name || '',
+							mtllib     : ( Array.isArray( libraries ) && libraries.length > 0 ? libraries[ libraries.length - 1 ] : '' ),
+							smooth     : ( previous !== undefined ? previous.smooth : this.smooth ),
+							groupStart : ( previous !== undefined ? previous.groupEnd : 0 ),
+							groupEnd   : -1,
+							groupCount : -1,
+							inherited  : false,
+
+							clone : function( index ) {
+								var cloned = {
+									index      : ( typeof index === 'number' ? index : this.index ),
+									name       : this.name,
+									mtllib     : this.mtllib,
+									smooth     : this.smooth,
+									groupStart : 0,
+									groupEnd   : -1,
+									groupCount : -1,
+									inherited  : false
+								};
+								cloned.clone = this.clone.bind(cloned);
+								return cloned;
+							}
+						};
+
+						this.materials.push( material );
+
+						return material;
+
+					},
+
+					currentMaterial : function() {
+
+						if ( this.materials.length > 0 ) {
+							return this.materials[ this.materials.length - 1 ];
+						}
+
+						return undefined;
+
+					},
+
+					_finalize : function( end ) {
+
+						var lastMultiMaterial = this.currentMaterial();
+						if ( lastMultiMaterial && lastMultiMaterial.groupEnd === -1 ) {
+
+							lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
+							lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
+							lastMultiMaterial.inherited = false;
+
+						}
+
+						// Ignore objects tail materials if no face declarations followed them before a new o/g started.
+						if ( end && this.materials.length > 1 ) {
+
+							for ( var mi = this.materials.length - 1; mi >= 0; mi-- ) {
+								if ( this.materials[mi].groupCount <= 0 ) {
+									this.materials.splice( mi, 1 );
+								}
+							}
+
+						}
+
+						// Guarantee at least one empty material, this makes the creation later more straight forward.
+						if ( end && this.materials.length === 0 ) {
+
+							this.materials.push({
+								name   : '',
+								smooth : this.smooth
+							});
+
+						}
+
+						return lastMultiMaterial;
+
+					}
+				};
+
+				// Inherit previous objects material.
+				// Spec tells us that a declared material must be set to all objects until a new material is declared.
+				// If a usemtl declaration is encountered while this new object is being parsed, it will
+				// overwrite the inherited material. Exception being that there was already face declarations
+				// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
+
+				if ( previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function" ) {
+
+					var declared = previousMaterial.clone( 0 );
+					declared.inherited = true;
+					this.object.materials.push( declared );
+
+				}
+
+				this.objects.push( this.object );
+
+			},
+
+			finalize : function() {
+
+				if ( this.object && typeof this.object._finalize === 'function' ) {
+
+					this.object._finalize( true );
+
+				}
+
+			},
+
+			parseVertexIndex: function ( value, len ) {
+
+				var index = parseInt( value, 10 );
+				return ( index >= 0 ? index - 1 : index + len / 3 ) * 3;
+
+			},
+
+			parseNormalIndex: function ( value, len ) {
+
+				var index = parseInt( value, 10 );
+				return ( index >= 0 ? index - 1 : index + len / 3 ) * 3;
+
+			},
+
+			parseUVIndex: function ( value, len ) {
+
+				var index = parseInt( value, 10 );
+				return ( index >= 0 ? index - 1 : index + len / 2 ) * 2;
+
+			},
+
+			addVertex: function ( a, b, c ) {
+
+				var src = this.vertices;
+				var dst = this.object.geometry.vertices;
+
+				dst.push( src[ a + 0 ] );
+				dst.push( src[ a + 1 ] );
+				dst.push( src[ a + 2 ] );
+				dst.push( src[ b + 0 ] );
+				dst.push( src[ b + 1 ] );
+				dst.push( src[ b + 2 ] );
+				dst.push( src[ c + 0 ] );
+				dst.push( src[ c + 1 ] );
+				dst.push( src[ c + 2 ] );
+
+			},
+
+			addVertexLine: function ( a ) {
+
+				var src = this.vertices;
+				var dst = this.object.geometry.vertices;
+
+				dst.push( src[ a + 0 ] );
+				dst.push( src[ a + 1 ] );
+				dst.push( src[ a + 2 ] );
+
+			},
+
+			addNormal : function ( a, b, c ) {
+
+				var src = this.normals;
+				var dst = this.object.geometry.normals;
+
+				dst.push( src[ a + 0 ] );
+				dst.push( src[ a + 1 ] );
+				dst.push( src[ a + 2 ] );
+				dst.push( src[ b + 0 ] );
+				dst.push( src[ b + 1 ] );
+				dst.push( src[ b + 2 ] );
+				dst.push( src[ c + 0 ] );
+				dst.push( src[ c + 1 ] );
+				dst.push( src[ c + 2 ] );
+
+			},
+
+			addUV: function ( a, b, c ) {
+
+				var src = this.uvs;
+				var dst = this.object.geometry.uvs;
+
+				dst.push( src[ a + 0 ] );
+				dst.push( src[ a + 1 ] );
+				dst.push( src[ b + 0 ] );
+				dst.push( src[ b + 1 ] );
+				dst.push( src[ c + 0 ] );
+				dst.push( src[ c + 1 ] );
+
+			},
+
+			addUVLine: function ( a ) {
+
+				var src = this.uvs;
+				var dst = this.object.geometry.uvs;
+
+				dst.push( src[ a + 0 ] );
+				dst.push( src[ a + 1 ] );
+
+			},
+
+			addFace: function ( a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd ) {
+
+				var vLen = this.vertices.length;
+
+				var ia = this.parseVertexIndex( a, vLen );
+				var ib = this.parseVertexIndex( b, vLen );
+				var ic = this.parseVertexIndex( c, vLen );
+				var id;
+
+				if ( d === undefined ) {
+
+					this.addVertex( ia, ib, ic );
+
+				} else {
+
+					id = this.parseVertexIndex( d, vLen );
+
+					this.addVertex( ia, ib, id );
+					this.addVertex( ib, ic, id );
+
+				}
+
+				if ( ua !== undefined ) {
+
+					var uvLen = this.uvs.length;
+
+					ia = this.parseUVIndex( ua, uvLen );
+					ib = this.parseUVIndex( ub, uvLen );
+					ic = this.parseUVIndex( uc, uvLen );
+
+					if ( d === undefined ) {
+
+						this.addUV( ia, ib, ic );
+
+					} else {
+
+						id = this.parseUVIndex( ud, uvLen );
+
+						this.addUV( ia, ib, id );
+						this.addUV( ib, ic, id );
+
+					}
+
+				}
+
+				if ( na !== undefined ) {
+
+					// Normals are many times the same. If so, skip function call and parseInt.
+					var nLen = this.normals.length;
+					ia = this.parseNormalIndex( na, nLen );
+
+					ib = na === nb ? ia : this.parseNormalIndex( nb, nLen );
+					ic = na === nc ? ia : this.parseNormalIndex( nc, nLen );
+
+					if ( d === undefined ) {
+
+						this.addNormal( ia, ib, ic );
+
+					} else {
+
+						id = this.parseNormalIndex( nd, nLen );
+
+						this.addNormal( ia, ib, id );
+						this.addNormal( ib, ic, id );
+
+					}
+
+				}
+
+			},
+
+			addLineGeometry: function ( vertices, uvs ) {
+
+				this.object.geometry.type = 'Line';
+
+				var vLen = this.vertices.length;
+				var uvLen = this.uvs.length;
+
+				for ( var vi = 0, l = vertices.length; vi < l; vi ++ ) {
+
+					this.addVertexLine( this.parseVertexIndex( vertices[ vi ], vLen ) );
+
+				}
+
+				for ( var uvi = 0, l = uvs.length; uvi < l; uvi ++ ) {
+
+					this.addUVLine( this.parseUVIndex( uvs[ uvi ], uvLen ) );
+
+				}
+
+			}
+
+		};
+
+		state.startObject( '', false );
+
+		return state;
+
+	},
+
+	parse: function ( text ) {
+
+		console.time( 'OBJLoader' );
+
+		var state = this._createParserState();
+
+		if ( text.indexOf( '\r\n' ) !== - 1 ) {
+
+			// This is faster than String.split with regex that splits on both
+			text = text.replace( /\r\n/g, '\n' );
+
+		}
+
+		if ( text.indexOf( '\\\n' ) !== - 1) {
+
+			// join lines separated by a line continuation character (\)
+			text = text.replace( /\\\n/g, '' );
+
+		}
+
+		var lines = text.split( '\n' );
+		var line = '', lineFirstChar = '', lineSecondChar = '';
+		var lineLength = 0;
+		var result = [];
+
+		// Faster to just trim left side of the line. Use if available.
+		var trimLeft = ( typeof ''.trimLeft === 'function' );
+
+		for ( var i = 0, l = lines.length; i < l; i ++ ) {
+
+			line = lines[ i ];
+
+			line = trimLeft ? line.trimLeft() : line.trim();
+
+			lineLength = line.length;
+
+			if ( lineLength === 0 ) continue;
+
+			lineFirstChar = line.charAt( 0 );
+
+			// @todo invoke passed in handler if any
+			if ( lineFirstChar === '#' ) continue;
+
+			if ( lineFirstChar === 'v' ) {
+
+				lineSecondChar = line.charAt( 1 );
+
+				if ( lineSecondChar === ' ' && ( result = this.regexp.vertex_pattern.exec( line ) ) !== null ) {
+
+					// 0                  1      2      3
+					// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+					state.vertices.push(
+						parseFloat( result[ 1 ] ),
+						parseFloat( result[ 2 ] ),
+						parseFloat( result[ 3 ] )
+					);
+
+				} else if ( lineSecondChar === 'n' && ( result = this.regexp.normal_pattern.exec( line ) ) !== null ) {
+
+					// 0                   1      2      3
+					// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+
+					state.normals.push(
+						parseFloat( result[ 1 ] ),
+						parseFloat( result[ 2 ] ),
+						parseFloat( result[ 3 ] )
+					);
+
+				} else if ( lineSecondChar === 't' && ( result = this.regexp.uv_pattern.exec( line ) ) !== null ) {
+
+					// 0               1      2
+					// ["vt 0.1 0.2", "0.1", "0.2"]
+
+					state.uvs.push(
+						parseFloat( result[ 1 ] ),
+						parseFloat( result[ 2 ] )
+					);
+
+				} else {
+
+					throw new Error( "Unexpected vertex/normal/uv line: '" + line  + "'" );
+
+				}
+
+			} else if ( lineFirstChar === "f" ) {
+
+				if ( ( result = this.regexp.face_vertex_uv_normal.exec( line ) ) !== null ) {
+
+					// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
+					// 0                        1    2    3    4    5    6    7    8    9   10         11         12
+					// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 4 ], result[ 7 ], result[ 10 ],
+						result[ 2 ], result[ 5 ], result[ 8 ], result[ 11 ],
+						result[ 3 ], result[ 6 ], result[ 9 ], result[ 12 ]
+					);
+
+				} else if ( ( result = this.regexp.face_vertex_uv.exec( line ) ) !== null ) {
+
+					// f vertex/uv vertex/uv vertex/uv
+					// 0                  1    2    3    4    5    6   7          8
+					// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 3 ], result[ 5 ], result[ 7 ],
+						result[ 2 ], result[ 4 ], result[ 6 ], result[ 8 ]
+					);
+
+				} else if ( ( result = this.regexp.face_vertex_normal.exec( line ) ) !== null ) {
+
+					// f vertex//normal vertex//normal vertex//normal
+					// 0                     1    2    3    4    5    6   7          8
+					// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 3 ], result[ 5 ], result[ 7 ],
+						undefined, undefined, undefined, undefined,
+						result[ 2 ], result[ 4 ], result[ 6 ], result[ 8 ]
+					);
+
+				} else if ( ( result = this.regexp.face_vertex.exec( line ) ) !== null ) {
+
+					// f vertex vertex vertex
+					// 0            1    2    3   4
+					// ["f 1 2 3", "1", "2", "3", undefined]
+
+					state.addFace(
+						result[ 1 ], result[ 2 ], result[ 3 ], result[ 4 ]
+					);
+
+				} else {
+
+					throw new Error( "Unexpected face line: '" + line  + "'" );
+
+				}
+
+			} else if ( lineFirstChar === "l" ) {
+
+				var lineParts = line.substring( 1 ).trim().split( " " );
+				var lineVertices = [], lineUVs = [];
+
+				if ( line.indexOf( "/" ) === - 1 ) {
+
+					lineVertices = lineParts;
+
+				} else {
+
+					for ( var li = 0, llen = lineParts.length; li < llen; li ++ ) {
+
+						var parts = lineParts[ li ].split( "/" );
+
+						if ( parts[ 0 ] !== "" ) lineVertices.push( parts[ 0 ] );
+						if ( parts[ 1 ] !== "" ) lineUVs.push( parts[ 1 ] );
+
+					}
+
+				}
+				state.addLineGeometry( lineVertices, lineUVs );
+
+			} else if ( ( result = this.regexp.object_pattern.exec( line ) ) !== null ) {
+
+				// o object_name
+				// or
+				// g group_name
+
+				// WORKAROUND: https://bugs.chromium.org/p/v8/issues/detail?id=2869
+				// var name = result[ 0 ].substr( 1 ).trim();
+				var name = ( " " + result[ 0 ].substr( 1 ).trim() ).substr( 1 );
+
+				state.startObject( name );
+
+			} else if ( this.regexp.material_use_pattern.test( line ) ) {
+
+				// material
+
+				state.object.startMaterial( line.substring( 7 ).trim(), state.materialLibraries );
+
+			} else if ( this.regexp.material_library_pattern.test( line ) ) {
+
+				// mtl file
+
+				state.materialLibraries.push( line.substring( 7 ).trim() );
+
+			} else if ( ( result = this.regexp.smoothing_pattern.exec( line ) ) !== null ) {
+
+				// smooth shading
+
+				// @todo Handle files that have varying smooth values for a set of faces inside one geometry,
+				// but does not define a usemtl for each face set.
+				// This should be detected and a dummy material created (later MultiMaterial and geometry groups).
+				// This requires some care to not create extra material on each smooth value for "normal" obj files.
+				// where explicit usemtl defines geometry groups.
+				// Example asset: examples/models/obj/cerberus/Cerberus.obj
+
+				var value = result[ 1 ].trim().toLowerCase();
+				state.object.smooth = ( value === '1' || value === 'on' );
+
+				var material = state.object.currentMaterial();
+				if ( material ) {
+
+					material.smooth = state.object.smooth;
+
+				}
+
+			} else {
+
+				// Handle null terminated files without exception
+				if ( line === '\0' ) continue;
+
+				throw new Error( "Unexpected line: '" + line  + "'" );
+
+			}
+
+		}
+
+		state.finalize();
+
+		var container = new THREE.Group();
+		container.materialLibraries = [].concat( state.materialLibraries );
+
+		for ( var i = 0, l = state.objects.length; i < l; i ++ ) {
+
+			var object = state.objects[ i ];
+			var geometry = object.geometry;
+			var materials = object.materials;
+			var isLine = ( geometry.type === 'Line' );
+
+			// Skip o/g line declarations that did not follow with any faces
+			if ( geometry.vertices.length === 0 ) continue;
+
+			var buffergeometry = new THREE.BufferGeometry();
+
+			buffergeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( geometry.vertices ), 3 ) );
+
+			if ( geometry.normals.length > 0 ) {
+
+				buffergeometry.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( geometry.normals ), 3 ) );
+
+			} else {
+
+				buffergeometry.computeVertexNormals();
+
+			}
+
+			if ( geometry.uvs.length > 0 ) {
+
+				buffergeometry.addAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( geometry.uvs ), 2 ) );
+
+			}
+
+			// Create materials
+
+			var createdMaterials = [];
+
+			for ( var mi = 0, miLen = materials.length; mi < miLen ; mi++ ) {
+
+				var sourceMaterial = materials[mi];
+				var material = undefined;
+
+				if ( this.materials !== null ) {
+
+					material = this.materials.create( sourceMaterial.name );
+
+					// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
+					if ( isLine && material && ! ( material instanceof THREE.LineBasicMaterial ) ) {
+
+						var materialLine = new THREE.LineBasicMaterial();
+						materialLine.copy( material );
+						material = materialLine;
+
+					}
+
+				}
+
+				if ( ! material ) {
+
+					material = ( ! isLine ? new THREE.MeshPhongMaterial() : new THREE.LineBasicMaterial() );
+					material.name = sourceMaterial.name;
+
+				}
+
+				material.shading = sourceMaterial.smooth ? THREE.SmoothShading : THREE.FlatShading;
+
+				createdMaterials.push(material);
+
+			}
+
+			// Create mesh
+
+			var mesh;
+
+			if ( createdMaterials.length > 1 ) {
+
+				for ( var mi = 0, miLen = materials.length; mi < miLen ; mi++ ) {
+
+					var sourceMaterial = materials[mi];
+					buffergeometry.addGroup( sourceMaterial.groupStart, sourceMaterial.groupCount, mi );
+
+				}
+
+				var multiMaterial = new THREE.MultiMaterial( createdMaterials );
+				mesh = ( ! isLine ? new THREE.Mesh( buffergeometry, multiMaterial ) : new THREE.LineSegments( buffergeometry, multiMaterial ) );
+
+			} else {
+
+				mesh = ( ! isLine ? new THREE.Mesh( buffergeometry, createdMaterials[ 0 ] ) : new THREE.LineSegments( buffergeometry, createdMaterials[ 0 ] ) );
+			}
+
+			mesh.name = object.name;
+
+			container.add( mesh );
+
+		}
+
+		console.timeEnd( 'OBJLoader' );
+
+		return container;
+
+	}
+
+};
+
+/**
  * @author alteredq / http://alteredqualia.com/
  * @author mr.doob / http://mrdoob.com/
  */
@@ -4394,4 +5138,4 @@ var KeyCodes;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1])(1)
 });
-!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.virtex=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var Virtex;!function(Virtex){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();Virtex.StringValue=StringValue}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(Virtex){var FileType=function(_super){function FileType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(FileType,_super),FileType}(Virtex.StringValue);FileType.DRACO=new FileType("application/octet-stream"),FileType.GLTF=new FileType("model/gltf+json"),FileType.THREEJS=new FileType("application/vnd.threejs+json"),Virtex.FileType=FileType}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var DRACOFileTypeHandler=function(){function DRACOFileTypeHandler(){}return DRACOFileTypeHandler.setup=function(viewport,obj){var geometry,bufferGeometry=obj,material=new THREE.MeshStandardMaterial({vertexColors:THREE.VertexColors});null==bufferGeometry.index?geometry=new THREE.Points(bufferGeometry,material):(bufferGeometry.computeVertexNormals(),geometry=new THREE.Mesh(bufferGeometry,material)),bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;geometry.scale.multiplyScalar(scale),geometry.position.x=-midX*scale,geometry.position.y=-midY*scale,geometry.position.z=-midZ*scale,geometry.castShadow=!0,geometry.receiveShadow=!0,obj=geometry,viewport.objectGroup.add(obj),viewport.createCamera()},DRACOFileTypeHandler}();Virtex.DRACOFileTypeHandler=DRACOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var glTFFileTypeHandler=function(){function glTFFileTypeHandler(){}return glTFFileTypeHandler.setup=function(viewport,obj){if(viewport.objectGroup.add(obj.scene),obj.animations)for(var animations=obj.animations,i=0,l=animations.length;i<l;i++);viewport.scene=obj.scene,obj.cameras&&obj.cameras.length&&(viewport.camera=obj.cameras[0])},glTFFileTypeHandler}();Virtex.glTFFileTypeHandler=glTFFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ThreeJSFileTypeHandler=function(){function ThreeJSFileTypeHandler(){}return ThreeJSFileTypeHandler.setup=function(viewport,obj){viewport.objectGroup.add(obj),viewport.createCamera()},ThreeJSFileTypeHandler}();Virtex.ThreeJSFileTypeHandler=ThreeJSFileTypeHandler}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}(),requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(callback){window.setTimeout(callback,5)}}();!function(Virtex){var Viewport=function(_super){function Viewport(options){var _this=_super.call(this,options)||this;_this._viewportCenter=new THREE.Vector2,_this._isFullscreen=!1,_this._isMouseDown=!1,_this._isVRMode=!1,_this._mousePos=new THREE.Vector2,_this._mousePosOnMouseDown=new THREE.Vector2,_this._pinchStart=new THREE.Vector2,_this._targetRotationOnMouseDown=new THREE.Vector2,_this._targetRotation=new THREE.Vector2,_this._vrEnabled=!0;var success=_this._init();return _this._resize(),success&&_this._tick(),_this}return __extends(Viewport,_super),Viewport.prototype._init=function(){var success=_super.prototype._init.call(this);return success?Detector.webgl?(this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>'),this._$viewport=this._$element.find(".viewport"),this._$loading=this._$element.find(".loading"),this._$loadingBar=this._$loading.find(".bar"),this._$loading.hide(),this.scene=new THREE.Scene,this.objectGroup=new THREE.Object3D,this.scene.add(this.objectGroup),this._createLights(),this.createCamera(),this._createControls(),this._createRenderer(),this._createEventListeners(),this._loadObject(this.options.data.file),this.options.data.showStats&&(this._stats=new Stats,this._stats.domElement.style.position="absolute",this._stats.domElement.style.top="0px",this._$viewport.append(this._stats.domElement)),!0):(Detector.addGetWebGLMessage(),this._$oldie=$("#oldie"),this._$oldie.appendTo(this._$element),!1):(console.error("Virtex failed to initialise"),!1)},Viewport.prototype.data=function(){return{ambientLightColor:13684944,ambientLightIntensity:1,cameraZ:4.5,directionalLight1Color:16777215,directionalLight1Intensity:.75,directionalLight2Color:10584,directionalLight2Intensity:.5,doubleSided:!0,fadeSpeed:1750,far:1e4,file:"",fullscreenEnabled:!0,maxZoom:10,minZoom:2,near:.05,shading:THREE.SmoothShading,showStats:!1,type:Virtex.FileType.THREEJS,vrBackgroundColor:0,zoomSpeed:1}},Viewport.prototype._getVRDisplay=function(){return new Promise(function(resolve){navigator.getVRDisplays().then(function(devices){for(var i=0;i<devices.length;i++)if(devices[i]instanceof VRDisplay){resolve(devices[i]);break}resolve(void 0)},function(){resolve(void 0)})})},Viewport.prototype._createLights=function(){this._lightGroup=new THREE.Object3D,this.scene.add(this._lightGroup);var light1=new THREE.DirectionalLight(this.options.data.directionalLight1Color,this.options.data.directionalLight1Intensity);light1.position.set(1,1,1),this._lightGroup.add(light1);var light2=new THREE.DirectionalLight(this.options.data.directionalLight2Color,this.options.data.directionalLight2Intensity);light2.position.set(-1,-1,-1),this._lightGroup.add(light2);var ambientLight=new THREE.AmbientLight(this.options.data.ambientLightColor,this.options.data.ambientLightIntensity);this._lightGroup.add(ambientLight)},Viewport.prototype.createCamera=function(){this.camera=new THREE.PerspectiveCamera(this._getFov(),this._getAspectRatio(),this.options.data.near,this.options.data.far);var cameraZ=this._getCameraZ();this.camera.position.z=this._targetZoom=cameraZ},Viewport.prototype._createRenderer=function(){this._renderer=new THREE.WebGLRenderer({antialias:!0,alpha:!0}),this._isVRMode?(this._renderer.setClearColor(this.options.data.vrBackgroundColor),this._vrEffect=new THREE.VREffect(this._renderer),this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height())):(this._renderer.setClearColor(this.options.data.vrBackgroundColor,0),this._renderer.setSize(this._$viewport.width(),this._$viewport.height())),this._$viewport.empty().append(this._renderer.domElement)},Viewport.prototype._createControls=function(){this._isVRMode&&(this._vrControls=new THREE.VRControls(this.camera))},Viewport.prototype._createEventListeners=function(){var _this=this;this.options.data.fullscreenEnabled&&$(document).on("webkitfullscreenchange mozfullscreenchange fullscreenchange",function(){_this._fullscreenChanged()}),this._$element.on("mousedown",function(e){_this._onMouseDown(e.originalEvent)}),this._$element.on("mousemove",function(e){_this._onMouseMove(e.originalEvent)}),this._$element.on("mouseup",function(){_this._onMouseUp()}),this._$element.on("mouseout",function(){_this._onMouseOut()}),this._$element.on("mousewheel",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("DOMMouseScroll",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("touchstart",function(e){_this._onTouchStart(e.originalEvent)}),this._$element.on("touchmove",function(e){_this._onTouchMove(e.originalEvent)}),this._$element.on("touchend",function(){_this._onTouchEnd()}),window.addEventListener("resize",function(){return _this._resize()},!1)},Viewport.prototype._loadObject=function(object){var _this=this;this._$loading.show();var loader;switch(this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():loader=new THREE.DRACOLoader;break;case Virtex.FileType.GLTF.toString():loader=new THREE.GLTFLoader;break;case Virtex.FileType.THREEJS.toString():loader=new THREE.ObjectLoader}loader.setCrossOrigin&&loader.setCrossOrigin("anonymous"),loader.load(object,function(obj){switch(_this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():Virtex.DRACOFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.GLTF.toString():Virtex.glTFFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.THREEJS.toString():Virtex.ThreeJSFileTypeHandler.setup(_this,obj)}_this._$loading.fadeOut(_this.options.data.fadeSpeed),_this.fire(Events.LOADED,obj)},function(e){e.lengthComputable&&_this._loadProgress(e.loaded/e.total)},function(e){console.error(e)})},Viewport.prototype._getBoundingBox=function(){return(new THREE.Box3).setFromObject(this.objectGroup)},Viewport.prototype._getBoundingWidth=function(){return this._getBoundingBox().getSize().x},Viewport.prototype._getBoundingHeight=function(){return this._getBoundingBox().getSize().y},Viewport.prototype._getCameraZ=function(){return this._getBoundingWidth()*this.options.data.cameraZ},Viewport.prototype._getFov=function(){if(!this.camera)return 1;var width=this._getBoundingWidth(),height=this._getBoundingHeight(),dist=this._getCameraZ()-width,fov=2*Math.atan(height/(2*dist))*(180/Math.PI);return fov},Viewport.prototype._loadProgress=function(progress){var fullWidth=this._$loading.width(),width=Math.floor(fullWidth*progress);this._$loadingBar.width(width)},Viewport.prototype._fullscreenChanged=function(){this._isFullscreen?(this.exitFullscreen(),this._$element.width(this._lastWidth),this._$element.height(this._lastHeight)):(this._lastWidth=this._getWidth(),this._lastHeight=this._getHeight()),this._isFullscreen=!this._isFullscreen,this._resize()},Viewport.prototype._onMouseDown=function(event){event.preventDefault(),this._isMouseDown=!0,this._mousePosOnMouseDown.x=event.clientX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=event.clientY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y},Viewport.prototype._onMouseMove=function(event){this._mousePos.x=event.clientX-this._viewportCenter.x,this._mousePos.y=event.clientY-this._viewportCenter.y,this._isMouseDown&&(this._targetRotation.y=this._targetRotationOnMouseDown.y+.02*(this._mousePos.y-this._mousePosOnMouseDown.y),this._targetRotation.x=this._targetRotationOnMouseDown.x+.02*(this._mousePos.x-this._mousePosOnMouseDown.x))},Viewport.prototype._onMouseUp=function(){this._isMouseDown=!1},Viewport.prototype._onMouseOut=function(){this._isMouseDown=!1},Viewport.prototype._onMouseWheel=function(event){event.preventDefault(),event.stopPropagation();var delta=0;void 0!==event.wheelDelta?delta=event.wheelDelta:void 0!==event.detail&&(delta=-event.detail),delta>0?this.zoomIn():delta<0&&this.zoomOut()},Viewport.prototype._onTouchStart=function(event){var touches=event.touches;1===touches.length&&(this._isMouseDown=!0,event.preventDefault(),this._mousePosOnMouseDown.x=touches[0].pageX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=touches[0].pageY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y)},Viewport.prototype._onTouchMove=function(event){event.preventDefault(),event.stopPropagation();var touches=event.touches;switch(touches.length){case 1:event.preventDefault(),this._mousePos.x=touches[0].pageX-this._viewportCenter.x,this._targetRotation.x=this._targetRotationOnMouseDown.x+.05*(this._mousePos.x-this._mousePosOnMouseDown.x),this._mousePos.y=touches[0].pageY-this._viewportCenter.y,this._targetRotation.y=this._targetRotationOnMouseDown.y+.05*(this._mousePos.y-this._mousePosOnMouseDown.y);break;case 2:var dx=touches[0].pageX-touches[1].pageX,dy=touches[0].pageY-touches[1].pageY,distance=Math.sqrt(dx*dx+dy*dy),pinchEnd=new THREE.Vector2(0,distance),pinchDelta=new THREE.Vector2;pinchDelta.subVectors(pinchEnd,this._pinchStart),pinchDelta.y>0?this.zoomIn():pinchDelta.y<0&&this.zoomOut(),this._pinchStart.copy(pinchEnd);break;case 3:}},Viewport.prototype._onTouchEnd=function(){this._isMouseDown=!1},Viewport.prototype._tick=function(){var _this=this;requestAnimFrame(function(){return _this._tick()}),this._update(),this._draw(),this.options.data.showStats&&this._stats.update()},Viewport.prototype.rotateY=function(radians){var rotation=this.objectGroup.rotation.y+radians;this.objectGroup.rotation.y=rotation},Viewport.prototype._update=function(){if(this._isVRMode)this._vrControls.update();else{this.rotateY(.1*(this._targetRotation.x-this.objectGroup.rotation.y));var finalRotationY=this._targetRotation.y-this.objectGroup.rotation.x;this.objectGroup.rotation.x<=1&&this.objectGroup.rotation.x>=-1&&(this.objectGroup.rotation.x+=.1*finalRotationY),this.objectGroup.rotation.x>1?this.objectGroup.rotation.x=1:this.objectGroup.rotation.x<-1&&(this.objectGroup.rotation.x=-1);var zoomDelta=.1*(this._targetZoom-this.camera.position.z);this.camera.position.z+=zoomDelta}},Viewport.prototype._draw=function(){this._isVRMode?this._vrEffect.render(this.scene,this.camera):this._renderer.render(this.scene,this.camera)},Viewport.prototype._getWidth=function(){return this._isFullscreen?window.innerWidth:this._$element.width()},Viewport.prototype._getHeight=function(){return this._isFullscreen?window.innerHeight:this._$element.height()},Viewport.prototype._getZoomSpeed=function(){return this._getBoundingWidth()*this.options.data.zoomSpeed},Viewport.prototype._getMaxZoom=function(){return this._getBoundingWidth()*this.options.data.maxZoom},Viewport.prototype._getMinZoom=function(){return this._getBoundingWidth()*this.options.data.minZoom},Viewport.prototype.zoomIn=function(){var targetZoom=this.camera.position.z-this._getZoomSpeed();targetZoom>this._getMinZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMinZoom()},Viewport.prototype.zoomOut=function(){var targetZoom=this.camera.position.z+this._getZoomSpeed();targetZoom<this._getMaxZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMaxZoom()},Viewport.prototype.enterVR=function(){var _this=this;this._vrEnabled&&(this._isVRMode=!0,this._prevCameraPosition=this.camera.position.clone(),this._prevCameraRotation=this.camera.rotation.clone(),this._createControls(),this._createRenderer(),this._getVRDisplay().then(function(display){display&&(_this._vrEffect.setVRDisplay(display),_this._vrControls.setVRDisplay(display),_this._vrEffect.setFullScreen(!0))}))},Viewport.prototype.exitVR=function(){this._vrEnabled&&(this._isVRMode=!1,this.camera.position.copy(this._prevCameraPosition),this.camera.rotation.copy(this._prevCameraRotation),this._createRenderer())},Viewport.prototype.toggleVR=function(){this._vrEnabled&&(this._isVRMode?this.exitVR():this.enterVR())},Viewport.prototype.enterFullscreen=function(){if(this.options.data.fullscreenEnabled){var elem=this._$element[0],requestFullScreen=this._getRequestFullScreen(elem);requestFullScreen&&requestFullScreen.call(elem)}},Viewport.prototype.exitFullscreen=function(){var exitFullScreen=this._getExitFullScreen();exitFullScreen&&exitFullScreen.call(document)},Viewport.prototype._getRequestFullScreen=function(elem){return elem.requestFullscreen?elem.requestFullscreen:elem.msRequestFullscreen?elem.msRequestFullscreen:elem.mozRequestFullScreen?elem.mozRequestFullScreen:!!elem.webkitRequestFullscreen&&elem.webkitRequestFullscreen},Viewport.prototype._getExitFullScreen=function(){return document.exitFullscreen?document.exitFullscreen:document.msExitFullscreen?document.msExitFullscreen:document.mozCancelFullScreen?document.mozCancelFullScreen:!!document.webkitExitFullscreen&&document.webkitExitFullscreen},Viewport.prototype._getAspectRatio=function(){return this._$viewport.width()/this._$viewport.height()},Viewport.prototype.resize=function(){this._resize()},Viewport.prototype._resize=function(){this._$element&&this._$viewport?(this._$element.width(this._getWidth()),this._$element.height(this._getHeight()),this._$viewport.width(this._getWidth()),this._$viewport.height(this._getHeight()),this._viewportCenter.x=this._$viewport.width()/2,this._viewportCenter.y=this._$viewport.height()/2,this.camera.aspect=this._getAspectRatio(),this.camera.updateProjectionMatrix(),this._isVRMode?this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height()):this._renderer.setSize(this._$viewport.width(),this._$viewport.height()),this._$loading.css({left:this._viewportCenter.x-this._$loading.width()/2,top:this._viewportCenter.y-this._$loading.height()/2})):this._$oldie&&this._$oldie.css({left:this._$element.width()/2-this._$oldie.outerWidth()/2,top:this._$element.height()/2-this._$oldie.outerHeight()/2})},Viewport}(_Components.BaseComponent);Virtex.Viewport=Viewport;var Events=function(){function Events(){}return Events}();Events.LOADED="loaded",Virtex.Events=Events}(Virtex||(Virtex={})),function(g){g.Virtex||(g.Virtex=Virtex)}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});
+!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.virtex=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var Virtex;!function(Virtex){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();Virtex.StringValue=StringValue}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(Virtex){var FileType=function(_super){function FileType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(FileType,_super),FileType}(Virtex.StringValue);FileType.DRACO=new FileType("application/octet-stream"),FileType.GLTF=new FileType("model/gltf+json"),FileType.OBJ=new FileType("text/plain"),FileType.THREEJS=new FileType("application/vnd.threejs+json"),Virtex.FileType=FileType}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var DRACOFileTypeHandler=function(){function DRACOFileTypeHandler(){}return DRACOFileTypeHandler.setup=function(viewport,obj){var geometry,bufferGeometry=obj,material=new THREE.MeshStandardMaterial({vertexColors:THREE.VertexColors});null==bufferGeometry.index?geometry=new THREE.Points(bufferGeometry,material):(bufferGeometry.computeVertexNormals(),geometry=new THREE.Mesh(bufferGeometry,material)),bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;geometry.scale.multiplyScalar(scale),geometry.position.x=-midX*scale,geometry.position.y=-midY*scale,geometry.position.z=-midZ*scale,geometry.castShadow=!0,geometry.receiveShadow=!0,obj=geometry,viewport.objectGroup.add(obj),viewport.createCamera()},DRACOFileTypeHandler}();Virtex.DRACOFileTypeHandler=DRACOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var glTFFileTypeHandler=function(){function glTFFileTypeHandler(){}return glTFFileTypeHandler.setup=function(viewport,obj){if(viewport.objectGroup.add(obj.scene),obj.animations)for(var animations=obj.animations,i=0,l=animations.length;i<l;i++);viewport.scene=obj.scene,obj.cameras&&obj.cameras.length&&(viewport.camera=obj.cameras[0])},glTFFileTypeHandler}();Virtex.glTFFileTypeHandler=glTFFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ObjFileTypeHandler=function(){function ObjFileTypeHandler(){}return ObjFileTypeHandler.setup=function(viewport,obj){viewport.objectGroup.add(obj),viewport.createCamera()},ObjFileTypeHandler}();Virtex.ObjFileTypeHandler=ObjFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ThreeJSFileTypeHandler=function(){function ThreeJSFileTypeHandler(){}return ThreeJSFileTypeHandler.setup=function(viewport,obj){viewport.objectGroup.add(obj),viewport.createCamera()},ThreeJSFileTypeHandler}();Virtex.ThreeJSFileTypeHandler=ThreeJSFileTypeHandler}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}(),requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(callback){window.setTimeout(callback,5)}}();!function(Virtex){var Viewport=function(_super){function Viewport(options){var _this=_super.call(this,options)||this;_this._viewportCenter=new THREE.Vector2,_this._isFullscreen=!1,_this._isMouseDown=!1,_this._isVRMode=!1,_this._mousePos=new THREE.Vector2,_this._mousePosOnMouseDown=new THREE.Vector2,_this._pinchStart=new THREE.Vector2,_this._targetRotationOnMouseDown=new THREE.Vector2,_this._targetRotation=new THREE.Vector2,_this._vrEnabled=!0;var success=_this._init();return _this._resize(),success&&_this._tick(),_this}return __extends(Viewport,_super),Viewport.prototype._init=function(){var success=_super.prototype._init.call(this);return success?Detector.webgl?(this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>'),this._$viewport=this._$element.find(".viewport"),this._$loading=this._$element.find(".loading"),this._$loadingBar=this._$loading.find(".bar"),this._$loading.hide(),this.scene=new THREE.Scene,this.objectGroup=new THREE.Object3D,this.scene.add(this.objectGroup),this._createLights(),this.createCamera(),this._createControls(),this._createRenderer(),this._createEventListeners(),this._loadObject(this.options.data.file),this.options.data.showStats&&(this._stats=new Stats,this._stats.domElement.style.position="absolute",this._stats.domElement.style.top="0px",this._$viewport.append(this._stats.domElement)),!0):(Detector.addGetWebGLMessage(),this._$oldie=$("#oldie"),this._$oldie.appendTo(this._$element),!1):(console.error("Virtex failed to initialise"),!1)},Viewport.prototype.data=function(){return{ambientLightColor:13684944,ambientLightIntensity:1,cameraZ:4.5,directionalLight1Color:16777215,directionalLight1Intensity:.75,directionalLight2Color:10584,directionalLight2Intensity:.5,doubleSided:!0,fadeSpeed:1750,far:1e4,file:"",fullscreenEnabled:!0,maxZoom:10,minZoom:2,near:.05,shading:THREE.SmoothShading,showStats:!1,type:Virtex.FileType.THREEJS,vrBackgroundColor:0,zoomSpeed:1}},Viewport.prototype._getVRDisplay=function(){return new Promise(function(resolve){navigator.getVRDisplays().then(function(devices){for(var i=0;i<devices.length;i++)if(devices[i]instanceof VRDisplay){resolve(devices[i]);break}resolve(void 0)},function(){resolve(void 0)})})},Viewport.prototype._createLights=function(){this._lightGroup=new THREE.Object3D,this.scene.add(this._lightGroup);var light1=new THREE.DirectionalLight(this.options.data.directionalLight1Color,this.options.data.directionalLight1Intensity);light1.position.set(1,1,1),this._lightGroup.add(light1);var light2=new THREE.DirectionalLight(this.options.data.directionalLight2Color,this.options.data.directionalLight2Intensity);light2.position.set(-1,-1,-1),this._lightGroup.add(light2);var ambientLight=new THREE.AmbientLight(this.options.data.ambientLightColor,this.options.data.ambientLightIntensity);this._lightGroup.add(ambientLight)},Viewport.prototype.createCamera=function(){this.camera=new THREE.PerspectiveCamera(this._getFov(),this._getAspectRatio(),this.options.data.near,this.options.data.far);var cameraZ=this._getCameraZ();this.camera.position.z=this._targetZoom=cameraZ},Viewport.prototype._createRenderer=function(){this._renderer=new THREE.WebGLRenderer({antialias:!0,alpha:!0}),this._isVRMode?(this._renderer.setClearColor(this.options.data.vrBackgroundColor),this._vrEffect=new THREE.VREffect(this._renderer),this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height())):(this._renderer.setClearColor(this.options.data.vrBackgroundColor,0),this._renderer.setSize(this._$viewport.width(),this._$viewport.height())),this._$viewport.empty().append(this._renderer.domElement)},Viewport.prototype._createControls=function(){this._isVRMode&&(this._vrControls=new THREE.VRControls(this.camera))},Viewport.prototype._createEventListeners=function(){var _this=this;this.options.data.fullscreenEnabled&&$(document).on("webkitfullscreenchange mozfullscreenchange fullscreenchange",function(){_this._fullscreenChanged()}),this._$element.on("mousedown",function(e){_this._onMouseDown(e.originalEvent)}),this._$element.on("mousemove",function(e){_this._onMouseMove(e.originalEvent)}),this._$element.on("mouseup",function(){_this._onMouseUp()}),this._$element.on("mouseout",function(){_this._onMouseOut()}),this._$element.on("mousewheel",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("DOMMouseScroll",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("touchstart",function(e){_this._onTouchStart(e.originalEvent)}),this._$element.on("touchmove",function(e){_this._onTouchMove(e.originalEvent)}),this._$element.on("touchend",function(){_this._onTouchEnd()}),window.addEventListener("resize",function(){return _this._resize()},!1)},Viewport.prototype._loadObject=function(object){var _this=this;this._$loading.show();var loader;switch(this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():loader=new THREE.DRACOLoader;break;case Virtex.FileType.GLTF.toString():loader=new THREE.GLTFLoader;break;case Virtex.FileType.OBJ.toString():loader=new THREE.OBJLoader;break;case Virtex.FileType.THREEJS.toString():loader=new THREE.ObjectLoader}loader.setCrossOrigin&&loader.setCrossOrigin("anonymous"),loader.load(object,function(obj){switch(_this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():Virtex.DRACOFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.GLTF.toString():Virtex.glTFFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.THREEJS.toString():Virtex.ThreeJSFileTypeHandler.setup(_this,obj)}_this._$loading.fadeOut(_this.options.data.fadeSpeed),_this.fire(Events.LOADED,obj)},function(e){e.lengthComputable&&_this._loadProgress(e.loaded/e.total)},function(e){console.error(e)})},Viewport.prototype._getBoundingBox=function(){return(new THREE.Box3).setFromObject(this.objectGroup)},Viewport.prototype._getBoundingWidth=function(){return this._getBoundingBox().getSize().x},Viewport.prototype._getBoundingHeight=function(){return this._getBoundingBox().getSize().y},Viewport.prototype._getCameraZ=function(){return this._getBoundingWidth()*this.options.data.cameraZ},Viewport.prototype._getFov=function(){if(!this.camera)return 1;var width=this._getBoundingWidth(),height=this._getBoundingHeight(),dist=this._getCameraZ()-width,fov=2*Math.atan(height/(2*dist))*(180/Math.PI);return fov},Viewport.prototype._loadProgress=function(progress){var fullWidth=this._$loading.width(),width=Math.floor(fullWidth*progress);this._$loadingBar.width(width)},Viewport.prototype._fullscreenChanged=function(){this._isFullscreen?(this.exitFullscreen(),this._$element.width(this._lastWidth),this._$element.height(this._lastHeight)):(this._lastWidth=this._getWidth(),this._lastHeight=this._getHeight()),this._isFullscreen=!this._isFullscreen,this._resize()},Viewport.prototype._onMouseDown=function(event){event.preventDefault(),this._isMouseDown=!0,this._mousePosOnMouseDown.x=event.clientX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=event.clientY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y},Viewport.prototype._onMouseMove=function(event){this._mousePos.x=event.clientX-this._viewportCenter.x,this._mousePos.y=event.clientY-this._viewportCenter.y,this._isMouseDown&&(this._targetRotation.y=this._targetRotationOnMouseDown.y+.02*(this._mousePos.y-this._mousePosOnMouseDown.y),this._targetRotation.x=this._targetRotationOnMouseDown.x+.02*(this._mousePos.x-this._mousePosOnMouseDown.x))},Viewport.prototype._onMouseUp=function(){this._isMouseDown=!1},Viewport.prototype._onMouseOut=function(){this._isMouseDown=!1},Viewport.prototype._onMouseWheel=function(event){event.preventDefault(),event.stopPropagation();var delta=0;void 0!==event.wheelDelta?delta=event.wheelDelta:void 0!==event.detail&&(delta=-event.detail),delta>0?this.zoomIn():delta<0&&this.zoomOut()},Viewport.prototype._onTouchStart=function(event){var touches=event.touches;1===touches.length&&(this._isMouseDown=!0,event.preventDefault(),this._mousePosOnMouseDown.x=touches[0].pageX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=touches[0].pageY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y)},Viewport.prototype._onTouchMove=function(event){event.preventDefault(),event.stopPropagation();var touches=event.touches;switch(touches.length){case 1:event.preventDefault(),this._mousePos.x=touches[0].pageX-this._viewportCenter.x,this._targetRotation.x=this._targetRotationOnMouseDown.x+.05*(this._mousePos.x-this._mousePosOnMouseDown.x),this._mousePos.y=touches[0].pageY-this._viewportCenter.y,this._targetRotation.y=this._targetRotationOnMouseDown.y+.05*(this._mousePos.y-this._mousePosOnMouseDown.y);break;case 2:var dx=touches[0].pageX-touches[1].pageX,dy=touches[0].pageY-touches[1].pageY,distance=Math.sqrt(dx*dx+dy*dy),pinchEnd=new THREE.Vector2(0,distance),pinchDelta=new THREE.Vector2;pinchDelta.subVectors(pinchEnd,this._pinchStart),pinchDelta.y>0?this.zoomIn():pinchDelta.y<0&&this.zoomOut(),this._pinchStart.copy(pinchEnd);break;case 3:}},Viewport.prototype._onTouchEnd=function(){this._isMouseDown=!1},Viewport.prototype._tick=function(){var _this=this;requestAnimFrame(function(){return _this._tick()}),this._update(),this._draw(),this.options.data.showStats&&this._stats.update()},Viewport.prototype.rotateY=function(radians){var rotation=this.objectGroup.rotation.y+radians;this.objectGroup.rotation.y=rotation},Viewport.prototype._update=function(){if(this._isVRMode)this._vrControls.update();else{this.rotateY(.1*(this._targetRotation.x-this.objectGroup.rotation.y));var finalRotationY=this._targetRotation.y-this.objectGroup.rotation.x;this.objectGroup.rotation.x<=1&&this.objectGroup.rotation.x>=-1&&(this.objectGroup.rotation.x+=.1*finalRotationY),this.objectGroup.rotation.x>1?this.objectGroup.rotation.x=1:this.objectGroup.rotation.x<-1&&(this.objectGroup.rotation.x=-1);var zoomDelta=.1*(this._targetZoom-this.camera.position.z);this.camera.position.z+=zoomDelta}},Viewport.prototype._draw=function(){this._isVRMode?this._vrEffect.render(this.scene,this.camera):this._renderer.render(this.scene,this.camera)},Viewport.prototype._getWidth=function(){return this._isFullscreen?window.innerWidth:this._$element.width()},Viewport.prototype._getHeight=function(){return this._isFullscreen?window.innerHeight:this._$element.height()},Viewport.prototype._getZoomSpeed=function(){return this._getBoundingWidth()*this.options.data.zoomSpeed},Viewport.prototype._getMaxZoom=function(){return this._getBoundingWidth()*this.options.data.maxZoom},Viewport.prototype._getMinZoom=function(){return this._getBoundingWidth()*this.options.data.minZoom},Viewport.prototype.zoomIn=function(){var targetZoom=this.camera.position.z-this._getZoomSpeed();targetZoom>this._getMinZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMinZoom()},Viewport.prototype.zoomOut=function(){var targetZoom=this.camera.position.z+this._getZoomSpeed();targetZoom<this._getMaxZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMaxZoom()},Viewport.prototype.enterVR=function(){var _this=this;this._vrEnabled&&(this._isVRMode=!0,this._prevCameraPosition=this.camera.position.clone(),this._prevCameraRotation=this.camera.rotation.clone(),this._createControls(),this._createRenderer(),this._getVRDisplay().then(function(display){display&&(_this._vrEffect.setVRDisplay(display),_this._vrControls.setVRDisplay(display),_this._vrEffect.setFullScreen(!0))}))},Viewport.prototype.exitVR=function(){this._vrEnabled&&(this._isVRMode=!1,this.camera.position.copy(this._prevCameraPosition),this.camera.rotation.copy(this._prevCameraRotation),this._createRenderer())},Viewport.prototype.toggleVR=function(){this._vrEnabled&&(this._isVRMode?this.exitVR():this.enterVR())},Viewport.prototype.enterFullscreen=function(){if(this.options.data.fullscreenEnabled){var elem=this._$element[0],requestFullScreen=this._getRequestFullScreen(elem);requestFullScreen&&requestFullScreen.call(elem)}},Viewport.prototype.exitFullscreen=function(){var exitFullScreen=this._getExitFullScreen();exitFullScreen&&exitFullScreen.call(document)},Viewport.prototype._getRequestFullScreen=function(elem){return elem.requestFullscreen?elem.requestFullscreen:elem.msRequestFullscreen?elem.msRequestFullscreen:elem.mozRequestFullScreen?elem.mozRequestFullScreen:!!elem.webkitRequestFullscreen&&elem.webkitRequestFullscreen},Viewport.prototype._getExitFullScreen=function(){return document.exitFullscreen?document.exitFullscreen:document.msExitFullscreen?document.msExitFullscreen:document.mozCancelFullScreen?document.mozCancelFullScreen:!!document.webkitExitFullscreen&&document.webkitExitFullscreen},Viewport.prototype._getAspectRatio=function(){return this._$viewport.width()/this._$viewport.height()},Viewport.prototype.resize=function(){this._resize()},Viewport.prototype._resize=function(){this._$element&&this._$viewport?(this._$element.width(this._getWidth()),this._$element.height(this._getHeight()),this._$viewport.width(this._getWidth()),this._$viewport.height(this._getHeight()),this._viewportCenter.x=this._$viewport.width()/2,this._viewportCenter.y=this._$viewport.height()/2,this.camera.aspect=this._getAspectRatio(),this.camera.updateProjectionMatrix(),this._isVRMode?this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height()):this._renderer.setSize(this._$viewport.width(),this._$viewport.height()),this._$loading.css({left:this._viewportCenter.x-this._$loading.width()/2,top:this._viewportCenter.y-this._$loading.height()/2})):this._$oldie&&this._$oldie.css({left:this._$element.width()/2-this._$oldie.outerWidth()/2,top:this._$element.height()/2-this._$oldie.outerHeight()/2})},Viewport}(_Components.BaseComponent);Virtex.Viewport=Viewport;var Events=function(){function Events(){}return Events}();Events.LOADED="loaded",Virtex.Events=Events}(Virtex||(Virtex={})),function(g){g.Virtex||(g.Virtex=Virtex)}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});

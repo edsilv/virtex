@@ -255,6 +255,9 @@ namespace Virtex {
                 case FileType.GLTF.toString() :
                     loader = new THREE.GLTFLoader();
                     break;
+                case FileType.OBJ.toString() :
+                    loader = new THREE.OBJLoader();
+                    break;
                 case FileType.THREEJS.toString() :
                     loader = new THREE.ObjectLoader();
                     break;

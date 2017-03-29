@@ -24,6 +24,12 @@ declare module THREE {
         load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
         setCrossOrigin(crossOrigin: string): void;
     }
+    class OBJLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+    }
 }
 
 declare namespace Virtex {
@@ -38,6 +44,7 @@ declare namespace Virtex {
     class FileType extends StringValue {
         static DRACO: FileType;
         static GLTF: FileType;
+        static OBJ: FileType;
         static THREEJS: FileType;
     }
 }
@@ -77,6 +84,12 @@ declare namespace Virtex {
         type: FileType;
         vrBackgroundColor: number;
         zoomSpeed?: number;
+    }
+}
+
+declare namespace Virtex {
+    class ObjFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
     }
 }
 

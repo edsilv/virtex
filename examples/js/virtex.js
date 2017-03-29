@@ -41,6 +41,7 @@ var Virtex;
     }(Virtex.StringValue));
     FileType.DRACO = new FileType("application/octet-stream");
     FileType.GLTF = new FileType("model/gltf+json");
+    FileType.OBJ = new FileType("text/plain");
     FileType.THREEJS = new FileType("application/vnd.threejs+json");
     Virtex.FileType = FileType;
 })(Virtex || (Virtex = {}));
@@ -112,6 +113,20 @@ var Virtex;
     Virtex.glTFFileTypeHandler = glTFFileTypeHandler;
 })(Virtex || (Virtex = {}));
 
+
+var Virtex;
+(function (Virtex) {
+    var ObjFileTypeHandler = (function () {
+        function ObjFileTypeHandler() {
+        }
+        ObjFileTypeHandler.setup = function (viewport, obj) {
+            viewport.objectGroup.add(obj);
+            viewport.createCamera();
+        };
+        return ObjFileTypeHandler;
+    }());
+    Virtex.ObjFileTypeHandler = ObjFileTypeHandler;
+})(Virtex || (Virtex = {}));
 
 var Virtex;
 (function (Virtex) {
@@ -336,6 +351,9 @@ var Virtex;
                     break;
                 case Virtex.FileType.GLTF.toString():
                     loader = new THREE.GLTFLoader();
+                    break;
+                case Virtex.FileType.OBJ.toString():
+                    loader = new THREE.OBJLoader();
                     break;
                 case Virtex.FileType.THREEJS.toString():
                     loader = new THREE.ObjectLoader();

@@ -14,6 +14,7 @@
     <!--<script src="js/three.js"></script>-->
     <script src="js/three.min.js"></script>
     <script src="js/GLTFLoader.js"></script>
+    <script src="js/OBJLoader.js"></script>
     <script src="js/draco_decoder.js"></script>
     <script src="js/DRACOLoader.js"></script>
     <script src="js/virtex.js"></script>
@@ -61,6 +62,14 @@
                 file: "models/threejs/hc941fm6529.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
             },
+            bone2: {
+                file: "models/draco/hc941fm6529.drc",
+                type: new Virtex.FileType("application/octet-stream")
+            },
+            bone3: {
+                file: "models/obj/hc941fm6529.obj",
+                type: new Virtex.FileType("text/plain")
+            },
             pointillist: {
                 file: "models/threejs/pointillist.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
@@ -72,10 +81,6 @@
             monster: {
                 file: "models/gltf/monster.gltf",
                 type: new Virtex.FileType("model/gltf+json")
-            },
-            bone2: {
-                file: "models/draco/hc941fm6529.drc",
-                type: new Virtex.FileType("application/octet-stream")
             }
         };
 
@@ -91,8 +96,8 @@
             viewport = new Virtex.Viewport({
                 target: document.querySelector('#viewer'),
                 data: {
-                    file: objects.bone2.file,
-                    type: objects.bone2.type, // defaults to threejs
+                    file: objects.bone3.file,
+                    type: objects.bone3.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
