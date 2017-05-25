@@ -243,7 +243,7 @@ namespace Virtex {
             window.addEventListener('resize', () => this._resize(), false);
         }
         
-        private _loadObject(object: string): void {
+        private _loadObject(objectPath: string): void {
             this._$loading.show();
 
             let loader: any;
@@ -267,7 +267,7 @@ namespace Virtex {
                 loader.setCrossOrigin('anonymous');
             }
 
-            loader.load(object,
+            loader.load(objectPath,
                 (obj: any) => {
 
                     switch (this.options.data.type.toString()) {
@@ -279,6 +279,9 @@ namespace Virtex {
                             break;
                         case FileType.THREEJS.toString() :
                             ThreeJSFileTypeHandler.setup(this, obj);
+                            break;
+                        case FileType.OBJ.toString() :
+                            ObjFileTypeHandler.setup(this, obj, objectPath);
                             break;
                     }
 

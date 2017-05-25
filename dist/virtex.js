@@ -119,9 +119,17 @@ var Virtex;
     var ObjFileTypeHandler = (function () {
         function ObjFileTypeHandler() {
         }
-        ObjFileTypeHandler.setup = function (viewport, obj) {
-            viewport.objectGroup.add(obj);
-            viewport.createCamera();
+        ObjFileTypeHandler.setup = function (viewport, obj, objpath) {
+            var imgloader = new THREE.MTLLoader();
+            imgloader.setPath(objpath.substring(0, objpath.lastIndexOf("/") + 1));
+            imgloader.load(obj.materialLibraries[0], function (materials) {
+                var objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.load(objpath, function (object) {
+                    viewport.objectGroup.add(object);
+                    viewport.createCamera();
+                }, function (e) { console.log("obj progress", e); }, function (e) { console.log("obj error", e); });
+            }, function (e) { console.log("mtl progress", e); }, function (e) { console.log("mtl error", e); });
         };
         return ObjFileTypeHandler;
     }());
@@ -341,7 +349,7 @@ var Virtex;
             });
             window.addEventListener('resize', function () { return _this._resize(); }, false);
         };
-        Viewport.prototype._loadObject = function (object) {
+        Viewport.prototype._loadObject = function (objectPath) {
             var _this = this;
             this._$loading.show();
             var loader;
@@ -362,7 +370,7 @@ var Virtex;
             if (loader.setCrossOrigin) {
                 loader.setCrossOrigin('anonymous');
             }
-            loader.load(object, function (obj) {
+            loader.load(objectPath, function (obj) {
                 switch (_this.options.data.type.toString()) {
                     case Virtex.FileType.DRACO.toString():
                         Virtex.DRACOFileTypeHandler.setup(_this, obj);
@@ -372,6 +380,9 @@ var Virtex;
                         break;
                     case Virtex.FileType.THREEJS.toString():
                         Virtex.ThreeJSFileTypeHandler.setup(_this, obj);
+                        break;
+                    case Virtex.FileType.OBJ.toString():
+                        Virtex.ObjFileTypeHandler.setup(_this, obj, objectPath);
                         break;
                 }
                 _this._$loading.fadeOut(_this.options.data.fadeSpeed);

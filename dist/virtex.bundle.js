@@ -4020,6 +4020,547 @@ THREE.GLTFLoader = ( function () {
 } )();
 
 /**
+ * Loads a Wavefront .mtl file specifying materials
+ *
+ * @author angelxuanchang
+ */
+
+THREE.MTLLoader = function ( manager ) {
+
+	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+
+};
+
+THREE.MTLLoader.prototype = {
+
+	constructor: THREE.MTLLoader,
+
+	/**
+	 * Loads and parses a MTL asset from a URL.
+	 *
+	 * @param {String} url - URL to the MTL file.
+	 * @param {Function} [onLoad] - Callback invoked with the loaded object.
+	 * @param {Function} [onProgress] - Callback for download progress.
+	 * @param {Function} [onError] - Callback for download errors.
+	 *
+	 * @see setPath setTexturePath
+	 *
+	 * @note In order for relative texture references to resolve correctly
+	 * you must call setPath and/or setTexturePath explicitly prior to load.
+	 */
+	load: function ( url, onLoad, onProgress, onError ) {
+
+		var scope = this;
+
+		var loader = new THREE.FileLoader( this.manager );
+		loader.setPath( this.path );
+		loader.load( url, function ( text ) {
+
+			onLoad( scope.parse( text ) );
+
+		}, onProgress, onError );
+
+	},
+
+	/**
+	 * Set base path for resolving references.
+	 * If set this path will be prepended to each loaded and found reference.
+	 *
+	 * @see setTexturePath
+	 * @param {String} path
+	 *
+	 * @example
+	 *     mtlLoader.setPath( 'assets/obj/' );
+	 *     mtlLoader.load( 'my.mtl', ... );
+	 */
+	setPath: function ( path ) {
+
+		this.path = path;
+
+	},
+
+	/**
+	 * Set base path for resolving texture references.
+	 * If set this path will be prepended found texture reference.
+	 * If not set and setPath is, it will be used as texture base path.
+	 *
+	 * @see setPath
+	 * @param {String} path
+	 *
+	 * @example
+	 *     mtlLoader.setPath( 'assets/obj/' );
+	 *     mtlLoader.setTexturePath( 'assets/textures/' );
+	 *     mtlLoader.load( 'my.mtl', ... );
+	 */
+	setTexturePath: function ( path ) {
+
+		this.texturePath = path;
+
+	},
+
+	setBaseUrl: function ( path ) {
+
+		console.warn( 'THREE.MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.' );
+
+		this.setTexturePath( path );
+
+	},
+
+	setCrossOrigin: function ( value ) {
+
+		this.crossOrigin = value;
+
+	},
+
+	setMaterialOptions: function ( value ) {
+
+		this.materialOptions = value;
+
+	},
+
+	/**
+	 * Parses a MTL file.
+	 *
+	 * @param {String} text - Content of MTL file
+	 * @return {THREE.MTLLoader.MaterialCreator}
+	 *
+	 * @see setPath setTexturePath
+	 *
+	 * @note In order for relative texture references to resolve correctly
+	 * you must call setPath and/or setTexturePath explicitly prior to parse.
+	 */
+	parse: function ( text ) {
+
+		var lines = text.split( '\n' );
+		var info = {};
+		var delimiter_pattern = /\s+/;
+		var materialsInfo = {};
+
+		for ( var i = 0; i < lines.length; i ++ ) {
+
+			var line = lines[ i ];
+			line = line.trim();
+
+			if ( line.length === 0 || line.charAt( 0 ) === '#' ) {
+
+				// Blank line or comment ignore
+				continue;
+
+			}
+
+			var pos = line.indexOf( ' ' );
+
+			var key = ( pos >= 0 ) ? line.substring( 0, pos ) : line;
+			key = key.toLowerCase();
+
+			var value = ( pos >= 0 ) ? line.substring( pos + 1 ) : '';
+			value = value.trim();
+
+			if ( key === 'newmtl' ) {
+
+				// New material
+
+				info = { name: value };
+				materialsInfo[ value ] = info;
+
+			} else if ( info ) {
+
+				if ( key === 'ka' || key === 'kd' || key === 'ks' ) {
+
+					var ss = value.split( delimiter_pattern, 3 );
+					info[ key ] = [ parseFloat( ss[ 0 ] ), parseFloat( ss[ 1 ] ), parseFloat( ss[ 2 ] ) ];
+
+				} else {
+
+					info[ key ] = value;
+
+				}
+
+			}
+
+		}
+
+		var materialCreator = new THREE.MTLLoader.MaterialCreator( this.texturePath || this.path, this.materialOptions );
+		materialCreator.setCrossOrigin( this.crossOrigin );
+		materialCreator.setManager( this.manager );
+		materialCreator.setMaterials( materialsInfo );
+		return materialCreator;
+
+	}
+
+};
+
+/**
+ * Create a new THREE-MTLLoader.MaterialCreator
+ * @param baseUrl - Url relative to which textures are loaded
+ * @param options - Set of options on how to construct the materials
+ *                  side: Which side to apply the material
+ *                        THREE.FrontSide (default), THREE.BackSide, THREE.DoubleSide
+ *                  wrap: What type of wrapping to apply for textures
+ *                        THREE.RepeatWrapping (default), THREE.ClampToEdgeWrapping, THREE.MirroredRepeatWrapping
+ *                  normalizeRGB: RGBs need to be normalized to 0-1 from 0-255
+ *                                Default: false, assumed to be already normalized
+ *                  ignoreZeroRGBs: Ignore values of RGBs (Ka,Kd,Ks) that are all 0's
+ *                                  Default: false
+ * @constructor
+ */
+
+THREE.MTLLoader.MaterialCreator = function ( baseUrl, options ) {
+
+	this.baseUrl = baseUrl || '';
+	this.options = options;
+	this.materialsInfo = {};
+	this.materials = {};
+	this.materialsArray = [];
+	this.nameLookup = {};
+
+	this.side = ( this.options && this.options.side ) ? this.options.side : THREE.FrontSide;
+	this.wrap = ( this.options && this.options.wrap ) ? this.options.wrap : THREE.RepeatWrapping;
+
+};
+
+THREE.MTLLoader.MaterialCreator.prototype = {
+
+	constructor: THREE.MTLLoader.MaterialCreator,
+
+	setCrossOrigin: function ( value ) {
+
+		this.crossOrigin = value;
+
+	},
+
+	setManager: function ( value ) {
+
+		this.manager = value;
+
+	},
+
+	setMaterials: function ( materialsInfo ) {
+
+		this.materialsInfo = this.convert( materialsInfo );
+		this.materials = {};
+		this.materialsArray = [];
+		this.nameLookup = {};
+
+	},
+
+	convert: function ( materialsInfo ) {
+
+		if ( ! this.options ) return materialsInfo;
+
+		var converted = {};
+
+		for ( var mn in materialsInfo ) {
+
+			// Convert materials info into normalized form based on options
+
+			var mat = materialsInfo[ mn ];
+
+			var covmat = {};
+
+			converted[ mn ] = covmat;
+
+			for ( var prop in mat ) {
+
+				var save = true;
+				var value = mat[ prop ];
+				var lprop = prop.toLowerCase();
+
+				switch ( lprop ) {
+
+					case 'kd':
+					case 'ka':
+					case 'ks':
+
+						// Diffuse color (color under white light) using RGB values
+
+						if ( this.options && this.options.normalizeRGB ) {
+
+							value = [ value[ 0 ] / 255, value[ 1 ] / 255, value[ 2 ] / 255 ];
+
+						}
+
+						if ( this.options && this.options.ignoreZeroRGBs ) {
+
+							if ( value[ 0 ] === 0 && value[ 1 ] === 0 && value[ 2 ] === 0 ) {
+
+								// ignore
+
+								save = false;
+
+							}
+
+						}
+
+						break;
+
+					default:
+
+						break;
+
+				}
+
+				if ( save ) {
+
+					covmat[ lprop ] = value;
+
+				}
+
+			}
+
+		}
+
+		return converted;
+
+	},
+
+	preload: function () {
+
+		for ( var mn in this.materialsInfo ) {
+
+			this.create( mn );
+
+		}
+
+	},
+
+	getIndex: function ( materialName ) {
+
+		return this.nameLookup[ materialName ];
+
+	},
+
+	getAsArray: function () {
+
+		var index = 0;
+
+		for ( var mn in this.materialsInfo ) {
+
+			this.materialsArray[ index ] = this.create( mn );
+			this.nameLookup[ mn ] = index;
+			index ++;
+
+		}
+
+		return this.materialsArray;
+
+	},
+
+	create: function ( materialName ) {
+
+		if ( this.materials[ materialName ] === undefined ) {
+
+			this.createMaterial_( materialName );
+
+		}
+
+		return this.materials[ materialName ];
+
+	},
+
+	createMaterial_: function ( materialName ) {
+
+		// Create material
+
+		var scope = this;
+		var mat = this.materialsInfo[ materialName ];
+		var params = {
+
+			name: materialName,
+			side: this.side
+
+		};
+
+		function resolveURL( baseUrl, url ) {
+
+			if ( typeof url !== 'string' || url === '' )
+				return '';
+
+			// Absolute URL
+			if ( /^https?:\/\//i.test( url ) ) return url;
+
+			return baseUrl + url;
+
+		}
+
+		function setMapForType( mapType, value ) {
+
+			if ( params[ mapType ] ) return; // Keep the first encountered texture
+
+			var texParams = scope.getTextureParams( value, params );
+			var map = scope.loadTexture( resolveURL( scope.baseUrl, texParams.url ) );
+
+			map.repeat.copy( texParams.scale );
+			map.offset.copy( texParams.offset );
+
+			map.wrapS = scope.wrap;
+			map.wrapT = scope.wrap;
+
+			params[ mapType ] = map;
+
+		}
+
+		for ( var prop in mat ) {
+
+			var value = mat[ prop ];
+
+			if ( value === '' ) continue;
+
+			switch ( prop.toLowerCase() ) {
+
+				// Ns is material specular exponent
+
+				case 'kd':
+
+					// Diffuse color (color under white light) using RGB values
+
+					params.color = new THREE.Color().fromArray( value );
+
+					break;
+
+				case 'ks':
+
+					// Specular color (color when light is reflected from shiny surface) using RGB values
+					params.specular = new THREE.Color().fromArray( value );
+
+					break;
+
+				case 'map_kd':
+
+					// Diffuse texture map
+
+					setMapForType( "map", value );
+
+					break;
+
+				case 'map_ks':
+
+					// Specular map
+
+					setMapForType( "specularMap", value );
+
+					break;
+
+				case 'map_bump':
+				case 'bump':
+
+					// Bump texture map
+
+					setMapForType( "bumpMap", value );
+
+					break;
+
+				case 'ns':
+
+					// The specular exponent (defines the focus of the specular highlight)
+					// A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
+
+					params.shininess = parseFloat( value );
+
+					break;
+
+				case 'd':
+
+					if ( value < 1 ) {
+
+						params.opacity = value;
+						params.transparent = true;
+
+					}
+
+					break;
+
+				case 'Tr':
+
+					if ( value > 0 ) {
+
+						params.opacity = 1 - value;
+						params.transparent = true;
+
+					}
+
+					break;
+
+				default:
+					break;
+
+			}
+
+		}
+
+		this.materials[ materialName ] = new THREE.MeshPhongMaterial( params );
+		return this.materials[ materialName ];
+
+	},
+
+	getTextureParams: function ( value, matParams ) {
+
+		var texParams = {
+
+			scale: new THREE.Vector2( 1, 1 ),
+			offset: new THREE.Vector2( 0, 0 )
+
+		 };
+
+		var items = value.split( /\s+/ );
+		var pos;
+
+		pos = items.indexOf( '-bm' );
+
+		if ( pos >= 0 ) {
+
+			matParams.bumpScale = parseFloat( items[ pos + 1 ] );
+			items.splice( pos, 2 );
+
+		}
+
+		pos = items.indexOf( '-s' );
+
+		if ( pos >= 0 ) {
+
+			texParams.scale.set( parseFloat( items[ pos + 1 ] ), parseFloat( items[ pos + 2 ] ) );
+			items.splice( pos, 4 ); // we expect 3 parameters here!
+
+		}
+
+		pos = items.indexOf( '-o' );
+
+		if ( pos >= 0 ) {
+
+			texParams.offset.set( parseFloat( items[ pos + 1 ] ), parseFloat( items[ pos + 2 ] ) );
+			items.splice( pos, 4 ); // we expect 3 parameters here!
+
+		}
+
+		texParams.url = items.join( ' ' ).trim();
+		return texParams;
+
+	},
+
+	loadTexture: function ( url, mapping, onLoad, onProgress, onError ) {
+
+		var texture;
+		var loader = THREE.Loader.Handlers.get( url );
+		var manager = ( this.manager !== undefined ) ? this.manager : THREE.DefaultLoadingManager;
+
+		if ( loader === null ) {
+
+			loader = new THREE.TextureLoader( manager );
+
+		}
+
+		if ( loader.setCrossOrigin ) loader.setCrossOrigin( this.crossOrigin );
+		texture = loader.load( url, onLoad, onProgress, onError );
+
+		if ( mapping !== undefined ) texture.mapping = mapping;
+
+		return texture;
+
+	}
+
+};
+
+/**
  * @author mrdoob / http://mrdoob.com/
  */
 
@@ -5138,4 +5679,4 @@ var KeyCodes;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1])(1)
 });
-!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.virtex=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var Virtex;!function(Virtex){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();Virtex.StringValue=StringValue}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(Virtex){var FileType=function(_super){function FileType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(FileType,_super),FileType}(Virtex.StringValue);FileType.DRACO=new FileType("application/octet-stream"),FileType.GLTF=new FileType("model/gltf+json"),FileType.OBJ=new FileType("text/plain"),FileType.THREEJS=new FileType("application/vnd.threejs+json"),Virtex.FileType=FileType}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var DRACOFileTypeHandler=function(){function DRACOFileTypeHandler(){}return DRACOFileTypeHandler.setup=function(viewport,obj){var geometry,bufferGeometry=obj,material=new THREE.MeshStandardMaterial({vertexColors:THREE.VertexColors});null==bufferGeometry.index?geometry=new THREE.Points(bufferGeometry,material):(bufferGeometry.computeVertexNormals(),geometry=new THREE.Mesh(bufferGeometry,material)),bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;geometry.scale.multiplyScalar(scale),geometry.position.x=-midX*scale,geometry.position.y=-midY*scale,geometry.position.z=-midZ*scale,geometry.castShadow=!0,geometry.receiveShadow=!0,obj=geometry,viewport.objectGroup.add(obj),viewport.createCamera()},DRACOFileTypeHandler}();Virtex.DRACOFileTypeHandler=DRACOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var glTFFileTypeHandler=function(){function glTFFileTypeHandler(){}return glTFFileTypeHandler.setup=function(viewport,obj){if(viewport.objectGroup.add(obj.scene),obj.animations)for(var animations=obj.animations,i=0,l=animations.length;i<l;i++);viewport.scene=obj.scene,obj.cameras&&obj.cameras.length&&(viewport.camera=obj.cameras[0])},glTFFileTypeHandler}();Virtex.glTFFileTypeHandler=glTFFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ObjFileTypeHandler=function(){function ObjFileTypeHandler(){}return ObjFileTypeHandler.setup=function(viewport,obj){viewport.objectGroup.add(obj),viewport.createCamera()},ObjFileTypeHandler}();Virtex.ObjFileTypeHandler=ObjFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ThreeJSFileTypeHandler=function(){function ThreeJSFileTypeHandler(){}return ThreeJSFileTypeHandler.setup=function(viewport,obj){viewport.objectGroup.add(obj),viewport.createCamera()},ThreeJSFileTypeHandler}();Virtex.ThreeJSFileTypeHandler=ThreeJSFileTypeHandler}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}(),requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(callback){window.setTimeout(callback,5)}}();!function(Virtex){var Viewport=function(_super){function Viewport(options){var _this=_super.call(this,options)||this;_this._viewportCenter=new THREE.Vector2,_this._isFullscreen=!1,_this._isMouseDown=!1,_this._isVRMode=!1,_this._mousePos=new THREE.Vector2,_this._mousePosOnMouseDown=new THREE.Vector2,_this._pinchStart=new THREE.Vector2,_this._targetRotationOnMouseDown=new THREE.Vector2,_this._targetRotation=new THREE.Vector2,_this._vrEnabled=!0;var success=_this._init();return _this._resize(),success&&_this._tick(),_this}return __extends(Viewport,_super),Viewport.prototype._init=function(){var success=_super.prototype._init.call(this);return success?Detector.webgl?(this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>'),this._$viewport=this._$element.find(".viewport"),this._$loading=this._$element.find(".loading"),this._$loadingBar=this._$loading.find(".bar"),this._$loading.hide(),this.scene=new THREE.Scene,this.objectGroup=new THREE.Object3D,this.scene.add(this.objectGroup),this._createLights(),this.createCamera(),this._createControls(),this._createRenderer(),this._createEventListeners(),this._loadObject(this.options.data.file),this.options.data.showStats&&(this._stats=new Stats,this._stats.domElement.style.position="absolute",this._stats.domElement.style.top="0px",this._$viewport.append(this._stats.domElement)),!0):(Detector.addGetWebGLMessage(),this._$oldie=$("#oldie"),this._$oldie.appendTo(this._$element),!1):(console.error("Virtex failed to initialise"),!1)},Viewport.prototype.data=function(){return{ambientLightColor:13684944,ambientLightIntensity:1,cameraZ:4.5,directionalLight1Color:16777215,directionalLight1Intensity:.75,directionalLight2Color:10584,directionalLight2Intensity:.5,doubleSided:!0,fadeSpeed:1750,far:1e4,file:"",fullscreenEnabled:!0,maxZoom:10,minZoom:2,near:.05,shading:THREE.SmoothShading,showStats:!1,type:Virtex.FileType.THREEJS,vrBackgroundColor:0,zoomSpeed:1}},Viewport.prototype._getVRDisplay=function(){return new Promise(function(resolve){navigator.getVRDisplays().then(function(devices){for(var i=0;i<devices.length;i++)if(devices[i]instanceof VRDisplay){resolve(devices[i]);break}resolve(void 0)},function(){resolve(void 0)})})},Viewport.prototype._createLights=function(){this._lightGroup=new THREE.Object3D,this.scene.add(this._lightGroup);var light1=new THREE.DirectionalLight(this.options.data.directionalLight1Color,this.options.data.directionalLight1Intensity);light1.position.set(1,1,1),this._lightGroup.add(light1);var light2=new THREE.DirectionalLight(this.options.data.directionalLight2Color,this.options.data.directionalLight2Intensity);light2.position.set(-1,-1,-1),this._lightGroup.add(light2);var ambientLight=new THREE.AmbientLight(this.options.data.ambientLightColor,this.options.data.ambientLightIntensity);this._lightGroup.add(ambientLight)},Viewport.prototype.createCamera=function(){this.camera=new THREE.PerspectiveCamera(this._getFov(),this._getAspectRatio(),this.options.data.near,this.options.data.far);var cameraZ=this._getCameraZ();this.camera.position.z=this._targetZoom=cameraZ},Viewport.prototype._createRenderer=function(){this._renderer=new THREE.WebGLRenderer({antialias:!0,alpha:!0}),this._isVRMode?(this._renderer.setClearColor(this.options.data.vrBackgroundColor),this._vrEffect=new THREE.VREffect(this._renderer),this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height())):(this._renderer.setClearColor(this.options.data.vrBackgroundColor,0),this._renderer.setSize(this._$viewport.width(),this._$viewport.height())),this._$viewport.empty().append(this._renderer.domElement)},Viewport.prototype._createControls=function(){this._isVRMode&&(this._vrControls=new THREE.VRControls(this.camera))},Viewport.prototype._createEventListeners=function(){var _this=this;this.options.data.fullscreenEnabled&&$(document).on("webkitfullscreenchange mozfullscreenchange fullscreenchange",function(){_this._fullscreenChanged()}),this._$element.on("mousedown",function(e){_this._onMouseDown(e.originalEvent)}),this._$element.on("mousemove",function(e){_this._onMouseMove(e.originalEvent)}),this._$element.on("mouseup",function(){_this._onMouseUp()}),this._$element.on("mouseout",function(){_this._onMouseOut()}),this._$element.on("mousewheel",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("DOMMouseScroll",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("touchstart",function(e){_this._onTouchStart(e.originalEvent)}),this._$element.on("touchmove",function(e){_this._onTouchMove(e.originalEvent)}),this._$element.on("touchend",function(){_this._onTouchEnd()}),window.addEventListener("resize",function(){return _this._resize()},!1)},Viewport.prototype._loadObject=function(object){var _this=this;this._$loading.show();var loader;switch(this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():loader=new THREE.DRACOLoader;break;case Virtex.FileType.GLTF.toString():loader=new THREE.GLTFLoader;break;case Virtex.FileType.OBJ.toString():loader=new THREE.OBJLoader;break;case Virtex.FileType.THREEJS.toString():loader=new THREE.ObjectLoader}loader.setCrossOrigin&&loader.setCrossOrigin("anonymous"),loader.load(object,function(obj){switch(_this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():Virtex.DRACOFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.GLTF.toString():Virtex.glTFFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.THREEJS.toString():Virtex.ThreeJSFileTypeHandler.setup(_this,obj)}_this._$loading.fadeOut(_this.options.data.fadeSpeed),_this.fire(Events.LOADED,obj)},function(e){e.lengthComputable&&_this._loadProgress(e.loaded/e.total)},function(e){console.error(e)})},Viewport.prototype._getBoundingBox=function(){return(new THREE.Box3).setFromObject(this.objectGroup)},Viewport.prototype._getBoundingWidth=function(){return this._getBoundingBox().getSize().x},Viewport.prototype._getBoundingHeight=function(){return this._getBoundingBox().getSize().y},Viewport.prototype._getCameraZ=function(){return this._getBoundingWidth()*this.options.data.cameraZ},Viewport.prototype._getFov=function(){if(!this.camera)return 1;var width=this._getBoundingWidth(),height=this._getBoundingHeight(),dist=this._getCameraZ()-width,fov=2*Math.atan(height/(2*dist))*(180/Math.PI);return fov},Viewport.prototype._loadProgress=function(progress){var fullWidth=this._$loading.width(),width=Math.floor(fullWidth*progress);this._$loadingBar.width(width)},Viewport.prototype._fullscreenChanged=function(){this._isFullscreen?(this.exitFullscreen(),this._$element.width(this._lastWidth),this._$element.height(this._lastHeight)):(this._lastWidth=this._getWidth(),this._lastHeight=this._getHeight()),this._isFullscreen=!this._isFullscreen,this._resize()},Viewport.prototype._onMouseDown=function(event){event.preventDefault(),this._isMouseDown=!0,this._mousePosOnMouseDown.x=event.clientX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=event.clientY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y},Viewport.prototype._onMouseMove=function(event){this._mousePos.x=event.clientX-this._viewportCenter.x,this._mousePos.y=event.clientY-this._viewportCenter.y,this._isMouseDown&&(this._targetRotation.y=this._targetRotationOnMouseDown.y+.02*(this._mousePos.y-this._mousePosOnMouseDown.y),this._targetRotation.x=this._targetRotationOnMouseDown.x+.02*(this._mousePos.x-this._mousePosOnMouseDown.x))},Viewport.prototype._onMouseUp=function(){this._isMouseDown=!1},Viewport.prototype._onMouseOut=function(){this._isMouseDown=!1},Viewport.prototype._onMouseWheel=function(event){event.preventDefault(),event.stopPropagation();var delta=0;void 0!==event.wheelDelta?delta=event.wheelDelta:void 0!==event.detail&&(delta=-event.detail),delta>0?this.zoomIn():delta<0&&this.zoomOut()},Viewport.prototype._onTouchStart=function(event){var touches=event.touches;1===touches.length&&(this._isMouseDown=!0,event.preventDefault(),this._mousePosOnMouseDown.x=touches[0].pageX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=touches[0].pageY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y)},Viewport.prototype._onTouchMove=function(event){event.preventDefault(),event.stopPropagation();var touches=event.touches;switch(touches.length){case 1:event.preventDefault(),this._mousePos.x=touches[0].pageX-this._viewportCenter.x,this._targetRotation.x=this._targetRotationOnMouseDown.x+.05*(this._mousePos.x-this._mousePosOnMouseDown.x),this._mousePos.y=touches[0].pageY-this._viewportCenter.y,this._targetRotation.y=this._targetRotationOnMouseDown.y+.05*(this._mousePos.y-this._mousePosOnMouseDown.y);break;case 2:var dx=touches[0].pageX-touches[1].pageX,dy=touches[0].pageY-touches[1].pageY,distance=Math.sqrt(dx*dx+dy*dy),pinchEnd=new THREE.Vector2(0,distance),pinchDelta=new THREE.Vector2;pinchDelta.subVectors(pinchEnd,this._pinchStart),pinchDelta.y>0?this.zoomIn():pinchDelta.y<0&&this.zoomOut(),this._pinchStart.copy(pinchEnd);break;case 3:}},Viewport.prototype._onTouchEnd=function(){this._isMouseDown=!1},Viewport.prototype._tick=function(){var _this=this;requestAnimFrame(function(){return _this._tick()}),this._update(),this._draw(),this.options.data.showStats&&this._stats.update()},Viewport.prototype.rotateY=function(radians){var rotation=this.objectGroup.rotation.y+radians;this.objectGroup.rotation.y=rotation},Viewport.prototype._update=function(){if(this._isVRMode)this._vrControls.update();else{this.rotateY(.1*(this._targetRotation.x-this.objectGroup.rotation.y));var finalRotationY=this._targetRotation.y-this.objectGroup.rotation.x;this.objectGroup.rotation.x<=1&&this.objectGroup.rotation.x>=-1&&(this.objectGroup.rotation.x+=.1*finalRotationY),this.objectGroup.rotation.x>1?this.objectGroup.rotation.x=1:this.objectGroup.rotation.x<-1&&(this.objectGroup.rotation.x=-1);var zoomDelta=.1*(this._targetZoom-this.camera.position.z);this.camera.position.z+=zoomDelta}},Viewport.prototype._draw=function(){this._isVRMode?this._vrEffect.render(this.scene,this.camera):this._renderer.render(this.scene,this.camera)},Viewport.prototype._getWidth=function(){return this._isFullscreen?window.innerWidth:this._$element.width()},Viewport.prototype._getHeight=function(){return this._isFullscreen?window.innerHeight:this._$element.height()},Viewport.prototype._getZoomSpeed=function(){return this._getBoundingWidth()*this.options.data.zoomSpeed},Viewport.prototype._getMaxZoom=function(){return this._getBoundingWidth()*this.options.data.maxZoom},Viewport.prototype._getMinZoom=function(){return this._getBoundingWidth()*this.options.data.minZoom},Viewport.prototype.zoomIn=function(){var targetZoom=this.camera.position.z-this._getZoomSpeed();targetZoom>this._getMinZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMinZoom()},Viewport.prototype.zoomOut=function(){var targetZoom=this.camera.position.z+this._getZoomSpeed();targetZoom<this._getMaxZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMaxZoom()},Viewport.prototype.enterVR=function(){var _this=this;this._vrEnabled&&(this._isVRMode=!0,this._prevCameraPosition=this.camera.position.clone(),this._prevCameraRotation=this.camera.rotation.clone(),this._createControls(),this._createRenderer(),this._getVRDisplay().then(function(display){display&&(_this._vrEffect.setVRDisplay(display),_this._vrControls.setVRDisplay(display),_this._vrEffect.setFullScreen(!0))}))},Viewport.prototype.exitVR=function(){this._vrEnabled&&(this._isVRMode=!1,this.camera.position.copy(this._prevCameraPosition),this.camera.rotation.copy(this._prevCameraRotation),this._createRenderer())},Viewport.prototype.toggleVR=function(){this._vrEnabled&&(this._isVRMode?this.exitVR():this.enterVR())},Viewport.prototype.enterFullscreen=function(){if(this.options.data.fullscreenEnabled){var elem=this._$element[0],requestFullScreen=this._getRequestFullScreen(elem);requestFullScreen&&requestFullScreen.call(elem)}},Viewport.prototype.exitFullscreen=function(){var exitFullScreen=this._getExitFullScreen();exitFullScreen&&exitFullScreen.call(document)},Viewport.prototype._getRequestFullScreen=function(elem){return elem.requestFullscreen?elem.requestFullscreen:elem.msRequestFullscreen?elem.msRequestFullscreen:elem.mozRequestFullScreen?elem.mozRequestFullScreen:!!elem.webkitRequestFullscreen&&elem.webkitRequestFullscreen},Viewport.prototype._getExitFullScreen=function(){return document.exitFullscreen?document.exitFullscreen:document.msExitFullscreen?document.msExitFullscreen:document.mozCancelFullScreen?document.mozCancelFullScreen:!!document.webkitExitFullscreen&&document.webkitExitFullscreen},Viewport.prototype._getAspectRatio=function(){return this._$viewport.width()/this._$viewport.height()},Viewport.prototype.resize=function(){this._resize()},Viewport.prototype._resize=function(){this._$element&&this._$viewport?(this._$element.width(this._getWidth()),this._$element.height(this._getHeight()),this._$viewport.width(this._getWidth()),this._$viewport.height(this._getHeight()),this._viewportCenter.x=this._$viewport.width()/2,this._viewportCenter.y=this._$viewport.height()/2,this.camera.aspect=this._getAspectRatio(),this.camera.updateProjectionMatrix(),this._isVRMode?this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height()):this._renderer.setSize(this._$viewport.width(),this._$viewport.height()),this._$loading.css({left:this._viewportCenter.x-this._$loading.width()/2,top:this._viewportCenter.y-this._$loading.height()/2})):this._$oldie&&this._$oldie.css({left:this._$element.width()/2-this._$oldie.outerWidth()/2,top:this._$element.height()/2-this._$oldie.outerHeight()/2})},Viewport}(_Components.BaseComponent);Virtex.Viewport=Viewport;var Events=function(){function Events(){}return Events}();Events.LOADED="loaded",Virtex.Events=Events}(Virtex||(Virtex={})),function(g){g.Virtex||(g.Virtex=Virtex)}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});
+!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.virtex=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var Virtex;!function(Virtex){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();Virtex.StringValue=StringValue}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(Virtex){var FileType=function(_super){function FileType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(FileType,_super),FileType}(Virtex.StringValue);FileType.DRACO=new FileType("application/octet-stream"),FileType.GLTF=new FileType("model/gltf+json"),FileType.OBJ=new FileType("text/plain"),FileType.THREEJS=new FileType("application/vnd.threejs+json"),Virtex.FileType=FileType}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var DRACOFileTypeHandler=function(){function DRACOFileTypeHandler(){}return DRACOFileTypeHandler.setup=function(viewport,obj){var geometry,bufferGeometry=obj,material=new THREE.MeshStandardMaterial({vertexColors:THREE.VertexColors});null==bufferGeometry.index?geometry=new THREE.Points(bufferGeometry,material):(bufferGeometry.computeVertexNormals(),geometry=new THREE.Mesh(bufferGeometry,material)),bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;geometry.scale.multiplyScalar(scale),geometry.position.x=-midX*scale,geometry.position.y=-midY*scale,geometry.position.z=-midZ*scale,geometry.castShadow=!0,geometry.receiveShadow=!0,obj=geometry,viewport.objectGroup.add(obj),viewport.createCamera()},DRACOFileTypeHandler}();Virtex.DRACOFileTypeHandler=DRACOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var glTFFileTypeHandler=function(){function glTFFileTypeHandler(){}return glTFFileTypeHandler.setup=function(viewport,obj){if(viewport.objectGroup.add(obj.scene),obj.animations)for(var animations=obj.animations,i=0,l=animations.length;i<l;i++);viewport.scene=obj.scene,obj.cameras&&obj.cameras.length&&(viewport.camera=obj.cameras[0])},glTFFileTypeHandler}();Virtex.glTFFileTypeHandler=glTFFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ObjFileTypeHandler=function(){function ObjFileTypeHandler(){}return ObjFileTypeHandler.setup=function(viewport,obj,objpath){var imgloader=new THREE.MTLLoader;imgloader.setPath(objpath.substring(0,objpath.lastIndexOf("/")+1)),imgloader.load(obj.materialLibraries[0],function(materials){var objLoader=new THREE.OBJLoader;objLoader.setMaterials(materials),objLoader.load(objpath,function(object){viewport.objectGroup.add(object),viewport.createCamera()},function(e){console.log("obj progress",e)},function(e){console.log("obj error",e)})},function(e){console.log("mtl progress",e)},function(e){console.log("mtl error",e)})},ObjFileTypeHandler}();Virtex.ObjFileTypeHandler=ObjFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ThreeJSFileTypeHandler=function(){function ThreeJSFileTypeHandler(){}return ThreeJSFileTypeHandler.setup=function(viewport,obj){viewport.objectGroup.add(obj),viewport.createCamera()},ThreeJSFileTypeHandler}();Virtex.ThreeJSFileTypeHandler=ThreeJSFileTypeHandler}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}(),requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(callback){window.setTimeout(callback,5)}}();!function(Virtex){var Viewport=function(_super){function Viewport(options){var _this=_super.call(this,options)||this;_this._viewportCenter=new THREE.Vector2,_this._isFullscreen=!1,_this._isMouseDown=!1,_this._isVRMode=!1,_this._mousePos=new THREE.Vector2,_this._mousePosOnMouseDown=new THREE.Vector2,_this._pinchStart=new THREE.Vector2,_this._targetRotationOnMouseDown=new THREE.Vector2,_this._targetRotation=new THREE.Vector2,_this._vrEnabled=!0;var success=_this._init();return _this._resize(),success&&_this._tick(),_this}return __extends(Viewport,_super),Viewport.prototype._init=function(){var success=_super.prototype._init.call(this);return success?Detector.webgl?(this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>'),this._$viewport=this._$element.find(".viewport"),this._$loading=this._$element.find(".loading"),this._$loadingBar=this._$loading.find(".bar"),this._$loading.hide(),this.scene=new THREE.Scene,this.objectGroup=new THREE.Object3D,this.scene.add(this.objectGroup),this._createLights(),this.createCamera(),this._createControls(),this._createRenderer(),this._createEventListeners(),this._loadObject(this.options.data.file),this.options.data.showStats&&(this._stats=new Stats,this._stats.domElement.style.position="absolute",this._stats.domElement.style.top="0px",this._$viewport.append(this._stats.domElement)),!0):(Detector.addGetWebGLMessage(),this._$oldie=$("#oldie"),this._$oldie.appendTo(this._$element),!1):(console.error("Virtex failed to initialise"),!1)},Viewport.prototype.data=function(){return{ambientLightColor:13684944,ambientLightIntensity:1,cameraZ:4.5,directionalLight1Color:16777215,directionalLight1Intensity:.75,directionalLight2Color:10584,directionalLight2Intensity:.5,doubleSided:!0,fadeSpeed:1750,far:1e4,file:"",fullscreenEnabled:!0,maxZoom:10,minZoom:2,near:.05,shading:THREE.SmoothShading,showStats:!1,type:Virtex.FileType.THREEJS,vrBackgroundColor:0,zoomSpeed:1}},Viewport.prototype._getVRDisplay=function(){return new Promise(function(resolve){navigator.getVRDisplays().then(function(devices){for(var i=0;i<devices.length;i++)if(devices[i]instanceof VRDisplay){resolve(devices[i]);break}resolve(void 0)},function(){resolve(void 0)})})},Viewport.prototype._createLights=function(){this._lightGroup=new THREE.Object3D,this.scene.add(this._lightGroup);var light1=new THREE.DirectionalLight(this.options.data.directionalLight1Color,this.options.data.directionalLight1Intensity);light1.position.set(1,1,1),this._lightGroup.add(light1);var light2=new THREE.DirectionalLight(this.options.data.directionalLight2Color,this.options.data.directionalLight2Intensity);light2.position.set(-1,-1,-1),this._lightGroup.add(light2);var ambientLight=new THREE.AmbientLight(this.options.data.ambientLightColor,this.options.data.ambientLightIntensity);this._lightGroup.add(ambientLight)},Viewport.prototype.createCamera=function(){this.camera=new THREE.PerspectiveCamera(this._getFov(),this._getAspectRatio(),this.options.data.near,this.options.data.far);var cameraZ=this._getCameraZ();this.camera.position.z=this._targetZoom=cameraZ},Viewport.prototype._createRenderer=function(){this._renderer=new THREE.WebGLRenderer({antialias:!0,alpha:!0}),this._isVRMode?(this._renderer.setClearColor(this.options.data.vrBackgroundColor),this._vrEffect=new THREE.VREffect(this._renderer),this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height())):(this._renderer.setClearColor(this.options.data.vrBackgroundColor,0),this._renderer.setSize(this._$viewport.width(),this._$viewport.height())),this._$viewport.empty().append(this._renderer.domElement)},Viewport.prototype._createControls=function(){this._isVRMode&&(this._vrControls=new THREE.VRControls(this.camera))},Viewport.prototype._createEventListeners=function(){var _this=this;this.options.data.fullscreenEnabled&&$(document).on("webkitfullscreenchange mozfullscreenchange fullscreenchange",function(){_this._fullscreenChanged()}),this._$element.on("mousedown",function(e){_this._onMouseDown(e.originalEvent)}),this._$element.on("mousemove",function(e){_this._onMouseMove(e.originalEvent)}),this._$element.on("mouseup",function(){_this._onMouseUp()}),this._$element.on("mouseout",function(){_this._onMouseOut()}),this._$element.on("mousewheel",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("DOMMouseScroll",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("touchstart",function(e){_this._onTouchStart(e.originalEvent)}),this._$element.on("touchmove",function(e){_this._onTouchMove(e.originalEvent)}),this._$element.on("touchend",function(){_this._onTouchEnd()}),window.addEventListener("resize",function(){return _this._resize()},!1)},Viewport.prototype._loadObject=function(objectPath){var _this=this;this._$loading.show();var loader;switch(this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():loader=new THREE.DRACOLoader;break;case Virtex.FileType.GLTF.toString():loader=new THREE.GLTFLoader;break;case Virtex.FileType.OBJ.toString():loader=new THREE.OBJLoader;break;case Virtex.FileType.THREEJS.toString():loader=new THREE.ObjectLoader}loader.setCrossOrigin&&loader.setCrossOrigin("anonymous"),loader.load(objectPath,function(obj){switch(_this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():Virtex.DRACOFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.GLTF.toString():Virtex.glTFFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.THREEJS.toString():Virtex.ThreeJSFileTypeHandler.setup(_this,obj);break;case Virtex.FileType.OBJ.toString():Virtex.ObjFileTypeHandler.setup(_this,obj,objectPath)}_this._$loading.fadeOut(_this.options.data.fadeSpeed),_this.fire(Events.LOADED,obj)},function(e){e.lengthComputable&&_this._loadProgress(e.loaded/e.total)},function(e){console.error(e)})},Viewport.prototype._getBoundingBox=function(){return(new THREE.Box3).setFromObject(this.objectGroup)},Viewport.prototype._getBoundingWidth=function(){return this._getBoundingBox().getSize().x},Viewport.prototype._getBoundingHeight=function(){return this._getBoundingBox().getSize().y},Viewport.prototype._getCameraZ=function(){return this._getBoundingWidth()*this.options.data.cameraZ},Viewport.prototype._getFov=function(){if(!this.camera)return 1;var width=this._getBoundingWidth(),height=this._getBoundingHeight(),dist=this._getCameraZ()-width,fov=2*Math.atan(height/(2*dist))*(180/Math.PI);return fov},Viewport.prototype._loadProgress=function(progress){var fullWidth=this._$loading.width(),width=Math.floor(fullWidth*progress);this._$loadingBar.width(width)},Viewport.prototype._fullscreenChanged=function(){this._isFullscreen?(this.exitFullscreen(),this._$element.width(this._lastWidth),this._$element.height(this._lastHeight)):(this._lastWidth=this._getWidth(),this._lastHeight=this._getHeight()),this._isFullscreen=!this._isFullscreen,this._resize()},Viewport.prototype._onMouseDown=function(event){event.preventDefault(),this._isMouseDown=!0,this._mousePosOnMouseDown.x=event.clientX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=event.clientY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y},Viewport.prototype._onMouseMove=function(event){this._mousePos.x=event.clientX-this._viewportCenter.x,this._mousePos.y=event.clientY-this._viewportCenter.y,this._isMouseDown&&(this._targetRotation.y=this._targetRotationOnMouseDown.y+.02*(this._mousePos.y-this._mousePosOnMouseDown.y),this._targetRotation.x=this._targetRotationOnMouseDown.x+.02*(this._mousePos.x-this._mousePosOnMouseDown.x))},Viewport.prototype._onMouseUp=function(){this._isMouseDown=!1},Viewport.prototype._onMouseOut=function(){this._isMouseDown=!1},Viewport.prototype._onMouseWheel=function(event){event.preventDefault(),event.stopPropagation();var delta=0;void 0!==event.wheelDelta?delta=event.wheelDelta:void 0!==event.detail&&(delta=-event.detail),delta>0?this.zoomIn():delta<0&&this.zoomOut()},Viewport.prototype._onTouchStart=function(event){var touches=event.touches;1===touches.length&&(this._isMouseDown=!0,event.preventDefault(),this._mousePosOnMouseDown.x=touches[0].pageX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=touches[0].pageY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y)},Viewport.prototype._onTouchMove=function(event){event.preventDefault(),event.stopPropagation();var touches=event.touches;switch(touches.length){case 1:event.preventDefault(),this._mousePos.x=touches[0].pageX-this._viewportCenter.x,this._targetRotation.x=this._targetRotationOnMouseDown.x+.05*(this._mousePos.x-this._mousePosOnMouseDown.x),this._mousePos.y=touches[0].pageY-this._viewportCenter.y,this._targetRotation.y=this._targetRotationOnMouseDown.y+.05*(this._mousePos.y-this._mousePosOnMouseDown.y);break;case 2:var dx=touches[0].pageX-touches[1].pageX,dy=touches[0].pageY-touches[1].pageY,distance=Math.sqrt(dx*dx+dy*dy),pinchEnd=new THREE.Vector2(0,distance),pinchDelta=new THREE.Vector2;pinchDelta.subVectors(pinchEnd,this._pinchStart),pinchDelta.y>0?this.zoomIn():pinchDelta.y<0&&this.zoomOut(),this._pinchStart.copy(pinchEnd);break;case 3:}},Viewport.prototype._onTouchEnd=function(){this._isMouseDown=!1},Viewport.prototype._tick=function(){var _this=this;requestAnimFrame(function(){return _this._tick()}),this._update(),this._draw(),this.options.data.showStats&&this._stats.update()},Viewport.prototype.rotateY=function(radians){var rotation=this.objectGroup.rotation.y+radians;this.objectGroup.rotation.y=rotation},Viewport.prototype._update=function(){if(this._isVRMode)this._vrControls.update();else{this.rotateY(.1*(this._targetRotation.x-this.objectGroup.rotation.y));var finalRotationY=this._targetRotation.y-this.objectGroup.rotation.x;this.objectGroup.rotation.x<=1&&this.objectGroup.rotation.x>=-1&&(this.objectGroup.rotation.x+=.1*finalRotationY),this.objectGroup.rotation.x>1?this.objectGroup.rotation.x=1:this.objectGroup.rotation.x<-1&&(this.objectGroup.rotation.x=-1);var zoomDelta=.1*(this._targetZoom-this.camera.position.z);this.camera.position.z+=zoomDelta}},Viewport.prototype._draw=function(){this._isVRMode?this._vrEffect.render(this.scene,this.camera):this._renderer.render(this.scene,this.camera)},Viewport.prototype._getWidth=function(){return this._isFullscreen?window.innerWidth:this._$element.width()},Viewport.prototype._getHeight=function(){return this._isFullscreen?window.innerHeight:this._$element.height()},Viewport.prototype._getZoomSpeed=function(){return this._getBoundingWidth()*this.options.data.zoomSpeed},Viewport.prototype._getMaxZoom=function(){return this._getBoundingWidth()*this.options.data.maxZoom},Viewport.prototype._getMinZoom=function(){return this._getBoundingWidth()*this.options.data.minZoom},Viewport.prototype.zoomIn=function(){var targetZoom=this.camera.position.z-this._getZoomSpeed();targetZoom>this._getMinZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMinZoom()},Viewport.prototype.zoomOut=function(){var targetZoom=this.camera.position.z+this._getZoomSpeed();targetZoom<this._getMaxZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMaxZoom()},Viewport.prototype.enterVR=function(){var _this=this;this._vrEnabled&&(this._isVRMode=!0,this._prevCameraPosition=this.camera.position.clone(),this._prevCameraRotation=this.camera.rotation.clone(),this._createControls(),this._createRenderer(),this._getVRDisplay().then(function(display){display&&(_this._vrEffect.setVRDisplay(display),_this._vrControls.setVRDisplay(display),_this._vrEffect.setFullScreen(!0))}))},Viewport.prototype.exitVR=function(){this._vrEnabled&&(this._isVRMode=!1,this.camera.position.copy(this._prevCameraPosition),this.camera.rotation.copy(this._prevCameraRotation),this._createRenderer())},Viewport.prototype.toggleVR=function(){this._vrEnabled&&(this._isVRMode?this.exitVR():this.enterVR())},Viewport.prototype.enterFullscreen=function(){if(this.options.data.fullscreenEnabled){var elem=this._$element[0],requestFullScreen=this._getRequestFullScreen(elem);requestFullScreen&&requestFullScreen.call(elem)}},Viewport.prototype.exitFullscreen=function(){var exitFullScreen=this._getExitFullScreen();exitFullScreen&&exitFullScreen.call(document)},Viewport.prototype._getRequestFullScreen=function(elem){return elem.requestFullscreen?elem.requestFullscreen:elem.msRequestFullscreen?elem.msRequestFullscreen:elem.mozRequestFullScreen?elem.mozRequestFullScreen:!!elem.webkitRequestFullscreen&&elem.webkitRequestFullscreen},Viewport.prototype._getExitFullScreen=function(){return document.exitFullscreen?document.exitFullscreen:document.msExitFullscreen?document.msExitFullscreen:document.mozCancelFullScreen?document.mozCancelFullScreen:!!document.webkitExitFullscreen&&document.webkitExitFullscreen},Viewport.prototype._getAspectRatio=function(){return this._$viewport.width()/this._$viewport.height()},Viewport.prototype.resize=function(){this._resize()},Viewport.prototype._resize=function(){this._$element&&this._$viewport?(this._$element.width(this._getWidth()),this._$element.height(this._getHeight()),this._$viewport.width(this._getWidth()),this._$viewport.height(this._getHeight()),this._viewportCenter.x=this._$viewport.width()/2,this._viewportCenter.y=this._$viewport.height()/2,this.camera.aspect=this._getAspectRatio(),this.camera.updateProjectionMatrix(),this._isVRMode?this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height()):this._renderer.setSize(this._$viewport.width(),this._$viewport.height()),this._$loading.css({left:this._viewportCenter.x-this._$loading.width()/2,top:this._viewportCenter.y-this._$loading.height()/2})):this._$oldie&&this._$oldie.css({left:this._$element.width()/2-this._$oldie.outerWidth()/2,top:this._$element.height()/2-this._$oldie.outerHeight()/2})},Viewport}(_Components.BaseComponent);Virtex.Viewport=Viewport;var Events=function(){function Events(){}return Events}();Events.LOADED="loaded",Virtex.Events=Events}(Virtex||(Virtex={})),function(g){g.Virtex||(g.Virtex=Virtex)}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});

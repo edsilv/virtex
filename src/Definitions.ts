@@ -11,6 +11,18 @@ interface Document{
 }
 
 declare module THREE {
+
+    export class MTLLoader {
+        constructor(manager?: LoadingManager);
+
+        manager: LoadingManager;
+
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+        setMaterials(materials: any): void;
+        setPath(path: string): void;
+    }
+
     export class GLTFLoader {
         constructor(manager?: LoadingManager);
 
@@ -39,5 +51,6 @@ declare module THREE {
 
         load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
         setCrossOrigin(crossOrigin: string): void;
+        setMaterials(materials: any): void;
     }
 }

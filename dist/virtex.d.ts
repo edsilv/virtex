@@ -10,6 +10,14 @@ interface Document {
     mozCancelFullScreen: any;
 }
 declare module THREE {
+    class MTLLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+        setMaterials(materials: any): void;
+        setPath(path: string): void;
+    }
     class GLTFLoader {
         constructor(manager?: LoadingManager);
         manager: LoadingManager;
@@ -29,6 +37,7 @@ declare module THREE {
         manager: LoadingManager;
         load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
         setCrossOrigin(crossOrigin: string): void;
+        setMaterials(materials: any): void;
     }
 }
 
@@ -89,7 +98,7 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class ObjFileTypeHandler {
-        static setup(viewport: Viewport, obj: any): void;
+        static setup(viewport: Viewport, obj: any, objpath: string): void;
     }
 }
 
@@ -140,7 +149,7 @@ declare namespace Virtex {
         private _createRenderer();
         private _createControls();
         private _createEventListeners();
-        private _loadObject(object);
+        private _loadObject(objectPath);
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();

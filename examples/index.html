@@ -17,6 +17,7 @@
     <script src="js/OBJLoader.js"></script>
     <script src="js/draco_decoder.js"></script>
     <script src="js/DRACOLoader.js"></script>
+    <script src="js/MTLLoader.js"></script>
     <script src="js/virtex.js"></script>
     <script src="js/VRControls.js"></script>
     <script src="js/VREffect.js"></script>
@@ -96,8 +97,8 @@
             viewport = new Virtex.Viewport({
                 target: document.querySelector('#viewer'),
                 data: {
-                    file: objects.bone3.file,
-                    type: objects.bone3.type, // defaults to threejs
+                    file: objects.bone.file,
+                    type: objects.bone.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
