@@ -94,9 +94,12 @@
         
         $(function() {
 
+            const isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+
             viewport = new Virtex.Viewport({
                 target: document.querySelector('#viewer'),
                 data: {
+                    antialias: !isAndroid,
                     file: objects.bone.file,
                     type: objects.bone.type, // defaults to threejs
                     fullscreenEnabled: true,

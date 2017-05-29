@@ -236,8 +236,10 @@ var Virtex;
         };
         Viewport.prototype.data = function () {
             return {
+                alpha: true,
                 ambientLightColor: 0xd0d0d0,
                 ambientLightIntensity: 1,
+                antialias: true,
                 cameraZ: 4.5,
                 directionalLight1Color: 0xffffff,
                 directionalLight1Intensity: 0.75,
@@ -293,8 +295,8 @@ var Virtex;
         };
         Viewport.prototype._createRenderer = function () {
             this._renderer = new THREE.WebGLRenderer({
-                antialias: true,
-                alpha: true
+                antialias: this.options.data.antialias,
+                alpha: this.options.data.alpha
             });
             if (this._isVRMode) {
                 this._renderer.setClearColor(this.options.data.vrBackgroundColor);

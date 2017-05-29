@@ -1,7 +1,9 @@
 namespace Virtex {
     export interface IVirtexData {
+        alpha: boolean,
         ambientLightColor?: number;
         ambientLightIntensity?: number;
+        antialias: boolean,
         cameraZ?: number;
         directionalLight1Color?: number;
         directionalLight1Intensity?: number;

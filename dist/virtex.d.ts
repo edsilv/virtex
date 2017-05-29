@@ -73,8 +73,10 @@ declare namespace Virtex {
 /// <reference types="three" />
 declare namespace Virtex {
     interface IVirtexData {
+        alpha: boolean;
         ambientLightColor?: number;
         ambientLightIntensity?: number;
+        antialias: boolean;
         cameraZ?: number;
         directionalLight1Color?: number;
         directionalLight1Intensity?: number;

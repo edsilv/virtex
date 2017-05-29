@@ -106,8 +106,10 @@ namespace Virtex {
         
         public data(): IVirtexData {
             return <IVirtexData>{
+                alpha: true,
                 ambientLightColor: 0xd0d0d0,
                 ambientLightIntensity: 1,
+                antialias: true,
                 cameraZ: 4.5, // multiply the width of the object by this number
                 directionalLight1Color: 0xffffff,
                 directionalLight1Intensity: 0.75,
@@ -172,8 +174,8 @@ namespace Virtex {
         private _createRenderer(): void {
 
             this._renderer = new THREE.WebGLRenderer({
-                antialias: true,
-                alpha: true
+                antialias: this.options.data.antialias,
+                alpha: this.options.data.alpha
             });
 
             if (this._isVRMode) {

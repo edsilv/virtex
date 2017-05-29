@@ -12,14 +12,14 @@
   "types": "./dist/virtex.d.ts",
   "dependencies": {
     "@types/three": "^0.83.4",
-    "@types/webvr-api": "0.0.31"
+    "@types/webvr-api": "0.0.31",
+    "base-component": "viewdir/base-component#es6",
+    "key-codes": "edsilv/key-codes",
+    "three": "^0.85.2"
   },
   "devDependencies": {
-    "base-component": "viewdir/base-component#es6",
     "gulp": "^3.8.7",
     "gulp-tasks": "viewdir/gulp-tasks#v1.0.5",
-    "key-codes": "edsilv/key-codes",
-    "three": "edsilv/three.js",
     "typings": "^2.1.0"
   },
   "scripts": {
