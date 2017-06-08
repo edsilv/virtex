@@ -4,7 +4,7 @@
 
 three.js object viewer.
 
-##Setup
+## Setup
 
 Clone the repo then run:
 
@@ -12,12 +12,12 @@ Clone the repo then run:
     gulp
     gulp examples
 
-##Examples
+## Examples
 
 - http://edsilv.github.io/virtex/examples/
 - [Universal Viewer 3D Extension](http://universalviewer.io/examples/?manifest=http%3A%2F%2Ffiles.universalviewer.io%2Fmanifests%2Fnelis%2Fecorche.json)
  
-##Guides
+## Guides
 
 - [Complete Photogrammetry Workflow](https://www.gitbook.com/book/sophiedixon/photogrammetry-guide/details)
 
