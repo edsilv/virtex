@@ -9,16 +9,17 @@
     "viewer"
   ],
   "main": "gulpfile.js",
-  "directories": {
-    "test": "test"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "base-component": "viewdir/base-component#v1.0.7",
-    "gulp": "^3.8.7",
-    "gulp-tasks": "viewdir/gulp-tasks#tsupdate",
+  "types": "./dist/virtex.d.ts",
+  "dependencies": {
+    "@types/three": "^0.83.4",
+    "@types/webvr-api": "0.0.31",
+    "base-component": "viewdir/base-component#es6",
     "key-codes": "edsilv/key-codes",
-    "three": "mrdoob/three.js#dev",
+    "three": "^0.85.2"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.7",
+    "gulp-tasks": "viewdir/gulp-tasks#v1.0.5",
     "typings": "^2.1.0"
   },
   "scripts": {

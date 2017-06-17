@@ -1,4 +1,8 @@
 // virtex v0.2.7 https://github.com/edsilv/virtex#readme
+/// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
+/// <reference types="three" />
+declare var global: any;
+declare var Stats: any;
 interface Document {
     mozFullScreen: boolean;
     msFullscreenElement: any;
@@ -6,6 +10,14 @@ interface Document {
     mozCancelFullScreen: any;
 }
 declare module THREE {
+    class MTLLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+        setMaterials(materials: any): void;
+        setPath(path: string): void;
+    }
     class GLTFLoader {
         constructor(manager?: LoadingManager);
         manager: LoadingManager;
@@ -13,6 +25,19 @@ declare module THREE {
         setCrossOrigin(crossOrigin: string): void;
         static Animations: any;
         static Shaders: any;
+    }
+    class DRACOLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+    }
+    class OBJLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+        setMaterials(materials: any): void;
     }
 }
 
@@ -26,15 +51,32 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class FileType extends StringValue {
+        static DRACO: FileType;
         static GLTF: FileType;
+        static OBJ: FileType;
         static THREEJS: FileType;
     }
 }
 
 declare namespace Virtex {
-    interface IVirtexOptions extends _Components.IBaseComponentOptions {
+    class DRACOFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
+    }
+}
+
+declare namespace Virtex {
+    class glTFFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
+    }
+}
+
+/// <reference types="three" />
+declare namespace Virtex {
+    interface IVirtexData {
+        alpha: boolean;
         ambientLightColor?: number;
         ambientLightIntensity?: number;
+        antialias: boolean;
         cameraZ?: number;
         directionalLight1Color?: number;
         directionalLight1Intensity?: number;
@@ -56,25 +98,36 @@ declare namespace Virtex {
     }
 }
 
-declare var Detector: any;
-declare var Stats: any;
+declare namespace Virtex {
+    class ObjFileTypeHandler {
+        static setup(viewport: Viewport, obj: any, objpath: string): void;
+    }
+}
+
+declare namespace Virtex {
+    class ThreeJSFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
+    }
+}
+
+/// <reference types="three" />
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare namespace Virtex {
     class Viewport extends _Components.BaseComponent {
-        options: IVirtexOptions;
+        options: _Components.IBaseComponentOptions;
         private _$viewport;
         private _$loading;
         private _$loadingBar;
         private _$oldie;
-        private _camera;
         private _lightGroup;
-        private _objectGroup;
         private _prevCameraPosition;
         private _prevCameraRotation;
         private _renderer;
-        private _scene;
         private _stats;
         private _viewportCenter;
+        camera: THREE.PerspectiveCamera;
+        objectGroup: THREE.Group;
+        scene: THREE.Scene;
         private _isFullscreen;
         private _isMouseDown;
         private _isVRMode;
@@ -89,22 +142,21 @@ declare namespace Virtex {
         private _vrControls;
         private _vrEffect;
         private _vrEnabled;
-        constructor(options: IVirtexOptions);
+        constructor(options: _Components.IBaseComponentOptions);
         protected _init(): boolean;
-        protected _getDefaultOptions(): IVirtexOptions;
+        data(): IVirtexData;
         private _getVRDisplay();
         private _createLights();
-        private _createCamera();
+        createCamera(): void;
         private _createRenderer();
         private _createControls();
         private _createEventListeners();
-        private _loadObject(object);
+        private _loadObject(objectPath);
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();
         private _getCameraZ();
         private _getFov();
-        private _isGLTF();
         private _loadProgress(progress);
         private _fullscreenChanged();
         private _onMouseDown(event);
@@ -134,10 +186,9 @@ declare namespace Virtex {
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
         private _getAspectRatio();
+        resize(): void;
         protected _resize(): void;
     }
-}
-declare namespace Virtex {
     class Events {
         static LOADED: string;
     }

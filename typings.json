@@ -1,10 +1,7 @@
 {
+  "name": "virtex",
   "globalDependencies": {
-    "base-component": "github:viewdir/base-component/dist/base-component.bundle.d.ts",
-    "key-codes": "github:edsilv/key-codes/dist/key-codes.d.ts",
-    "three": "registry:dt/three#0.81.0+20161229235626",
-    "three-vrcontrols": "registry:dt/three-vrcontrols#0.0.0+20161028135557",
-    "three-vreffect": "registry:dt/three-vreffect#0.0.0+20161028135557",
-    "webvr-api": "registry:dt/webvr-api#0.0.0+20161228192002"
+    "base-component": "github:viewdir/base-component/dist/base-component.d.ts#es6",
+    "key-codes": "github:edsilv/key-codes/dist/key-codes.d.ts"
   }
 }

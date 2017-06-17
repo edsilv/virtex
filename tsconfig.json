@@ -8,7 +8,9 @@
         "moduleResolution": "node",
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "lib": ["es6"],
+        "types": ["jquery", "three", "webvr-api"]
     },
     "files": [
         "src/Definitions.ts",
