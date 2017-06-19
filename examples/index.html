@@ -17,6 +17,8 @@
     <script src="js/OBJLoader.js"></script>
     <script src="js/draco_decoder.js"></script>
     <script src="js/DRACOLoader.js"></script>
+    <script src="js/corto.js"></script>
+    <script src="js/CORTOLoader.js"></script>
     <script src="js/MTLLoader.js"></script>
     <script src="js/virtex.js"></script>
     <script src="js/VRControls.js"></script>
@@ -71,6 +73,10 @@
                 file: "models/obj/hc941fm6529.obj",
                 type: new Virtex.FileType("text/plain")
             },
+            bone4: {
+                file: "models/corto/hc941fm6529.crt",
+                type: new Virtex.FileType("application/corto")
+            },
             harbour: {
                 file: "models/threejs/harbour.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
@@ -100,8 +106,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.bone.file,
-                    type: objects.bone.type, // defaults to threejs
+                    file: objects.bone4.file,
+                    type: objects.bone4.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
