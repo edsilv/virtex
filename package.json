@@ -16,7 +16,7 @@
     "base-component": "viewdir/base-component#es6",
     "key-codes": "edsilv/key-codes",
     "three": "^0.85.2",
-    "corto": "edsilv/corto"
+    "corto": "cnr-isti-vclab/corto"
   },
   "devDependencies": {
     "gulp": "^3.8.7",
