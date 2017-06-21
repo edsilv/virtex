@@ -15,6 +15,8 @@ tasks.init({
         'node_modules/three/examples/js/libs/stats.min.js',
         'node_modules/three/examples/js/loaders/draco_decoder.js',
         'node_modules/three/examples/js/loaders/DRACOLoader.js',
+        'node_modules/corto/js/corto.js',
+        'node_modules/corto/js/CORTOLoader.js',
         'node_modules/three/examples/js/loaders/GLTFLoader.js',
         'node_modules/three/examples/js/loaders/MTLLoader.js',
         'node_modules/three/examples/js/loaders/OBJLoader.js',

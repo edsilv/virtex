@@ -254,6 +254,9 @@ namespace Virtex {
                 case FileType.DRACO.toString() :
                     loader = new THREE.DRACOLoader();
                     break;
+                case FileType.CORTO.toString() :
+                    loader = new THREE.CORTOLoader();
+                    break;
                 case FileType.GLTF.toString() :
                     loader = new THREE.GLTFLoader();
                     break;
@@ -275,6 +278,9 @@ namespace Virtex {
                     switch (this.options.data.type.toString()) {
                         case FileType.DRACO.toString() :
                             DRACOFileTypeHandler.setup(this, obj);
+                            break;
+                        case FileType.CORTO.toString() :
+                            CORTOFileTypeHandler.setup(this, obj);
                             break;
                         case FileType.GLTF.toString() :
                             glTFFileTypeHandler.setup(this, obj);

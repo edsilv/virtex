@@ -17,6 +17,8 @@
     <script src="js/OBJLoader.js"></script>
     <script src="js/draco_decoder.js"></script>
     <script src="js/DRACOLoader.js"></script>
+    <script src="js/corto.js"></script>
+    <script src="js/CORTOLoader.js"></script>
     <script src="js/MTLLoader.js"></script>
     <script src="js/virtex.js"></script>
     <script src="js/VRControls.js"></script>
@@ -65,11 +67,15 @@
             },
             bone2: {
                 file: "models/draco/hc941fm6529.drc",
-                type: new Virtex.FileType("application/octet-stream")
+                type: new Virtex.FileType("application/draco")
             },
             bone3: {
                 file: "models/obj/hc941fm6529.obj",
                 type: new Virtex.FileType("text/plain")
+            },
+            bone4: {
+                file: "models/corto/hc941fm6529.crt",
+                type: new Virtex.FileType("application/corto")
             },
             harbour: {
                 file: "models/threejs/harbour.json",

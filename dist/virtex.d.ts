@@ -32,6 +32,12 @@ declare module THREE {
         load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
         setCrossOrigin(crossOrigin: string): void;
     }
+    class CORTOLoader {
+        constructor(manager?: LoadingManager);
+        manager: LoadingManager;
+        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
+        setCrossOrigin(crossOrigin: string): void;
+    }
     class OBJLoader {
         constructor(manager?: LoadingManager);
         manager: LoadingManager;
@@ -52,9 +58,16 @@ declare namespace Virtex {
 declare namespace Virtex {
     class FileType extends StringValue {
         static DRACO: FileType;
+        static CORTO: FileType;
         static GLTF: FileType;
         static OBJ: FileType;
         static THREEJS: FileType;
+    }
+}
+
+declare namespace Virtex {
+    class CORTOFileTypeHandler {
+        static setup(viewport: Viewport, obj: any): void;
     }
 }
 
