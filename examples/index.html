@@ -67,7 +67,7 @@
             },
             bone2: {
                 file: "models/draco/hc941fm6529.drc",
-                type: new Virtex.FileType("application/octet-stream")
+                type: new Virtex.FileType("application/draco")
             },
             bone3: {
                 file: "models/obj/hc941fm6529.obj",
@@ -106,8 +106,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.bone4.file,
-                    type: objects.bone4.type, // defaults to threejs
+                    file: objects.bone.file,
+                    type: objects.bone.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,

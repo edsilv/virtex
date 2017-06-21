@@ -15,7 +15,8 @@
     "@types/webvr-api": "0.0.31",
     "base-component": "viewdir/base-component#es6",
     "key-codes": "edsilv/key-codes",
-    "three": "^0.85.2"
+    "three": "^0.85.2",
+    "corto": "edsilv/corto"
   },
   "devDependencies": {
     "gulp": "^3.8.7",
