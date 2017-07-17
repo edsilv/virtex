@@ -1,4 +1,4 @@
-// virtex v0.2.7 https://github.com/edsilv/virtex#readme
+// virtex v0.3.0 https://github.com/edsilv/virtex#readme
 /// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
 /// <reference types="three" />
 declare var global: any;

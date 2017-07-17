@@ -1,6 +1,6 @@
 {
   "name": "virtex3d",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "3D object viewer built with three.js",
   "keywords": [
     "3D",
@@ -13,8 +13,8 @@
   "dependencies": {
     "@types/three": "^0.83.4",
     "@types/webvr-api": "0.0.31",
-    "base-component": "viewdir/base-component#es6",
-    "key-codes": "edsilv/key-codes",
+    "base-component": "viewdir/base-component#v1.1.0",
+    "key-codes": "edsilv/key-codes#v0.0.5",
     "three": "^0.85.2",
     "corto": "cnr-isti-vclab/corto"
   },
