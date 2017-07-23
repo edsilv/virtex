@@ -420,6 +420,12 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
 					break;
 
+				case 'norm':
+
+					setMapForType( "normalMap", value );
+
+					break;
+
 				case 'map_bump':
 				case 'bump':
 
