@@ -23,6 +23,8 @@ namespace Virtex {
         private _lightGroup: THREE.Group;
         private _prevCameraPosition: any;
         private _prevCameraRotation: any;
+        private _raycaster: THREE.Raycaster;
+        private _raycastObjectCache: THREE.Object3D | null = null;
         private _renderer: THREE.WebGLRenderer;
         private _stats: any;
         private _viewportCenter: THREE.Vector2 = new THREE.Vector2();
@@ -35,7 +37,9 @@ namespace Virtex {
         private _isVRMode: boolean = false;
         private _lastHeight: number;
         private _lastWidth: number;
+        private _isMouseOver: boolean = false;
         private _mousePos: THREE.Vector2 = new THREE.Vector2();
+        private _mousePosNorm: THREE.Vector2 = new THREE.Vector2(-1, -1);
         private _mousePosOnMouseDown: THREE.Vector2 = new THREE.Vector2();
         private _pinchStart: THREE.Vector2 = new THREE.Vector2();
         private _targetRotationOnMouseDown: THREE.Vector2 = new THREE.Vector2();
@@ -83,6 +87,8 @@ namespace Virtex {
             this.scene = new THREE.Scene();
             this.objectGroup = new THREE.Object3D();
             this.scene.add(this.objectGroup);
+
+            this._raycaster = new THREE.Raycaster();
 
             this._createLights();
             this.createCamera();
@@ -383,6 +389,11 @@ namespace Virtex {
             this._mousePos.x = event.clientX - this._viewportCenter.x;
             this._mousePos.y = event.clientY - this._viewportCenter.y;
 
+            this._mousePosNorm.x = (event.clientX / this._getWidth()) * 2 - 1;
+		    this._mousePosNorm.y = - (event.clientY / this._getHeight()) * 2 + 1;
+            
+            //console.log(this._mousePosNorm);
+
             if (this._isMouseDown) {
                 this._targetRotation.y = this._targetRotationOnMouseDown.y + (this._mousePos.y - this._mousePosOnMouseDown.y) * 0.02;
                 this._targetRotation.x = this._targetRotationOnMouseDown.x + (this._mousePos.x - this._mousePosOnMouseDown.x) * 0.02;
@@ -558,15 +569,67 @@ namespace Virtex {
 
                 const zoomDelta: number = (this._targetZoom - this.camera.position.z) * 0.1;
                 this.camera.position.z += zoomDelta;
+
+                // cast a ray from the mouse position
+
+                if (this.objectGroup.children.length) {
+                    
+                    this._raycaster.setFromCamera(this._mousePosNorm, this.camera);
+
+                    const obj: THREE.Object3D | null = this._getRaycastObject();
+
+                    if (obj) {
+
+                        const intersects: THREE.Intersection[] = this._raycaster.intersectObject(obj);
+
+                        if (intersects.length > 0) {
+                            this._isMouseOver = true;
+                            // var obj2 = intersects[0].object;
+                            // (<any>obj2).material.emissive.setHex( 0xff0000 );
+                            // console.log("hit");
+                        } else {
+                            this._isMouseOver = false;
+                        }
+
+                    }
+                }
+                
             }
         }
 
         private _draw(): void {
-            if (this._isVRMode){
+            if (this._isVRMode) {
                 this._vrEffect.render(this.scene, this.camera);                
             } else {
                 this._renderer.render(this.scene, this.camera);
+
+                if (this._isMouseOver) {
+                    this._$element.addClass('grabbable');
+                    if (this._isMouseDown) {
+                        this._$element.addClass('grabbing');
+                    } else {
+                        this._$element.removeClass('grabbing');
+                    }
+                } else {
+                    this._$element.removeClass('grabbable');
+                    this._$element.removeClass('grabbing');
+                }
             }
+        }
+
+        private _getRaycastObject(): THREE.Object3D | null {
+
+            if (this._raycastObjectCache) {
+                return this._raycastObjectCache;
+            }
+
+            this.objectGroup.traverse((child: THREE.Object3D) => {
+                if (child instanceof THREE.Mesh) {
+                    this._raycastObjectCache = child;
+                }
+            });
+
+            return this._raycastObjectCache;
         }
 
         private _getWidth(): number {

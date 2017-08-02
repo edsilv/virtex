@@ -21,6 +21,16 @@
   width: 1px;
   background-color: #fff;
 }
+.virtex.grabbable {
+  cursor: move;
+  /* fallback if grab cursor is unsupported */
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+.virtex.grabbable.grabbing {
+  cursor: -moz-grabbing !important;
+}
 #oldie {
   position: absolute;
   margin-top: 0px !important;

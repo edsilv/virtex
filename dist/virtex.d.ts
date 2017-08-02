@@ -135,6 +135,8 @@ declare namespace Virtex {
         private _lightGroup;
         private _prevCameraPosition;
         private _prevCameraRotation;
+        private _raycaster;
+        private _raycastObjectCache;
         private _renderer;
         private _stats;
         private _viewportCenter;
@@ -146,7 +148,9 @@ declare namespace Virtex {
         private _isVRMode;
         private _lastHeight;
         private _lastWidth;
+        private _isMouseOver;
         private _mousePos;
+        private _mousePosNorm;
         private _mousePosOnMouseDown;
         private _pinchStart;
         private _targetRotationOnMouseDown;
@@ -184,6 +188,7 @@ declare namespace Virtex {
         rotateY(radians: number): void;
         private _update();
         private _draw();
+        private _getRaycastObject();
         private _getWidth();
         private _getHeight();
         private _getZoomSpeed();

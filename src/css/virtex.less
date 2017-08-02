@@ -8,7 +8,7 @@
     background: radial-gradient(ellipse at center,  #252424 0%,#171717 85%);
 }
 
-.virtex .viewport{
+.virtex .viewport {
     position: relative;
 }
 
@@ -25,7 +25,20 @@
     background-color: #fff;
 }
 
-#oldie{
+.virtex.grabbable {
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+.virtex.grabbable.grabbing { 
+    //cursor: grabbing !important;
+    cursor: -moz-grabbing !important;
+    //cursor: -webkit-grabbing !important;
+}
+
+#oldie {
     position: absolute;
     margin-top: 0px !important;
     margin-right: 0px !important;
