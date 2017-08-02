@@ -25,17 +25,17 @@
     background-color: #fff;
 }
 
-.virtex.grabbable {
+.virtex.grabbable canvas {
     cursor: move; /* fallback if grab cursor is unsupported */
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
 }
 
-.virtex.grabbable.grabbing { 
-    //cursor: grabbing !important;
+.virtex.grabbable.grabbing canvas { 
+    cursor: grabbing !important;
     cursor: -moz-grabbing !important;
-    //cursor: -webkit-grabbing !important;
+    cursor: -webkit-grabbing !important;
 }
 
 #oldie {
