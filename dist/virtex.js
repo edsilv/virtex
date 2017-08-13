@@ -164,7 +164,7 @@ var Virtex;
         }
         ObjFileTypeHandler.setup = function (viewport, obj, objpath) {
             var imgloader = new THREE.MTLLoader();
-            imgloader.setCrossOrigin('');
+            imgloader.setCrossOrigin('anonymous');
             imgloader.setPath(objpath.substring(0, objpath.lastIndexOf("/") + 1));
             imgloader.load(obj.materialLibraries[0], function (materials) {
                 var objLoader = new THREE.OBJLoader();
