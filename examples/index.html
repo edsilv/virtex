@@ -77,6 +77,10 @@
                 file: "models/corto/hc941fm6529.crt",
                 type: new Virtex.FileType("application/corto")
             },
+            bone5: {
+                file: "https://files.blokdust.io/manifests/stanford/vertebra/hc941fm6529.obj",
+                type: new Virtex.FileType("text/plain")
+            },
             harbour: {
                 file: "models/threejs/harbour.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
@@ -106,8 +110,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.bone3.file,
-                    type: objects.bone3.type, // defaults to threejs
+                    file: objects.bone5.file,
+                    type: objects.bone5.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
