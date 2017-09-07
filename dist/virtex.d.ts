@@ -1,52 +1,4 @@
 // virtex v0.3.0 https://github.com/edsilv/virtex#readme
-/// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
-/// <reference types="three" />
-declare var global: any;
-declare var Stats: any;
-interface Document {
-    mozFullScreen: boolean;
-    msFullscreenElement: any;
-    msExitFullscreen: any;
-    mozCancelFullScreen: any;
-}
-declare module THREE {
-    class MTLLoader {
-        constructor(manager?: LoadingManager);
-        manager: LoadingManager;
-        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
-        setCrossOrigin(crossOrigin: string): void;
-        setMaterials(materials: any): void;
-        setPath(path: string): void;
-    }
-    class GLTFLoader {
-        constructor(manager?: LoadingManager);
-        manager: LoadingManager;
-        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
-        setCrossOrigin(crossOrigin: string): void;
-        static Animations: any;
-        static Shaders: any;
-    }
-    class DRACOLoader {
-        constructor(manager?: LoadingManager);
-        manager: LoadingManager;
-        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
-        setCrossOrigin(crossOrigin: string): void;
-    }
-    class CORTOLoader {
-        constructor(manager?: LoadingManager);
-        manager: LoadingManager;
-        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
-        setCrossOrigin(crossOrigin: string): void;
-    }
-    class OBJLoader {
-        constructor(manager?: LoadingManager);
-        manager: LoadingManager;
-        load(url: string, onLoad?: (object: Object3D) => void, onProgress?: (xhr: ProgressEvent) => void, onError?: (xhr: ErrorEvent) => void): void;
-        setCrossOrigin(crossOrigin: string): void;
-        setMaterials(materials: any): void;
-    }
-}
-
 declare namespace Virtex {
     class StringValue {
         value: string;
@@ -83,7 +35,6 @@ declare namespace Virtex {
     }
 }
 
-/// <reference types="three" />
 declare namespace Virtex {
     interface IVirtexData {
         alpha: boolean;
@@ -123,7 +74,6 @@ declare namespace Virtex {
     }
 }
 
-/// <reference types="three" />
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare namespace Virtex {
     class Viewport extends _Components.BaseComponent {
