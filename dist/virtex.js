@@ -164,7 +164,7 @@ var Virtex;
         }
         ObjFileTypeHandler.setup = function (viewport, obj, objpath) {
             var imgloader = new THREE.MTLLoader();
-            imgloader.setCrossOrigin('anonymous');
+            imgloader.setCrossOrigin(true);
             imgloader.setPath(objpath.substring(0, objpath.lastIndexOf("/") + 1));
             imgloader.load(obj.materialLibraries[0], function (materials) {
                 var objLoader = new THREE.OBJLoader();
@@ -172,8 +172,16 @@ var Virtex;
                 objLoader.load(objpath, function (object) {
                     viewport.objectGroup.add(object);
                     viewport.createCamera();
-                }, function (e) { console.log("obj progress", e); }, function (e) { console.log("obj error", e); });
-            }, function (e) { console.log("mtl progress", e); }, function (e) { console.log("mtl error", e); });
+                }, function () {
+                    //console.log("obj progress", e);
+                }, function () {
+                    //console.log("obj error", e);
+                });
+            }, function () {
+                //console.log("mtl progress", e);
+            }, function () {
+                //console.log("mtl error", e);
+            });
         };
         return ObjFileTypeHandler;
     }());

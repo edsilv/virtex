@@ -1,4 +1,14 @@
 // virtex v0.3.0 https://github.com/edsilv/virtex#readme
+/// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
+declare var global: any;
+declare var Stats: any;
+interface Document {
+    mozFullScreen: boolean;
+    msFullscreenElement: any;
+    msExitFullscreen: any;
+    mozCancelFullScreen: any;
+}
+
 declare namespace Virtex {
     class StringValue {
         value: string;
@@ -75,6 +85,7 @@ declare namespace Virtex {
 }
 
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
+declare var Detector: any;
 declare namespace Virtex {
     class Viewport extends _Components.BaseComponent {
         options: _Components.IBaseComponentOptions;

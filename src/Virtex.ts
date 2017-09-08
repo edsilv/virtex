@@ -10,6 +10,8 @@ var requestAnimFrame = (function () {
         };
 })();
 
+declare var Detector: any;
+
 namespace Virtex {
     export class Viewport extends _Components.BaseComponent {
         
@@ -258,13 +260,13 @@ namespace Virtex {
             
             switch (this.options.data.type.toString()) {
                 case FileType.DRACO.toString() :
-                    loader = new THREE.DRACOLoader();
+                    loader = new (<any>THREE).DRACOLoader();
                     break;
                 case FileType.CORTO.toString() :
-                    loader = new THREE.CORTOLoader();
+                    loader = new (<any>THREE).CORTOLoader();
                     break;
                 case FileType.GLTF.toString() :
-                    loader = new THREE.GLTFLoader();
+                    loader = new (<any>THREE).GLTFLoader();
                     break;
                 case FileType.OBJ.toString() :
                     loader = new THREE.OBJLoader();
