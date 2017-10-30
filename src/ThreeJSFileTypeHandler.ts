@@ -1,7 +1,7 @@
 namespace Virtex {
     export class ThreeJSFileTypeHandler {
 
-        static setup(viewport: Viewport, obj: any): void {
+        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void {
 
             // use the three.js setting in Blender's material tab
             // if (this.options.doubleSided) {
@@ -11,8 +11,8 @@ namespace Virtex {
             // }
 
             viewport.objectGroup.add(obj);
-
             viewport.createCamera();
+            cb(obj);
         }
     }
 }

@@ -1,7 +1,7 @@
 namespace Virtex {
     export class glTFFileTypeHandler {
 
-        static setup(viewport: Viewport, obj: any): void {
+        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void {
 
             viewport.objectGroup.add(obj.scene);
 
@@ -20,6 +20,8 @@ namespace Virtex {
             if (obj.cameras && obj.cameras.length) {
                 viewport.camera = obj.cameras[0];
             }
+
+            cb(obj);
         }
     }
 }

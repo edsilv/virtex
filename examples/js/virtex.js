@@ -52,7 +52,7 @@ var Virtex;
     var CORTOFileTypeHandler = (function () {
         function CORTOFileTypeHandler() {
         }
-        CORTOFileTypeHandler.setup = function (viewport, obj) {
+        CORTOFileTypeHandler.setup = function (viewport, obj, cb) {
             var bufferGeometry = obj.geometry;
             /*            const material = new THREE.MeshStandardMaterial({vertexColors: THREE.VertexColors});
                         let geometry;
@@ -83,6 +83,7 @@ var Virtex;
             //            obj = geometry;
             viewport.objectGroup.add(obj);
             viewport.createCamera();
+            cb(obj);
         };
         return CORTOFileTypeHandler;
     }());
@@ -94,7 +95,7 @@ var Virtex;
     var DRACOFileTypeHandler = (function () {
         function DRACOFileTypeHandler() {
         }
-        DRACOFileTypeHandler.setup = function (viewport, obj) {
+        DRACOFileTypeHandler.setup = function (viewport, obj, cb) {
             var bufferGeometry = obj;
             var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.VertexColors });
             var geometry;
@@ -125,6 +126,7 @@ var Virtex;
             obj = geometry;
             viewport.objectGroup.add(obj);
             viewport.createCamera();
+            cb(obj);
         };
         return DRACOFileTypeHandler;
     }());
@@ -136,7 +138,7 @@ var Virtex;
     var glTFFileTypeHandler = (function () {
         function glTFFileTypeHandler() {
         }
-        glTFFileTypeHandler.setup = function (viewport, obj) {
+        glTFFileTypeHandler.setup = function (viewport, obj, cb) {
             viewport.objectGroup.add(obj.scene);
             if (obj.animations) {
                 var animations = obj.animations;
@@ -150,6 +152,7 @@ var Virtex;
             if (obj.cameras && obj.cameras.length) {
                 viewport.camera = obj.cameras[0];
             }
+            cb(obj);
         };
         return glTFFileTypeHandler;
     }());
@@ -162,16 +165,34 @@ var Virtex;
     var ObjFileTypeHandler = (function () {
         function ObjFileTypeHandler() {
         }
-        ObjFileTypeHandler.setup = function (viewport, obj, objpath) {
+        ObjFileTypeHandler.setup = function (viewport, objpath, obj, cb) {
             var imgloader = new THREE.MTLLoader();
             imgloader.setCrossOrigin(true);
             imgloader.setPath(objpath.substring(0, objpath.lastIndexOf("/") + 1));
             imgloader.load(obj.materialLibraries[0], function (materials) {
                 var objLoader = new THREE.OBJLoader();
                 objLoader.setMaterials(materials);
-                objLoader.load(objpath, function (object) {
-                    viewport.objectGroup.add(object);
+                objLoader.load(objpath, function (obj) {
+                    // Compute range of the geometry coordinates for proper rendering.
+                    var bufferGeometry = obj.children[0].geometry;
+                    bufferGeometry.computeBoundingBox();
+                    var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
+                    var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
+                    var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
+                    var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
+                    var scale = 1.0 / diagonalSize;
+                    var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
+                    var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
+                    var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
+                    obj.scale.multiplyScalar(scale);
+                    obj.position.x = -midX * scale;
+                    obj.position.y = -midY * scale;
+                    obj.position.z = -midZ * scale;
+                    obj.castShadow = true;
+                    obj.receiveShadow = true;
+                    viewport.objectGroup.add(obj);
                     viewport.createCamera();
+                    cb(obj);
                 }, function () {
                     //console.log("obj progress", e);
                 }, function () {
@@ -193,7 +214,7 @@ var Virtex;
     var ThreeJSFileTypeHandler = (function () {
         function ThreeJSFileTypeHandler() {
         }
-        ThreeJSFileTypeHandler.setup = function (viewport, obj) {
+        ThreeJSFileTypeHandler.setup = function (viewport, obj, cb) {
             // use the three.js setting in Blender's material tab
             // if (this.options.doubleSided) {
             //     obj.traverse((child: any) => {
@@ -202,6 +223,7 @@ var Virtex;
             // }
             viewport.objectGroup.add(obj);
             viewport.createCamera();
+            cb(obj);
         };
         return ThreeJSFileTypeHandler;
     }());
@@ -434,23 +456,21 @@ var Virtex;
             loader.load(objectPath, function (obj) {
                 switch (_this.options.data.type.toString()) {
                     case Virtex.FileType.DRACO.toString():
-                        Virtex.DRACOFileTypeHandler.setup(_this, obj);
+                        Virtex.DRACOFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
                         break;
                     case Virtex.FileType.CORTO.toString():
-                        Virtex.CORTOFileTypeHandler.setup(_this, obj);
+                        Virtex.CORTOFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
                         break;
                     case Virtex.FileType.GLTF.toString():
-                        Virtex.glTFFileTypeHandler.setup(_this, obj);
+                        Virtex.glTFFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
                         break;
                     case Virtex.FileType.THREEJS.toString():
-                        Virtex.ThreeJSFileTypeHandler.setup(_this, obj);
+                        Virtex.ThreeJSFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
                         break;
                     case Virtex.FileType.OBJ.toString():
-                        Virtex.ObjFileTypeHandler.setup(_this, obj, objectPath);
+                        Virtex.ObjFileTypeHandler.setup(_this, objectPath, obj, _this._loaded.bind(_this));
                         break;
                 }
-                _this._$loading.fadeOut(_this.options.data.fadeSpeed);
-                _this.fire(Events.LOADED, obj);
             }, function (e) {
                 if (e.lengthComputable) {
                     _this._loadProgress(e.loaded / e.total);
@@ -459,6 +479,12 @@ var Virtex;
                 // error
                 console.error(e);
             });
+        };
+        Viewport.prototype._loaded = function (obj) {
+            //const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
+            //this.scene.add(boundingBox);
+            this._$loading.fadeOut(this.options.data.fadeSpeed);
+            this.fire(Events.LOADED, obj);
         };
         Viewport.prototype._getBoundingBox = function () {
             return new THREE.Box3().setFromObject(this.objectGroup);

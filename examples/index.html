@@ -15,8 +15,8 @@
     <script src="js/three.min.js"></script>
     <script src="js/GLTFLoader.js"></script>
     <script src="js/OBJLoader.js"></script>
-    <script src="js/draco_decoder.js"></script>
-    <script src="js/DRACOLoader.js"></script>
+    <!-- <script src="js/draco_decoder.js"></script>
+    <script src="js/DRACOLoader.js"></script> -->
     <script src="js/corto.js"></script>
     <script src="js/CORTOLoader.js"></script>
     <script src="js/MTLLoader.js"></script>
@@ -81,6 +81,10 @@
                 file: "https://files.blokdust.io/manifests/stanford/vertebra/hc941fm6529.obj",
                 type: new Virtex.FileType("text/plain")
             },
+            bone6: {
+                file: "models/obj/compact-tsn.obj",
+                type: new Virtex.FileType("text/plain")
+            },
             harbour: {
                 file: "models/threejs/harbour.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
@@ -110,8 +114,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.bone3.file,
-                    type: objects.bone3.type, // defaults to threejs
+                    file: objects.bone6.file,
+                    type: objects.bone6.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,

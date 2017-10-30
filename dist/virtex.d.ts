@@ -29,19 +29,19 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class CORTOFileTypeHandler {
-        static setup(viewport: Viewport, obj: any): void;
+        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
     }
 }
 
 declare namespace Virtex {
     class DRACOFileTypeHandler {
-        static setup(viewport: Viewport, obj: any): void;
+        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
     }
 }
 
 declare namespace Virtex {
     class glTFFileTypeHandler {
-        static setup(viewport: Viewport, obj: any): void;
+        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
     }
 }
 
@@ -74,13 +74,13 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class ObjFileTypeHandler {
-        static setup(viewport: Viewport, obj: any, objpath: string): void;
+        static setup(viewport: Viewport, objpath: string, obj: any, cb: (object: any) => void): void;
     }
 }
 
 declare namespace Virtex {
     class ThreeJSFileTypeHandler {
-        static setup(viewport: Viewport, obj: any): void;
+        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
     }
 }
 
@@ -130,6 +130,7 @@ declare namespace Virtex {
         private _createControls();
         private _createEventListeners();
         private _loadObject(objectPath);
+        private _loaded(obj);
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();

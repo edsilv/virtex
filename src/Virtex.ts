@@ -285,25 +285,22 @@ namespace Virtex {
 
                     switch (this.options.data.type.toString()) {
                         case FileType.DRACO.toString() :
-                            DRACOFileTypeHandler.setup(this, obj);
+                            DRACOFileTypeHandler.setup(this, obj, this._loaded.bind(this));
                             break;
                         case FileType.CORTO.toString() :
-                            CORTOFileTypeHandler.setup(this, obj);
+                            CORTOFileTypeHandler.setup(this, obj, this._loaded.bind(this));
                             break;
                         case FileType.GLTF.toString() :
-                            glTFFileTypeHandler.setup(this, obj);
+                            glTFFileTypeHandler.setup(this, obj, this._loaded.bind(this));
                             break;
                         case FileType.THREEJS.toString() :
-                            ThreeJSFileTypeHandler.setup(this, obj);
+                            ThreeJSFileTypeHandler.setup(this, obj, this._loaded.bind(this));
                             break;
                         case FileType.OBJ.toString() :
-                            ObjFileTypeHandler.setup(this, obj, objectPath);
+                            ObjFileTypeHandler.setup(this, objectPath, obj, this._loaded.bind(this));
                             break;
                     }
 
-                    this._$loading.fadeOut(this.options.data.fadeSpeed);
-                    
-                    this.fire(Events.LOADED, obj);
                 },
                 (e: ProgressEvent) => {
                     if (e.lengthComputable) {
@@ -315,6 +312,16 @@ namespace Virtex {
                     console.error(e);
                 }
             );
+        }
+
+        private _loaded(obj: any): void {
+
+            //const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
+            //this.scene.add(boundingBox);
+
+            this._$loading.fadeOut(this.options.data.fadeSpeed);
+            
+            this.fire(Events.LOADED, obj);
         }
 
         private _getBoundingBox(): THREE.Box3 {

@@ -1,7 +1,7 @@
 namespace Virtex {
     export class CORTOFileTypeHandler {
 
-        static setup(viewport: Viewport, obj: any): void {
+        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void {
             const bufferGeometry = obj.geometry;
 /*            const material = new THREE.MeshStandardMaterial({vertexColors: THREE.VertexColors});
             let geometry;
@@ -34,8 +34,9 @@ namespace Virtex {
 //            obj = geometry;
 
             viewport.objectGroup.add(obj);
-
             viewport.createCamera();
+
+            cb(obj);
         }
     }
 }
