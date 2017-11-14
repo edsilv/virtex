@@ -20,6 +20,7 @@
     <script src="js/corto.js"></script>
     <script src="js/CORTOLoader.js"></script>
     <script src="js/MTLLoader.js"></script>
+    <script src="js/PLYLoader.js"></script>
     <script src="js/virtex.js"></script>
     <script src="js/VRControls.js"></script>
     <script src="js/VREffect.js"></script>
@@ -96,6 +97,10 @@
             monster: {
                 file: "models/gltf/monster.gltf",
                 type: new Virtex.FileType("model/gltf+json")
+            },
+            pub: {
+                file: "models/ply/pub.ply",
+                type: new Virtex.FileType("application/ply")
             }
         };
 
@@ -114,8 +119,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.bone6.file,
-                    type: objects.bone6.type, // defaults to threejs
+                    file: objects.pub.file,
+                    type: objects.pub.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,

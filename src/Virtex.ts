@@ -274,6 +274,9 @@ namespace Virtex {
                 case FileType.THREEJS.toString() :
                     loader = new THREE.ObjectLoader();
                     break;
+                case FileType.PLY.toString() :
+                    loader = new (<any>THREE).PLYLoader();
+                    break;
             }
             
             if (loader.setCrossOrigin) {
@@ -298,6 +301,9 @@ namespace Virtex {
                             break;
                         case FileType.OBJ.toString() :
                             ObjFileTypeHandler.setup(this, objectPath, obj, this._loaded.bind(this));
+                            break;
+                        case FileType.PLY.toString() :
+                            PLYFileTypeHandler.setup(this, obj, this._loaded.bind(this));
                             break;
                     }
 

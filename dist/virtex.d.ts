@@ -23,6 +23,7 @@ declare namespace Virtex {
         static CORTO: FileType;
         static GLTF: FileType;
         static OBJ: FileType;
+        static PLY: FileType;
         static THREEJS: FileType;
     }
 }
@@ -75,6 +76,12 @@ declare namespace Virtex {
 declare namespace Virtex {
     class ObjFileTypeHandler {
         static setup(viewport: Viewport, objpath: string, obj: any, cb: (object: any) => void): void;
+    }
+}
+
+declare namespace Virtex {
+    class PLYFileTypeHandler {
+        static setup(viewport: Viewport, geometry: any, cb: (object: any) => void): void;
     }
 }
 

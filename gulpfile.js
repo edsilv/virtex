@@ -20,6 +20,7 @@ tasks.init({
         'node_modules/three/examples/js/loaders/GLTFLoader.js',
         'node_modules/three/examples/js/loaders/MTLLoader.js',
         'node_modules/three/examples/js/loaders/OBJLoader.js',
+        'node_modules/three/examples/js/loaders/PLYLoader.js',
         'node_modules/three/examples/js/Detector.js',
         'node_modules/three/examples/js/vr/WebVR.js',
         'node_modules/key-codes/dist/key-codes.js'

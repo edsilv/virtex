@@ -41,6 +41,7 @@ var Virtex;
         FileType.CORTO = new FileType("application/corto");
         FileType.GLTF = new FileType("model/gltf+json");
         FileType.OBJ = new FileType("text/plain");
+        FileType.PLY = new FileType("application/ply");
         FileType.THREEJS = new FileType("application/vnd.threejs+json");
         return FileType;
     }(Virtex.StringValue));
@@ -207,6 +208,21 @@ var Virtex;
         return ObjFileTypeHandler;
     }());
     Virtex.ObjFileTypeHandler = ObjFileTypeHandler;
+})(Virtex || (Virtex = {}));
+
+var Virtex;
+(function (Virtex) {
+    var PLYFileTypeHandler = (function () {
+        function PLYFileTypeHandler() {
+        }
+        PLYFileTypeHandler.setup = function (viewport, geometry, cb) {
+            viewport.objectGroup.add(new THREE.Mesh(geometry));
+            viewport.createCamera();
+            cb(geometry);
+        };
+        return PLYFileTypeHandler;
+    }());
+    Virtex.PLYFileTypeHandler = PLYFileTypeHandler;
 })(Virtex || (Virtex = {}));
 
 var Virtex;
@@ -449,6 +465,9 @@ var Virtex;
                 case Virtex.FileType.THREEJS.toString():
                     loader = new THREE.ObjectLoader();
                     break;
+                case Virtex.FileType.PLY.toString():
+                    loader = new THREE.PLYLoader();
+                    break;
             }
             if (loader.setCrossOrigin) {
                 loader.setCrossOrigin('anonymous');
@@ -469,6 +488,9 @@ var Virtex;
                         break;
                     case Virtex.FileType.OBJ.toString():
                         Virtex.ObjFileTypeHandler.setup(_this, objectPath, obj, _this._loaded.bind(_this));
+                        break;
+                    case Virtex.FileType.PLY.toString():
+                        Virtex.PLYFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
                         break;
                 }
             }, function (e) {
