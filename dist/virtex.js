@@ -216,9 +216,11 @@ var Virtex;
         function PLYFileTypeHandler() {
         }
         PLYFileTypeHandler.setup = function (viewport, geometry, cb) {
-            viewport.objectGroup.add(new THREE.Mesh(geometry));
+            var material = new THREE.PointsMaterial({ vertexColors: THREE.VertexColors });
+            var mesh = new THREE.Points(geometry, material);
+            viewport.objectGroup.add(mesh);
             viewport.createCamera();
-            cb(geometry);
+            cb(mesh);
         };
         return PLYFileTypeHandler;
     }());
