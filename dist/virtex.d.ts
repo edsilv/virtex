@@ -1,5 +1,4 @@
-// virtex v0.3.2 https://github.com/edsilv/virtex#readme
-/// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
+// virtex v0.3.3 https://github.com/edsilv/virtex#readme
 declare var global: any;
 declare var Stats: any;
 interface Document {
@@ -91,6 +90,7 @@ declare namespace Virtex {
     }
 }
 
+/// <reference types="base-component" />
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare var Detector: any;
 declare namespace Virtex {

@@ -1,7 +1,0 @@
-{
-  "name": "virtex",
-  "globalDependencies": {
-    "base-component": "github:viewdir/base-component/dist/base-component.d.ts#v1.1.0",
-    "key-codes": "github:edsilv/key-codes/dist/key-codes.d.ts"
-  }
-}
