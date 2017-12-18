@@ -247,16 +247,6 @@ var Virtex;
     Virtex.ThreeJSFileTypeHandler = ThreeJSFileTypeHandler;
 })(Virtex || (Virtex = {}));
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
@@ -269,36 +259,36 @@ var requestAnimFrame = (function () {
 })();
 var Virtex;
 (function (Virtex) {
-    var Viewport = /** @class */ (function (_super) {
-        __extends(Viewport, _super);
+    var Viewport = /** @class */ (function () {
         function Viewport(options) {
-            var _this = _super.call(this, options) || this;
-            _this._raycastObjectCache = null;
-            _this._viewportCenter = new THREE.Vector2();
-            _this._isFullscreen = false;
-            _this._isMouseDown = false;
-            _this._isVRMode = false;
-            _this._isMouseOver = false;
-            _this._mousePos = new THREE.Vector2();
-            _this._mousePosNorm = new THREE.Vector2(-1, -1);
-            _this._mousePosOnMouseDown = new THREE.Vector2();
-            _this._pinchStart = new THREE.Vector2();
-            _this._targetRotationOnMouseDown = new THREE.Vector2();
-            _this._targetRotation = new THREE.Vector2();
-            _this._vrEnabled = true;
-            var success = _this._init();
-            _this._resize();
+            this._raycastObjectCache = null;
+            this._viewportCenter = new THREE.Vector2();
+            this._isFullscreen = false;
+            this._isMouseDown = false;
+            this._isVRMode = false;
+            this._isMouseOver = false;
+            this._mousePos = new THREE.Vector2();
+            this._mousePosNorm = new THREE.Vector2(-1, -1);
+            this._mousePosOnMouseDown = new THREE.Vector2();
+            this._pinchStart = new THREE.Vector2();
+            this._targetRotationOnMouseDown = new THREE.Vector2();
+            this._targetRotation = new THREE.Vector2();
+            this._vrEnabled = true;
+            this.options = options;
+            this.options.data = $.extend(this.data(), options.data);
+            var success = this._init();
+            this._resize();
             if (success) {
-                _this._tick();
+                this._tick();
             }
-            return _this;
         }
         Viewport.prototype._init = function () {
-            var success = _super.prototype._init.call(this);
-            if (!success) {
-                console.error("Virtex failed to initialise");
+            this._$element = $(this.options.target);
+            if (!this._$element.length) {
+                console.warn('target not found');
                 return false;
             }
+            this._$element.empty();
             if (!Detector.webgl) {
                 Detector.addGetWebGLMessage();
                 this._$oldie = $('#oldie');
@@ -880,6 +870,26 @@ var Virtex;
         Viewport.prototype._getAspectRatio = function () {
             return this._$viewport.width() / this._$viewport.height();
         };
+        Viewport.prototype.on = function (name, callback, ctx) {
+            var e = this._e || (this._e = {});
+            (e[name] || (e[name] = [])).push({
+                fn: callback,
+                ctx: ctx
+            });
+        };
+        Viewport.prototype.fire = function (name) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            var data = [].slice.call(args, 1);
+            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
+            var i = 0;
+            var len = evtArr.length;
+            for (i; i < len; i++) {
+                evtArr[i].fn.apply(evtArr[i].ctx, data);
+            }
+        };
         Viewport.prototype.resize = function () {
             this._resize();
         };
@@ -912,7 +922,7 @@ var Virtex;
             }
         };
         return Viewport;
-    }(_Components.BaseComponent));
+    }());
     Virtex.Viewport = Viewport;
     var Events = /** @class */ (function () {
         function Events() {

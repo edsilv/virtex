@@ -48,27 +48,30 @@ declare namespace Virtex {
 declare namespace Virtex {
     interface IVirtexData {
         alpha: boolean;
-        ambientLightColor?: number;
-        ambientLightIntensity?: number;
+        ambientLightColor: number;
+        ambientLightIntensity: number;
         antialias: boolean;
-        cameraZ?: number;
-        directionalLight1Color?: number;
-        directionalLight1Intensity?: number;
-        directionalLight2Color?: number;
-        directionalLight2Intensity?: number;
-        element?: string;
-        fadeSpeed?: number;
-        far?: number;
+        cameraZ: number;
+        directionalLight1Color: number;
+        directionalLight1Intensity: number;
+        directionalLight2Color: number;
+        directionalLight2Intensity: number;
+        fadeSpeed: number;
+        far: number;
         file: string;
-        fullscreenEnabled?: boolean;
-        maxZoom?: number;
-        minZoom?: number;
-        near?: number;
-        shading?: THREE.Shading;
-        showStats?: boolean;
+        fullscreenEnabled: boolean;
+        maxZoom: number;
+        minZoom: number;
+        near: number;
+        shading: THREE.Shading;
+        showStats: boolean;
         type: FileType;
         vrBackgroundColor: number;
-        zoomSpeed?: number;
+        zoomSpeed: number;
+    }
+    interface IVirtexOptions {
+        target: HTMLElement;
+        data: IVirtexData;
     }
 }
 
@@ -90,12 +93,13 @@ declare namespace Virtex {
     }
 }
 
-/// <reference types="base-component" />
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare var Detector: any;
 declare namespace Virtex {
-    class Viewport extends _Components.BaseComponent {
-        options: _Components.IBaseComponentOptions;
+    class Viewport {
+        private _$element;
+        options: IVirtexOptions;
+        private _e;
         private _$viewport;
         private _$loading;
         private _$loadingBar;
@@ -127,7 +131,7 @@ declare namespace Virtex {
         private _vrControls;
         private _vrEffect;
         private _vrEnabled;
-        constructor(options: _Components.IBaseComponentOptions);
+        constructor(options: IVirtexOptions);
         protected _init(): boolean;
         data(): IVirtexData;
         private _getVRDisplay();
@@ -173,6 +177,8 @@ declare namespace Virtex {
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
         private _getAspectRatio();
+        on(name: string, callback: Function, ctx: any): void;
+        fire(name: string, ...args: any[]): void;
         resize(): void;
         protected _resize(): void;
     }

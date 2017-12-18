@@ -13,7 +13,6 @@
   "dependencies": {
     "@types/three": "^0.84.20",
     "@types/webvr-api": "0.0.31",
-    "base-component": "iiif-commons/base-component#v1.1.2",
     "key-codes": "edsilv/key-codes#v0.0.7",
     "three": "^0.87.1"
   },

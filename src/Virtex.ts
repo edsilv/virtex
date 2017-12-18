@@ -13,10 +13,12 @@ var requestAnimFrame = (function () {
 declare var Detector: any;
 
 namespace Virtex {
-    export class Viewport extends _Components.BaseComponent {
+    export class Viewport {
         
-        public options: _Components.IBaseComponentOptions;
+        private _$element: JQuery;
+        public options: IVirtexOptions;
         
+        private _e: any;
         private _$viewport: JQuery;
         private _$loading: JQuery;
         private _$loadingBar: JQuery;
@@ -51,9 +53,10 @@ namespace Virtex {
         private _vrEffect: THREE.VREffect;
         private _vrEnabled: boolean = true;
 
-        constructor(options: _Components.IBaseComponentOptions) {
+        constructor(options: IVirtexOptions) {
             
-            super(options);
+            this.options = options;
+            this.options.data = $.extend(this.data(), options.data);
 
             const success: boolean = this._init();
 
@@ -66,12 +69,14 @@ namespace Virtex {
 
         protected _init(): boolean {
 
-            const success: boolean = super._init();
-
-            if (!success) {
-                console.error("Virtex failed to initialise");
+            this._$element = $(this.options.target);
+            
+            if (!this._$element.length) {
+                console.warn('target not found');
                 return false;
             }
+
+            this._$element.empty();
             
             if (!Detector.webgl) {
                 Detector.addGetWebGLMessage();
@@ -777,6 +782,26 @@ namespace Virtex {
 
         private _getAspectRatio(): number {
             return this._$viewport.width() / this._$viewport.height();
+        }
+
+        public on(name: string, callback: Function, ctx: any): void {
+            var e = this._e || (this._e = {});
+
+            (e[name] || (e[name] = [])).push({
+                fn: callback,
+                ctx: ctx
+            });
+        }
+
+        public fire(name: string, ...args: any[]): void {
+            var data = [].slice.call(args, 1);
+            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
+            var i = 0;
+            var len = evtArr.length;
+
+            for (i; i < len; i++) {
+                evtArr[i].fn.apply(evtArr[i].ctx, data);
+            }
         }
 
         public resize(): void {
