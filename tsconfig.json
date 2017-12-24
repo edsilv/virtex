@@ -11,9 +11,7 @@
         "strictNullChecks": true,
         "lib": ["es6", "dom"],
         "types": [
-            "base-component",
             "key-codes",
-            "jquery",
             "three",
             "webvr-api"
         ]

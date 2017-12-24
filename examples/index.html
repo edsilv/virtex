@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>virtex: test</title>
+    <title>virtex</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="css/virtex.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -9,8 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
-    <script src="js/base-component.js"></script>
     <!--<script src="js/three.js"></script>-->
     <script src="js/three.min.js"></script>
     <script src="js/GLTFLoader.js"></script>
@@ -111,7 +109,7 @@
         //        thekiss: 'http://files.universalviewer.io/manifests/foundobjects/thekiss/thekiss.json'
         //    };
         
-        $(function() {
+        window.addEventListener('DOMContentLoaded', () => {
 
             const isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
@@ -119,8 +117,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.pub.file,
-                    type: objects.pub.type, // defaults to threejs
+                    file: objects.bone5.file,
+                    type: objects.bone5.type, // defaults to threejs
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
@@ -136,33 +134,33 @@
                 //alert(args);
             });
 
-            $('#zoomIn').on('click', function(e){
+            document.querySelector('#zoomIn').addEventListener('click', function(e) {
                 e.preventDefault();
 
                 viewport.zoomIn();
             });
 
-            $('#zoomOut').on('click', function(e){
+            document.querySelector('#zoomOut').addEventListener('click', function(e) {
                 e.preventDefault();
 
                 viewport.zoomOut();
             });
             
-            $('#fullscreen').on('click', function(e){
+            document.querySelector('#fullscreen').addEventListener('click', function(e) {
                 e.preventDefault();
 
                 viewport.enterFullscreen();
             });
             
-            $('#vr').on('click', function(e){
+            document.querySelector('#vr').addEventListener('click', function(e) {
                 e.preventDefault();
 
                 viewport.toggleVR();
             });
-
-            if (!WEBVR.isAvailable()) {
-				$('#vr').hide();
-			}
+            
+            WEBVR.checkAvailability().catch(function(message) {
+                document.querySelector('#vr').style.visibility = "hidden";
+            });
         });
     </script>
 
