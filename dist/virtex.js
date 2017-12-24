@@ -313,7 +313,7 @@ var Virtex;
             this._createEventListeners();
             this._$viewport.appendChild(this._$loading);
             this._$loading.appendChild(this._$loadingBar);
-            this._$loading.style.visibility = "hidden";
+            this._$loading.classList.add('beforeload');
             this._loadObject(this.options.data.file);
             // STATS //
             if (this.options.data.showStats) {
@@ -450,7 +450,8 @@ var Virtex;
         };
         Viewport.prototype._loadObject = function (objectPath) {
             var _this = this;
-            this._$loading.style.visibility = "visible";
+            this._$loading.classList.remove('beforeload');
+            this._$loading.classList.add('duringload');
             var loader;
             switch (this.options.data.type.toString()) {
                 case Virtex.FileType.DRACO.toString():
@@ -508,9 +509,8 @@ var Virtex;
         Viewport.prototype._loaded = function (obj) {
             //const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
             //this.scene.add(boundingBox);
-            // todo: add fading
-            //this._$loading.fadeOut(this.options.data.fadeSpeed);
-            this._$loading.style.visibility = "hidden";
+            this._$loading.classList.remove('duringload');
+            this._$loading.classList.add('afterload');
             this.fire(Events.LOADED, obj);
         };
         Viewport.prototype._getBoundingBox = function () {
