@@ -97,13 +97,13 @@ declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare var Detector: any;
 declare namespace Virtex {
     class Viewport {
-        private _$element;
+        private _element;
         options: IVirtexOptions;
         private _e;
-        private _$viewport;
-        private _$loading;
-        private _$loadingBar;
-        private _$oldie;
+        private _viewport;
+        private _loading;
+        private _loadingBar;
+        private _oldie;
         private _lightGroup;
         private _prevCameraPosition;
         private _prevCameraRotation;
