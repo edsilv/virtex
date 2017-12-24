@@ -145,7 +145,7 @@ namespace Virtex {
                 near: 0.05,
                 shading: THREE.SmoothShading,
                 showStats: false,
-                type: FileType.THREEJS,
+                type: FileType.OBJ,
                 vrBackgroundColor: 0x000000,
                 zoomSpeed: 1
             }

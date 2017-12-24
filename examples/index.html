@@ -99,6 +99,10 @@
             pub: {
                 file: "models/ply/pub.ply",
                 type: new Virtex.FileType("application/ply")
+            },
+            woody: {
+                file: 'https://sophiedixon.github.io/3d-portfolio/collection/woody/_woody/woody.obj',
+
             }
         };
 
@@ -117,8 +121,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.bone5.file,
-                    type: objects.bone5.type, // defaults to threejs
+                    file: objects.woody.file,
+                    type: objects.bone5.type, // defaults to obj
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,

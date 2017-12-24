@@ -345,7 +345,7 @@ var Virtex;
                 near: 0.05,
                 shading: THREE.SmoothShading,
                 showStats: false,
-                type: Virtex.FileType.THREEJS,
+                type: Virtex.FileType.OBJ,
                 vrBackgroundColor: 0x000000,
                 zoomSpeed: 1
             };
