@@ -1,5 +1,4 @@
-// virtex v0.3.1 https://github.com/edsilv/virtex#readme
-/// <reference path="../node_modules/typescript/lib/lib.es6.d.ts" />
+// virtex v0.3.4 https://github.com/edsilv/virtex#readme
 declare var global: any;
 declare var Stats: any;
 interface Document {
@@ -23,6 +22,7 @@ declare namespace Virtex {
         static CORTO: FileType;
         static GLTF: FileType;
         static OBJ: FileType;
+        static PLY: FileType;
         static THREEJS: FileType;
     }
 }
@@ -48,33 +48,42 @@ declare namespace Virtex {
 declare namespace Virtex {
     interface IVirtexData {
         alpha: boolean;
-        ambientLightColor?: number;
-        ambientLightIntensity?: number;
+        ambientLightColor: number;
+        ambientLightIntensity: number;
         antialias: boolean;
-        cameraZ?: number;
-        directionalLight1Color?: number;
-        directionalLight1Intensity?: number;
-        directionalLight2Color?: number;
-        directionalLight2Intensity?: number;
-        element?: string;
-        fadeSpeed?: number;
-        far?: number;
+        cameraZ: number;
+        directionalLight1Color: number;
+        directionalLight1Intensity: number;
+        directionalLight2Color: number;
+        directionalLight2Intensity: number;
+        fadeSpeed: number;
+        far: number;
         file: string;
-        fullscreenEnabled?: boolean;
-        maxZoom?: number;
-        minZoom?: number;
-        near?: number;
-        shading?: THREE.Shading;
-        showStats?: boolean;
+        fullscreenEnabled: boolean;
+        maxZoom: number;
+        minZoom: number;
+        near: number;
+        shading: THREE.Shading;
+        showStats: boolean;
         type: FileType;
         vrBackgroundColor: number;
-        zoomSpeed?: number;
+        zoomSpeed: number;
+    }
+    interface IVirtexOptions {
+        target: HTMLElement;
+        data: IVirtexData;
     }
 }
 
 declare namespace Virtex {
     class ObjFileTypeHandler {
         static setup(viewport: Viewport, objpath: string, obj: any, cb: (object: any) => void): void;
+    }
+}
+
+declare namespace Virtex {
+    class PLYFileTypeHandler {
+        static setup(viewport: Viewport, geometry: any, cb: (object: any) => void): void;
     }
 }
 
@@ -87,12 +96,14 @@ declare namespace Virtex {
 declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare var Detector: any;
 declare namespace Virtex {
-    class Viewport extends _Components.BaseComponent {
-        options: _Components.IBaseComponentOptions;
-        private _$viewport;
-        private _$loading;
-        private _$loadingBar;
-        private _$oldie;
+    class Viewport {
+        private _element;
+        options: IVirtexOptions;
+        private _e;
+        private _viewport;
+        private _loading;
+        private _loadingBar;
+        private _oldie;
         private _lightGroup;
         private _prevCameraPosition;
         private _prevCameraRotation;
@@ -120,7 +131,7 @@ declare namespace Virtex {
         private _vrControls;
         private _vrEffect;
         private _vrEnabled;
-        constructor(options: _Components.IBaseComponentOptions);
+        constructor(options: IVirtexOptions);
         protected _init(): boolean;
         data(): IVirtexData;
         private _getVRDisplay();
@@ -166,6 +177,8 @@ declare namespace Virtex {
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
         private _getAspectRatio();
+        on(name: string, callback: Function, ctx: any): void;
+        fire(name: string, ...args: any[]): void;
         resize(): void;
         protected _resize(): void;
     }

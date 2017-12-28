@@ -1,6 +1,6 @@
 {
   "name": "virtex3d",
-  "version": "0.3.1",
+  "version": "0.3.4",
   "description": "3D object viewer built with three.js",
   "keywords": [
     "3D",
@@ -13,24 +13,19 @@
   "dependencies": {
     "@types/three": "^0.84.20",
     "@types/webvr-api": "0.0.31",
-    "base-component": "viewdir/base-component#v1.1.0",
-    "key-codes": "edsilv/key-codes#v0.0.5",
-    "three": "^0.87.1",
-    "corto": "cnr-isti-vclab/corto"
+    "key-codes": "edsilv/key-codes#v0.0.7",
+    "three": "^0.87.1"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-tasks": "viewdir/gulp-tasks#v1.0.5",
-    "typings": "^2.1.1"
+    "gulp-tasks": "iiif-commons/gulp-tasks#v1.0.7"
   },
-  "scripts": {
-    "postinstall": "typings install"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edsilv/virtex.git"
   },
-  "author": "Edward Silverton <e.silverton@gmail.com> (http://edsilv.com)",
+  "author": "@edsilv",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/edsilv/virtex/issues"

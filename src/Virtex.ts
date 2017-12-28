@@ -13,14 +13,16 @@ var requestAnimFrame = (function () {
 declare var Detector: any;
 
 namespace Virtex {
-    export class Viewport extends _Components.BaseComponent {
+    export class Viewport {
         
-        public options: _Components.IBaseComponentOptions;
+        private _element: HTMLElement;
+        public options: IVirtexOptions;
         
-        private _$viewport: JQuery;
-        private _$loading: JQuery;
-        private _$loadingBar: JQuery;
-        private _$oldie: JQuery;
+        private _e: any;
+        private _viewport: HTMLElement;
+        private _loading: HTMLElement;
+        private _loadingBar: HTMLElement;
+        private _oldie: HTMLElement;
 
         private _lightGroup: THREE.Group;
         private _prevCameraPosition: any;
@@ -51,9 +53,10 @@ namespace Virtex {
         private _vrEffect: THREE.VREffect;
         private _vrEnabled: boolean = true;
 
-        constructor(options: _Components.IBaseComponentOptions) {
+        constructor(options: IVirtexOptions) {
             
-            super(options);
+            this.options = options;
+            this.options.data = Object.assign({}, this.data(), options.data);
 
             const success: boolean = this._init();
 
@@ -66,25 +69,30 @@ namespace Virtex {
 
         protected _init(): boolean {
 
-            const success: boolean = super._init();
-
-            if (!success) {
-                console.error("Virtex failed to initialise");
+            this._element = this.options.target;
+            
+            if (!this._element) {
+                console.warn('target not found');
                 return false;
             }
+
+            this._element.innerHTML = '';
             
             if (!Detector.webgl) {
                 Detector.addGetWebGLMessage();
-                this._$oldie = $('#oldie');
-                this._$oldie.appendTo(this._$element);
+                this._oldie = <HTMLElement>document.querySelector('#oldie');
+                this._element.appendChild(this._oldie);
                 return false;
             }
 
-            this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>');
-            this._$viewport = this._$element.find('.viewport');
-            this._$loading = this._$element.find('.loading');
-            this._$loadingBar = this._$loading.find('.bar');
-            this._$loading.hide();
+            this._viewport = document.createElement('div');
+            this._viewport.classList.add('viewport');
+            this._loading = document.createElement('div');
+            this._loading.classList.add('loading');
+            this._loadingBar = document.createElement('div');
+            this._loadingBar.classList.add('bar');
+            
+            this._element.appendChild(this._viewport);
 
             this.scene = new THREE.Scene();
             this.objectGroup = new THREE.Object3D();
@@ -98,6 +106,10 @@ namespace Virtex {
             this._createRenderer();
             this._createEventListeners();
 
+            this._viewport.appendChild(this._loading);
+            this._loading.appendChild(this._loadingBar);
+            this._loading.classList.add('beforeload');
+
             this._loadObject(this.options.data.file);
             
             // STATS //
@@ -106,7 +118,7 @@ namespace Virtex {
                 this._stats = new Stats();
                 this._stats.domElement.style.position = 'absolute';
                 this._stats.domElement.style.top = '0px';
-                this._$viewport.append(this._stats.domElement);
+                this._viewport.appendChild(this._stats.domElement);
             }
 
             return true;
@@ -133,7 +145,7 @@ namespace Virtex {
                 near: 0.05,
                 shading: THREE.SmoothShading,
                 showStats: false,
-                type: FileType.THREEJS,
+                type: FileType.OBJ,
                 vrBackgroundColor: 0x000000,
                 zoomSpeed: 1
             }
@@ -189,13 +201,14 @@ namespace Virtex {
             if (this._isVRMode) {
                 this._renderer.setClearColor(this.options.data.vrBackgroundColor);
                 this._vrEffect = new THREE.VREffect(this._renderer);
-                this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());
+                this._vrEffect.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
             } else {
                 this._renderer.setClearColor(this.options.data.vrBackgroundColor, 0);
-                this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+                this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
             }
 
-            this._$viewport.empty().append(this._renderer.domElement);
+            this._viewport.innerHTML = '';
+            this._viewport.appendChild(this._renderer.domElement);
         }
         
         private _createControls(): void {
@@ -209,44 +222,53 @@ namespace Virtex {
         private _createEventListeners(): void {
             
             if (this.options.data.fullscreenEnabled) {
-                $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', () => {
+
+                document.addEventListener('webkitfullscreenchange', () => {
+                    this._fullscreenChanged();
+                });
+
+                document.addEventListener('mozfullscreenchange', () => {
+                    this._fullscreenChanged();
+                });
+
+                document.addEventListener('fullscreenchange', () => {
                     this._fullscreenChanged();
                 });
             }
             
-            this._$element.on('mousedown', (e) => {
-                this._onMouseDown(<MouseEvent>e.originalEvent);
+            this._element.addEventListener('mousedown', (e: MouseEvent) => {
+                this._onMouseDown(e);
             });
 
-            this._$element.on('mousemove', (e) => {
-                this._onMouseMove(<MouseEvent>e.originalEvent);
+            this._element.addEventListener('mousemove', (e: MouseEvent) => {
+                this._onMouseMove(e);
             });
 
-            this._$element.on('mouseup', () => {
+            this._element.addEventListener('mouseup', () => {
                 this._onMouseUp();
             });
 
-            this._$element.on('mouseout', () => {
+            this._element.addEventListener('mouseout', () => {
                 this._onMouseOut();
             });
 
-            this._$element.on('mousewheel', (e) => {
-                this._onMouseWheel(<MouseWheelEvent>e.originalEvent);
+            this._element.addEventListener('mousewheel', (e: WheelEvent) => {
+                this._onMouseWheel(e);
             });
 
-            this._$element.on('DOMMouseScroll', (e) => {
-                this._onMouseWheel(<MouseWheelEvent>e.originalEvent); // firefox
+            this._element.addEventListener('DOMMouseScroll', (e: MouseWheelEvent) => {
+                this._onMouseWheel(e); // firefox
             });
 
-            this._$element.on('touchstart', (e) => {
-                this._onTouchStart(<TouchEvent>e.originalEvent);
+            this._element.addEventListener('touchstart', (e: TouchEvent) => {
+                this._onTouchStart(e);
             });
 
-            this._$element.on('touchmove', (e) => {
-                this._onTouchMove(<TouchEvent>e.originalEvent);
+            this._element.addEventListener('touchmove', (e: TouchEvent) => {
+                this._onTouchMove(e);
             });
 
-            this._$element.on('touchend', () => {
+            this._element.addEventListener('touchend', () => {
                 this._onTouchEnd();
             });
 
@@ -254,7 +276,9 @@ namespace Virtex {
         }
         
         private _loadObject(objectPath: string): void {
-            this._$loading.show();
+            
+            this._loading.classList.remove('beforeload');
+            this._loading.classList.add('duringload');
 
             let loader: any;
             
@@ -273,6 +297,9 @@ namespace Virtex {
                     break;
                 case FileType.THREEJS.toString() :
                     loader = new THREE.ObjectLoader();
+                    break;
+                case FileType.PLY.toString() :
+                    loader = new (<any>THREE).PLYLoader();
                     break;
             }
             
@@ -299,6 +326,9 @@ namespace Virtex {
                         case FileType.OBJ.toString() :
                             ObjFileTypeHandler.setup(this, objectPath, obj, this._loaded.bind(this));
                             break;
+                        case FileType.PLY.toString() :
+                            PLYFileTypeHandler.setup(this, obj, this._loaded.bind(this));
+                            break;
                     }
 
                 },
@@ -319,7 +349,8 @@ namespace Virtex {
             //const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
             //this.scene.add(boundingBox);
 
-            this._$loading.fadeOut(this.options.data.fadeSpeed);
+            this._loading.classList.remove('duringload');
+            this._loading.classList.add('afterload');
             
             this.fire(Events.LOADED, obj);
         }
@@ -360,17 +391,17 @@ namespace Virtex {
         }
 
         private _loadProgress(progress: number): void {
-            const fullWidth: number = this._$loading.width();
+            const fullWidth: number = this._loading.offsetWidth;
             const width: number = Math.floor(fullWidth * progress);
-            this._$loadingBar.width(width);
+            this._loadingBar.style.width = String(width) + "px";
         }
 
         private _fullscreenChanged(): void {
             if (this._isFullscreen) { 
                 // exiting fullscreen
                 this.exitFullscreen();
-                this._$element.width(this._lastWidth);
-                this._$element.height(this._lastHeight);
+                this._element.style.width = String(this._lastWidth);
+                this._element.style.height = String(this._lastHeight);
             } else { 
                 // entering fullscreen
                 this._lastWidth = this._getWidth();
@@ -613,15 +644,15 @@ namespace Virtex {
                 this._renderer.render(this.scene, this.camera);
 
                 if (this._isMouseOver) {
-                    this._$element.addClass('grabbable');
+                    this._element.classList.add('grabbable');
                     if (this._isMouseDown) {
-                        this._$element.addClass('grabbing');
+                        this._element.classList.add('grabbing');
                     } else {
-                        this._$element.removeClass('grabbing');
+                        this._element.classList.remove('grabbing');
                     }
                 } else {
-                    this._$element.removeClass('grabbable');
-                    this._$element.removeClass('grabbing');
+                    this._element.classList.remove('grabbable');
+                    this._element.classList.remove('grabbing');
                 }
             }
         }
@@ -645,14 +676,14 @@ namespace Virtex {
             if (this._isFullscreen){
                 return window.innerWidth;
             }
-            return this._$element.width();
+            return this._element.offsetWidth;
         }
 
         private _getHeight(): number {
             if (this._isFullscreen){
                 return window.innerHeight;
             }
-            return this._$element.height();
+            return this._element.offsetHeight;
         }
 
         private _getZoomSpeed(): number {
@@ -725,7 +756,7 @@ namespace Virtex {
         
         public enterFullscreen(): void {            
             if (!this.options.data.fullscreenEnabled) return;            
-            const elem: HTMLElement = this._$element[0];
+            const elem: HTMLElement = this._element;
             const requestFullScreen: any = this._getRequestFullScreen(elem);
 
             if (requestFullScreen){
@@ -770,7 +801,27 @@ namespace Virtex {
         }
 
         private _getAspectRatio(): number {
-            return this._$viewport.width() / this._$viewport.height();
+            return this._viewport.offsetWidth / this._viewport.offsetHeight;
+        }
+
+        public on(name: string, callback: Function, ctx: any): void {
+            var e = this._e || (this._e = {});
+
+            (e[name] || (e[name] = [])).push({
+                fn: callback,
+                ctx: ctx
+            });
+        }
+
+        public fire(name: string, ...args: any[]): void {
+            var data = [].slice.call(args, 1);
+            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
+            var i = 0;
+            var len = evtArr.length;
+
+            for (i; i < len; i++) {
+                evtArr[i].fn.apply(evtArr[i].ctx, data);
+            }
         }
 
         public resize(): void {
@@ -779,36 +830,35 @@ namespace Virtex {
 
         protected _resize(): void {
 
-            if (this._$element && this._$viewport) {
+            if (this._element && this._viewport) {
                 
-                this._$element.width(this._getWidth());
-                this._$element.height(this._getHeight());
+                const width: string = String(this._getWidth() + "px");
+                const height: string = String(this._getHeight() + "px");
 
-                this._$viewport.width(this._getWidth());
-                this._$viewport.height(this._getHeight());
+                this._element.style.width = width;
+                this._element.style.height = height;
 
-                this._viewportCenter.x = this._$viewport.width() / 2;
-                this._viewportCenter.y = this._$viewport.height() / 2;
+                this._viewport.style.width = width;
+                this._viewport.style.height = height;
+
+                this._viewportCenter.x = this._viewport.offsetWidth / 2;
+                this._viewportCenter.y = this._viewport.offsetHeight / 2;
 
                 this.camera.aspect = this._getAspectRatio();
                 this.camera.updateProjectionMatrix();
                 
                 if (this._isVRMode) {
-                    this._vrEffect.setSize(this._$viewport.width(), this._$viewport.height());                    
+                    this._vrEffect.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);                    
                 } else {
-                    this._renderer.setSize(this._$viewport.width(), this._$viewport.height());
+                    this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
                 }
 
-                this._$loading.css({
-                    left: (this._viewportCenter.x) - (this._$loading.width() / 2),
-                    top: (this._viewportCenter.y) - (this._$loading.height() / 2)
-                });
+                this._loading.style.left = String((this._viewportCenter.x) - (this._loading.offsetWidth / 2)) + "px";
+                this._loading.style.top = String((this._viewportCenter.y) - (this._loading.offsetHeight / 2)) + "px";
                 
-            } else if (this._$oldie) {
-                this._$oldie.css({
-                    left: (this._$element.width() / 2) - (this._$oldie.outerWidth() / 2),
-                    top: (this._$element.height() / 2) - (this._$oldie.outerHeight() / 2)
-                });
+            } else if (this._oldie) {
+                this._oldie.style.left = String((this._element.offsetWidth / 2) - (this._oldie.offsetWidth / 2)) + "px";
+                this._oldie.style.top = String((this._element.offsetHeight / 2) - (this._oldie.offsetHeight / 2)) + "px";
             }
         }
     }
@@ -819,7 +869,7 @@ namespace Virtex {
 }
 
 (function(g: any) {
-    if (!g.Virtex){
+    if (!g.Virtex) {
         g.Virtex = Virtex;
     }
 })(global);

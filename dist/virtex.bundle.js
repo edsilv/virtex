@@ -1,66 +1,3 @@
-// base-component v1.1.0 https://github.com/viewdir/base-component#readme
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.baseComponent = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function (global){
-///<reference path="../node_modules/typescript/lib/lib.es6.d.ts"/> 
-
-var _Components;
-(function (_Components) {
-    var BaseComponent = (function () {
-        function BaseComponent(options) {
-            this.options = options;
-            this.options.data = $.extend(this.data(), options.data);
-        }
-        BaseComponent.prototype._init = function () {
-            this._$element = $(this.options.target);
-            if (!this._$element.length) {
-                console.warn('element not found');
-                return false;
-            }
-            this._$element.empty();
-            return true;
-        };
-        BaseComponent.prototype.data = function () {
-            return {};
-        };
-        BaseComponent.prototype.on = function (name, callback, ctx) {
-            var e = this._e || (this._e = {});
-            (e[name] || (e[name] = [])).push({
-                fn: callback,
-                ctx: ctx
-            });
-        };
-        BaseComponent.prototype.fire = function (name) {
-            var args = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args[_i - 1] = arguments[_i];
-            }
-            var data = [].slice.call(arguments, 1);
-            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
-            var i = 0;
-            var len = evtArr.length;
-            for (i; i < len; i++) {
-                evtArr[i].fn.apply(evtArr[i].ctx, data);
-            }
-        };
-        BaseComponent.prototype._resize = function () {
-        };
-        BaseComponent.prototype.set = function (data) {
-        };
-        return BaseComponent;
-    }());
-    _Components.BaseComponent = BaseComponent;
-})(_Components || (_Components = {}));
-(function (g) {
-    if (!g._Components) {
-        g._Components = _Components;
-    }
-})(global);
-
-
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[1])(1)
-});
 // threejs.org/license
 (function(m,na){"object"===typeof exports&&"undefined"!==typeof module?na(exports):"function"===typeof define&&define.amd?define(["exports"],na):na(m.THREE=m.THREE||{})})(this,function(m){function na(){}function D(a,b){this.x=a||0;this.y=b||0}function N(a,b,c,d,e,f,g,h,k,l){Object.defineProperty(this,"id",{value:lf++});this.uuid=R.generateUUID();this.name="";this.image=void 0!==a?a:N.DEFAULT_IMAGE;this.mipmaps=[];this.mapping=void 0!==b?b:N.DEFAULT_MAPPING;this.wrapS=void 0!==c?c:1001;this.wrapT=
 void 0!==d?d:1001;this.magFilter=void 0!==e?e:1006;this.minFilter=void 0!==f?f:1008;this.anisotropy=void 0!==k?k:1;this.format=void 0!==g?g:1023;this.type=void 0!==h?h:1009;this.offset=new D(0,0);this.repeat=new D(1,1);this.generateMipmaps=!0;this.premultiplyAlpha=!1;this.flipY=!0;this.unpackAlignment=4;this.encoding=void 0!==l?l:3E3;this.version=0;this.onUpdate=null}function S(a,b,c,d){this.x=a||0;this.y=b||0;this.z=c||0;this.w=void 0!==d?d:1}function Ab(a,b,c){this.uuid=R.generateUUID();this.width=
@@ -1633,1232 +1570,6 @@ var Stats=function(){function h(a){c.appendChild(a.dom);return a}function k(a){f
 if(self.performance&&self.performance.memory)var t=h(new Stats.Panel("MB","#f08","#201"));k(0);return{REVISION:16,dom:c,addPanel:h,showPanel:k,begin:function(){g=(performance||Date).now()},end:function(){a++;var c=(performance||Date).now();f.update(c-g,200);if(c>e+1E3&&(r.update(1E3*a/(c-e),100),e=c,a=0,t)){var d=performance.memory;t.update(d.usedJSHeapSize/1048576,d.jsHeapSizeLimit/1048576)}return c},update:function(){g=this.end()},domElement:c,setMode:k}};
 Stats.Panel=function(h,k,l){var c=Infinity,g=0,e=Math.round,a=e(window.devicePixelRatio||1),r=80*a,f=48*a,t=3*a,u=2*a,d=3*a,m=15*a,n=74*a,p=30*a,q=document.createElement("canvas");q.width=r;q.height=f;q.style.cssText="width:80px;height:48px";var b=q.getContext("2d");b.font="bold "+9*a+"px Helvetica,Arial,sans-serif";b.textBaseline="top";b.fillStyle=l;b.fillRect(0,0,r,f);b.fillStyle=k;b.fillText(h,t,u);b.fillRect(d,m,n,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d,m,n,p);return{dom:q,update:function(f,
 v){c=Math.min(c,f);g=Math.max(g,f);b.fillStyle=l;b.globalAlpha=1;b.fillRect(0,0,r,m);b.fillStyle=k;b.fillText(e(f)+" "+h+" ("+e(c)+"-"+e(g)+")",t,u);b.drawImage(q,d+a,m,n-a,p,d,m,n-a,p);b.fillRect(d+n-a,m,a,p);b.fillStyle=l;b.globalAlpha=.9;b.fillRect(d+n-a,m,a,e((1-f/v)*p))}}};"object"===typeof module&&(module.exports=Stats);
-
-/*
-Corto
-
-Copyright(C) 2017 - Federico Ponchio
-ISTI - Italian National Research Council - Visual Computing Lab
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  You should have received 
-a copy of the GNU General Public License along with Corto.
-If not, see <http://www.gnu.org/licenses/>.
-*/
-
-BitStream = function(array) {
-	var t = this;
-	t.a = array;
-	t.current = array[0];
-	t.position = 0; //position in the buffer
-	t.pending = 32;  //bits still to read
-};
- 
-BitStream.prototype = { 
-	read: function(bits) {
-		var t = this;
-		if(bits > t.pending) {
-			t.pending = bits - t.pending;
-			var result = (t.current << t.pending)>>>0; //looks the same.
-			t.pending = 32 - t.pending;
-
-			t.current = t.a[++t.position];
-			result |= (t.current >>> t.pending);
-			t.current = (t.current & ((1<<t.pending)-1))>>>0; //slighting faster than mask.
-			return result;
-		} else { //splitting result in branch seems faster.
-
-			t.pending -= bits;
-			var result = (t.current >>> t.pending);
-			t.current = (t.current & ((1<<t.pending)-1))>>>0; //slighting faster than mask, 
-			return result;
-		}
-	}
-};
-
-Stream = function(buffer, byteOffset, byteLength) {
-	var t = this;
-	t.data = buffer;
-	t.buffer = new Uint8Array(buffer);
-	t.pos = byteOffset?byteOffset:0;
-	t.view = new DataView(buffer);
-}
-
-Stream.prototype = {
-	logs: new Uint8Array(16768), 
-	readChar: function() {
-		var c = this.buffer[this.pos++];
-		if(c > 127) c -= 256;
-		return c;
-	},
-	readUChar: function() {
-		return this.buffer[this.pos++];
-	},	
-	readShort: function() {
-		this.pos += 2;
-		return this.view.getInt16(this.pos-2, true);
-	},
-	readFloat: function() {
-		this.pos += 4;
-		return this.view.getFloat32(this.pos-4, true);
-	},
-	readInt: function() {
-		this.pos += 4;
-		return this.view.getInt32(this.pos-4, true);
-	},
-	readArray: function(n) {
-		var a = this.buffer.subarray(this.pos, this.pos+n);
-		this.pos += n;
-		return a;
-	},
-	readString: function() {
-		var n = this.readShort();
-		var s = String.fromCharCode.apply(null, this.readArray(n-1));
-		this.pos++; //null terminator of string.
-		return s;
-	},
-	readBitStream:function() {
-		var n = this.readInt();
-		var pad = this.pos & 0x3;
-		if(pad != 0)
-			this.pos += 4 - pad;
-		var b = new BitStream(new Uint32Array(this.data, this.pos, n));
-		this.pos += n*4;
-		return b;
-	},
-	//make decodearray2,3 later //TODO faster to create values here or passing them?
-	decodeArray: function(N, values) {
-		var t = this;
-		var bitstream = t.readBitStream();
-
-		var tunstall = new Tunstall;
-		while(t.logs.length < values.length)
-			t.logs = new Uint8Array(values.length);
-
-		tunstall.decompress(this, t.logs);
-
-		for(var i = 0; i < t.logs.readed; i++) {
-			var diff = t.logs[i];
-			if(diff == 0) {
-				for(var c = 0; c < N; c++)
-					values[i*N + c] = 0;
-				continue;
-			}
-			var max = (1<<diff)>>>1;
-			for(var c = 0; c < N; c++)
-				values[i*N + c] = bitstream.read(diff) - max;
-		}
-		return t.logs.readed;
-	},
-
-	decodeValues: function(N, values) {
-		var t = this;
-		var bitstream = t.readBitStream();
-		var tunstall = new Tunstall;
-		var size = values.length/N;
-		while(t.logs.length < size)
-			t.logs = new Uint8Array(size);
-
-		for(var c = 0; c < N; c++) {
-			tunstall.decompress(this, t.logs);
-
-			for(var i = 0; i < t.logs.readed; i++) {
-				var diff = t.logs[i];
-				if(diff == 0) {
-					values[i*N + c] = 0;
-					continue;
-				}
-
-				var val = bitstream.read(diff);
-				var middle = (1<<(diff-1))>>>0;
-				if(val < middle)
-					val = -val -middle;
-				values[i*N + c] = val;
-			}
-		}
-		return t.logs.readed;
-	}
-};
-
-
-function Tunstall() {
-}
-
-
-Tunstall.prototype = {
-	wordsize: 8,
-	dictionary_size: 256,
-	starts: new Uint32Array(256), //starts of each queue
-	queue: new Uint32Array(512), //array of n symbols array of prob, position in buffer, length //limit to 8k*3
-	index: new Uint32Array(512),
-	lengths: new Uint32Array(512),
-	table: new Uint8Array(8192), //worst case for 2 
-
-	decompress: function(stream, data) {
-		var nsymbols = stream.readUChar();
-		this.probs = stream.readArray(nsymbols*2);
-		this.createDecodingTables();
-		var size = stream.readInt();
-		if(size > 100000000) throw("TOO LARGE!");
-		if(!data)
-			data = new Uint8Array(size);
-		if(data.length < size)
-			throw "Array for results too small";
-		data.readed = size;
-
-		var compressed_size = stream.readInt();
-		if(size > 100000000) throw("TOO LARGE!");
-		var compressed_data = stream.readArray(compressed_size);
-		if(size)
-			this._decompress(compressed_data, compressed_size, data, size);
-		return data;
-	}, 
-
-
-	createDecodingTables: function() {
-
-		var t = this;
-		var n_symbols = t.probs.length/2;
-		if(n_symbols <= 1) return;
-
-		var queue = Tunstall.prototype.queue;
-
-		var end = 0; //keep track of queue end
-		var pos = 0; //keep track of buffer first free space
-		var n_words = 0;
-
-		//Here probs will range from 0 to 0xffff for better precision
-		for(var i = 0; i < n_symbols; i++)
-			queue[i] = t.probs[2*i+1] << 8;
-
-		var max_repeat = (t.dictionary_size - 1)/(n_symbols - 1);
-		var repeat = 2;
-		var p0 = queue[0];
-		var p1 = queue[1];
-		var prob = (p0*p0)>>>16;
-		while(prob > p1 && repeat < max_repeat) {
-			prob = (prob*p0)>>> 16;
-			repeat++;
-		}
-
-		if(repeat >= 16) { //Very low entropy results in large tables > 8K.
-			t.table[pos++] = t.probs[0];
-			for(var k = 1; k < n_symbols; k++) {
-				for(var i = 0; i < repeat-1; i++)
-					t.table[pos++] = t.probs[0];
-				t.table[pos++] = t.probs[2*k];
-			}
-			t.starts[0] = (repeat-1)*n_symbols;
-			for(var k = 1; k < n_symbols; k++)
-				t.starts[k] = k;
-
-			for(var col = 0; col < repeat; col++) {
-				for(var row = 1; row < n_symbols; row++) {
-					var off = (row + col*n_symbols);
-					if(col > 0)
-						queue[off] = (prob * queue[row]) >> 16;
-					t.index[off] = row*repeat - col;
-					t.lengths[off] = col+1;
-				}
-				if(col == 0)
-					prob = p0;
-				else
-					prob = (prob*p0) >>> 16;
-			}
-			var first = ((repeat-1)*n_symbols);
-			queue[first] = prob;
-			t.index[first] = 0;
-			t.lengths[first] = repeat;
-
-			n_words = 1 + repeat*(n_symbols - 1);
-			end = repeat*n_symbols;
-
-		} else {
-			//initialize adding all symbols to queues
-			for(var i = 0; i < n_symbols; i++) {
-				queue[i] = t.probs[i*2+1]<<8;
-				t.index[i] = i;
-				t.lengths[i] = 1;
-	
-				t.starts[i] = i;
-				t.table[i] = t.probs[i*2];
-			}
-			pos = n_symbols;
-			end = n_symbols;
-			n_words = n_symbols;
-		}
-
-		//at each step we grow all queues using the most probable sequence
-		while(n_words < t.dictionary_size) {
-			//find highest probability word
-			var best = 0;
-			var max_prob = 0;
-			for(var i = 0; i < n_symbols; i++) {
-				var p = queue[t.starts[i]]; //front of queue probability.
-				if(p > max_prob) {
-					best = i;
-					max_prob = p;
-				}
-			}
-			var start = t.starts[best];
-			var offset = t.index[start];
-			var len = t.lengths[start];
-
-			for(var i = 0; i < n_symbols; i++) {
-				queue[end] = (queue[i] * queue[start])>>>16;
-				t.index[end] = pos;
-				t.lengths[end] = len + 1;
-				end++;
-
-				for(var k  = 0; k < len; k++)
-					t.table[pos + k] = t.table[offset + k]; //copy sequence of symbols
-				pos += len;
-				t.table[pos++] = t.probs[i*2]; //append symbol
-				if(i + n_words == t.dictionary_size - 1)
-					break;
-			}
-			if(i == n_symbols)
-				t.starts[best] += n_symbols; //move one column
-			n_words += n_symbols -1;
-		}
-
-
-		var word = 0;
-		for(i = 0, row = 0; i < end; i ++, row++) {
-			if(row >= n_symbols)
-				row  = 0;
-			if(t.starts[row] > i) continue; //skip deleted words
-
-			t.index[word] = t.index[i];
-			t.lengths[word] = t.lengths[i];
-			word++;
-		}
-	},
-	_decompress: function(input, input_size, output, output_size) {
-		//TODO optimize using buffer arrays
-		var input_pos = 0;
-		var output_pos = 0;
-		if(this.probs.length == 2) {
-			var symbol = this.probs[0];
-			for(var i = 0; i < output_size; i++)
-				output[i] = symbol;
-			return;
-		}
-
-		while(input_pos < input_size-1) {
-			var symbol = input[input_pos++];
-			var start = this.index[symbol];
-			var end = start + this.lengths[symbol];
-			for(var i = start; i < end; i++) 
-				output[output_pos++] = this.table[i];
-		}
-
-		//last symbol might override so we check.
-		var symbol = input[input_pos];
-		var start = this.index[symbol];
-		var end = start + output_size - output_pos;
-		var length = output_size - output_pos;
-		for(var i = start; i < end; i++)
-			output[output_pos++] = this.table[i];
-
-		return output;
-	}
-}
-/*
-Corto
-
-Copyright(C) 2017 - Federico Ponchio
-ISTI - Italian National Research Council - Visual Computing Lab
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  You should have received 
-a copy of the GNU General Public License along with Corto.
-If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
-
-
-function Attribute(name, q, components, type, strategy) {
-	var t = this;
-	t.name = name;
-	t.q = q; //float
-	t.components = components; //integer
-	t.type = type;
-	t.strategy = strategy;
-}
-
-Attribute.prototype = {
-
-Type: { UINT32:0, INT32:1, UINT16:2, INT16:3, UINT8:4, INT8:5, FLOAT:6, DOUBLE:7 }, 
-
-Strategy: { PARALLEL:1, CORRELATED:2 },
-
-init: function(nvert, nface) {
-	var t = this;
-	var n = nvert*t.components;
-	t.values = new Int32Array(n);  //local workspace 
-
-	//init output buffers
-	switch(t.type) {
-	case t.Type.UINT32:
-	case t.Type.INT32: t.values = t.buffer = new Int32Array(n); break; //no point replicating.
-	case t.Type.UINT16:
-	case t.Type.INT16: t.buffer = new Int16Array(n); break;
-	case t.Type.UINT8: t.buffer = new Uint8Array(n); break;
-	case t.Type.INT8: t.buffer  = new Int8Array(n); break;
-	case t.Type.FLOAT:
-	case t.Type.DOUBLE: t.buffer = new Float32Array(n); break;
-	default: throw "Error if reading";
-	}
-},
-
-decode: function(nvert, stream) {
-	var t = this;
-	if(t.strategy & t.Strategy.CORRELATED) //correlated
-		stream.decodeArray(t.components, t.values);
-	else
-		stream.decodeValues(t.components, t.values);
-},
-
-deltaDecode: function(nvert, context) {
-	var t = this;
-	var values = t.values;
-	var N = t.components;
-
-	if(t.strategy & t.Strategy.PARALLEL) { //parallel
-		var n = context.length/3;
-		for(var i = 1; i < n; i++) {
-			for(var c = 0; c < N; c++) {
-				values[i*N + c] += values[context[i*3]*N + c] + values[context[i*3+1]*N + c] - values[context[i*3+2]*N + c];
-			}
-		}
-	} else if(context) {
-		var n = context.length/3;
-		for(var i = 1; i < n; i++)
-			for(var c = 0; c < N; c++)
-				values[i*N + c] += values[context[i*3]*N + c];
-	} else {
-		for(var i = N; i < nvert*N; i++)
-			values[i] += values[i - N];
-	}
-},
-
-postDelta: function() {},
-
-dequantize: function(nvert) {
-	var t= this;
-	var n = t.components*nvert;
-	switch(t.type) {
-	case t.Type.UINT32:
-	case t.Type.INT32: break;
-	case t.Type.UINT16:
-	case t.Type.INT16: 
-	case t.Type.UINT8: 
-	case t.Type.INT8: 
-		for(var i = 0; i < n; i++)
-			t.buffer[i] = t.values[i]*t.q;
-		break;
-	case t.Type.FLOAT:
-	case t.Type.DOUBLE: 
-		for(var i = 0; i < n; i++)
-			t.buffer[i] = t.values[i]*t.q;
-		break;
-	}
-}
-
-};
-
-
-/* COLOR ATTRIBUTE */
-
-function ColorAttr(name, q, components, type, strategy) {
-	Attribute.call(this, name, q, components, type, strategy);
-	this.qc = [];
-}
-
-ColorAttr.prototype = Object.create(Attribute.prototype);
-ColorAttr.prototype.decode = function(nvert, stream) {
-	for(var c = 0; c < 4; c++)
-		this.qc[c] = stream.readUChar();
-	Attribute.prototype.decode.call(this, nvert, stream);
-}
-
-ColorAttr.prototype.dequantize = function(nvert) {
-	var t = this;
-	for(var i = 0; i < nvert; i++) {
-		var offset = i*4;
-		var rgboff = i*3;
-
-		var e0 = t.values[offset + 0];
-		var e1 = t.values[offset + 1];
-		var e2 = t.values[offset + 2];
-
-		t.buffer[rgboff + 0] = ((e2 + e0)* t.qc[0])&0xff;
-		t.buffer[rgboff + 1] = e0* t.qc[1];
-		t.buffer[rgboff + 2] = ((e1 + e0)* t.qc[2])&0xff;
-//		t.buffer[offset + 3] = t.values[offset + 3] * t.qc[3];
-	}
-}
-
-/* NORMAL ATTRIBUTE */
-
-function NormalAttr(name, q, components, type, strategy) {
-	Attribute.call(this, name, q, components, type, strategy);
-}
-
-NormalAttr.prototype = Object.create(Attribute.prototype);
-
-NormalAttr.prototype.Prediction = { DIFF: 0, ESTIMATED: 1, BORDER: 2 };
-
-NormalAttr.prototype.init = function(nvert, nface) {
-	var t = this;
-	var n = nvert*t.components;
-	t.values = new Int32Array(2*nvert);  //local workspace 
-
-	//init output buffers
-	switch(t.type) {
-	case t.Type.INT16: t.buffer = new Int16Array(n); break;
-	case t.Type.FLOAT:
-	case t.Type.DOUBLE: t.buffer = new Float32Array(n); break;
-	default: throw "Error if reading";
-	}
-};
-
-NormalAttr.prototype.decode = function(nvert, stream) {
-	var t = this;
-	t.prediction = stream.readUChar();
-
-	stream.decodeArray(2, t.values);
-};
-
-NormalAttr.prototype.deltaDecode = function(nvert, context) {
-	var t = this;
-	if(t.prediction != t.Prediction.DIFF)
-		return;
-
-	if(context) {
-		for(var i = 1; i < nvert; i++) {
-			for(var c = 0; c < 2; c++) {
-				var d = t.values[i*2 + c];
-				t.values[i*2 + c] += t.values[context[i*3]*2 + c];
-			}
-		}
-	} else { //point clouds assuming values are already sorted by proximity.
-		for(var i = 2; i < nvert*2; i++) {
-			var d = t.values[i];
-			t.values[i] += t.values[i-2];
-		}
-	}
-};
-
-NormalAttr.prototype.postDelta = function(nvert, nface, attrs, index) {
-	var t = this;
-	//for border and estimate we need the position already deltadecoded but before dequantized
-	if(t.prediction == t.Prediction.DIFF)
-		return;
-
-	if(!attrs.position)
-		throw "No position attribute found. Use DIFF normal strategy instead.";
-
-	var coord = attrs.position;
-
-	t.estimated = new Float32Array(nvert*3);
-	t.estimateNormals(nvert, coord.values, nface, index.faces);
-
-	if(t.prediction == t.Prediction.BORDER) {
-		t.boundary = new Uint32Array(nvert);
-		t.markBoundary(nvert, nface, index.faces, t.boundary);
-	}
-
-	t.computeNormals(nvert);
-} 
-
-NormalAttr.prototype.dequantize = function(nvert) {
-	var t = this;
-	if(t.prediction != t.Prediction.DIFF)
-		return;
-
-	for(var i = 0; i < nvert; i++)
-		t.toSphere(i, t.values, i, t.buffer, t.q)
-}
-
-NormalAttr.prototype.computeNormals = function(nvert) {
-	var t = this;
-	var norm = t.estimated;
-
-	if(t.prediction == t.Prediction.ESTIMATED) {
-		for(var i = 0; i < nvert; i++) {
-			t.toOcta(i, norm, i, t.values, t.q);
-			t.toSphere(i, t.values, i, t.buffer, t.q);
-		}
-
-	} else { //BORDER
-		var count = 0; //here for the border.
-		for(var i = 0, k = 0; i < nvert; i++, k+=3) {
-			if(t.boundary[i] != 0) {
-				t.toOcta(i, norm, count, t.values, t.q);
-				t.toSphere(count, t.values, i, t.buffer, t.q);
-				count++;
-
-			} else { //no correction
-				var len = 1/Math.sqrt(norm[k]*norm[k] + norm[k+1]*norm[k+1] + norm[k+2]*norm[k+2]);
-				if(t.type == t.Type.INT16)
-					len *= 32767;
-
-				t.buffer[k] = norm[k]*len;
-				t.buffer[k+1] = norm[k+1]*len;
-				t.buffer[k+2] = norm[k+2]*len;  
-			}
-		}
-	}
-}
-
-NormalAttr.prototype.markBoundary = function( nvert,  nface, index, boundary) {	
-	for(var f = 0; f < nface*3; f += 3) {
-		boundary[index[f+0]] ^= index[f+1] ^ index[f+2];
-		boundary[index[f+1]] ^= index[f+2] ^ index[f+0];
-		boundary[index[f+2]] ^= index[f+0] ^ index[f+1];
-	}
-}
-
-
-NormalAttr.prototype.estimateNormals = function(nvert, coords, nface, index) {
-	var t = this;
-	for(var f = 0; f < nface*3; f += 3) {
-		var a = 3*index[f + 0];
-		var b = 3*index[f + 1];
-		var c = 3*index[f + 2];
-
-		var ba0 = coords[b+0] - coords[a+0];
-		var ba1 = coords[b+1] - coords[a+1];
-		var ba2 = coords[b+2] - coords[a+2];
-
-		var ca0 = coords[c+0] - coords[a+0];
-		var ca1 = coords[c+1] - coords[a+1];
-		var ca2 = coords[c+2] - coords[a+2];
-
-		var n0 = ba1*ca2 - ba2*ca1;
-		var n1 = ba2*ca0 - ba0*ca2;
-		var n2 = ba0*ca1 - ba1*ca0;
-
-		t.estimated[a + 0] += n0;
-		t.estimated[a + 1] += n1;
-		t.estimated[a + 2] += n2;
-		t.estimated[b + 0] += n0;
-		t.estimated[b + 1] += n1;
-		t.estimated[b + 2] += n2;
-		t.estimated[c + 0] += n0;
-		t.estimated[c + 1] += n1;
-		t.estimated[c + 2] += n2;
-	}
-}
-
-
-//taks input in ingress at i offset, adds out at c offset
-NormalAttr.prototype.toSphere = function(i, input, o, out, unit) {
-
-	var t = this;
-	var j = i*2;
-	var k = o*3;
-	var av0 = input[j] > 0? input[j]:-input[j];
-	var av1 = input[j+1] > 0? input[j+1]:-input[j+1];
-	out[k] = input[j];
-	out[k+1] = input[j+1];
-	out[k+2] = unit - av0 - av1;
-	if (out[k+2] < 0) {
-		out[k] = (input[j] > 0)? unit - av1 : av1 - unit;
-		out[k+1] = (input[j+1] > 0)? unit - av0: av0 - unit;
-	}
-	var len = 1/Math.sqrt(out[k]*out[k] + out[k+1]*out[k+1] + out[k+2]*out[k+2]);
-	if(t.type == t.Type.INT16)
-		len *= 32767;
-
-	out[k] *= len;
-	out[k+1] *= len;
-	out[k+2] *= len;
-}
-
-NormalAttr.prototype.toOcta = function(i, input, o, output, unit) {
-	var k = o*2;
-	var j = i*3; //input
-
-	var av0 = input[j] > 0? input[j]:-input[j];
-	var av1 = input[j+1] > 0? input[j+1]:-input[j+1];
-	var av2 = input[j+2] > 0? input[j+2]:-input[j+2];
-	var len = av0 + av1 + av2;
-	var p0 = input[j]/len;
-	var p1 = input[j+1]/len;
-
-	var ap0 = p0 > 0? p0: -p0;
-	var ap1 = p1 > 0? p1: -p1;
-
-	if(input[j+2] < 0) {
-		p0 = (input[j] >= 0)? 1.0 - ap1 : ap1 - 1;
-		p1 = (input[j+1] >= 0)? 1.0 - ap0 : ap0 - 1;
-	}
-	output[k] += p0*unit;
-	output[k+1] += p1*unit;
-
-/*
-		Point2f p(v[0], v[1]);
-		p /= (fabs(v[0]) + fabs(v[1]) + fabs(v[2]));
-
-		if(v[2] < 0) {
-			p = Point2f(1.0f - fabs(p[1]), 1.0f - fabs(p[0]));
-			if(v[0] < 0) p[0] = -p[0];
-			if(v[1] < 0) p[1] = -p[1];
-		}
-		return Point2i(p[0]*unit, p[1]*unit); */
-}
-
-
-/* INDEX ATTRIBUTE */
-
-function IndexAttr(nvert, nface, type) {
-	var t = this;
-	if((!type && nface < (1<<16)) || type == 0) //uint16
-		t.faces = new Uint16Array(nface*3);
-	else if(!type || type == 2) //uint32 
-		t.faces = new Uint32Array(nface*3);
-	else
-		throw "Unsupported type";
-
-	t.prediction = new Uint32Array(nvert*3);
-}
-
-IndexAttr.prototype = {
-decode: function(stream) {
-	var t = this;
-
-	var max_front = stream.readInt();
-	t.front = new Int32Array(max_front*5);
-
-	var tunstall = new Tunstall;
-	t.clers = tunstall.decompress(stream);
-	t.bitstream = stream.readBitStream();
-},
-
-decodeGroups: function(stream) {
-	var t = this;
-	var n = stream.readInt();
-	t.groups = new Array(n);
-	for(var i = 0; i < n; i++) {
-		var end = stream.readInt();
-		var np = stream.readUChar();
-		var g = { end: end, properties: {} };
-		for(var k = 0; k < np; k++) {
-			var key = stream.readString();
-			g.properties[key] = stream.readString();
-		}
-		t.groups[i] = g;
-	}
-}
-};
-
-/*
-Corto
-
-Copyright(C) 2017 - Federico Ponchio
-ISTI - Italian National Research Council - Visual Computing Lab
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  You should have received 
-a copy of the GNU General Public License along with Corto.
-If not, see <http://www.gnu.org/licenses/>.
-*/
-
-onmessage = function(job) {
-	if(typeof(job.data) == "string") return;
-
-	var buffer = job.data.buffer;
-	if(!buffer) return;
-
-	var decoder = new CortoDecoder(buffer);
-	var model = decoder.decode();
-	
-	//pass back job
-	postMessage({ model: model, buffer: buffer, request: job.data.request});
-}
-
-
-function CortoDecoder(data, byteOffset, byteLength) {
-	if(byteOffset & 0x3)
-		throw "Memory aligned on 4 bytes is mandatory";
-
-	var t = this;
-	var stream = t.stream = new Stream(data, byteOffset, byteLength);
-	
-	var magic = stream.readInt();
-	if(magic != 2021286656) return;
-
-	var version = stream.readInt();
-	t.entropy = stream.readUChar();
-	//exif
-	t.geometry = {};
-	var n = stream.readInt();
-	for(var i = 0; i < n; i++) {
-		var key = stream.readString();
-		t.geometry[key] = stream.readString();
-	}
-
-	//attributes
-	var n = stream.readInt();
-
-	t.attributes = {};
-	for(var i = 0; i < n; i++) {
-		var a = {};
-		var name = stream.readString();
-		var codec = stream.readInt();
-		var q = stream.readFloat();
-		var components = stream.readUChar(); //internal number of components
-		var type = stream.readUChar();     //default type (same as it was in input), can be overridden
-		var strategy = stream.readUChar();
-		var attr;
-		switch(codec) {
-		case 2: attr = NormalAttr; break;
-		case 3: attr = ColorAttr; break;
-		case 1: //generic codec
-		default: attr = Attribute; break;
-		}
-		t.attributes[name] = new attr(name, q, components, type, strategy);
-	}
-
-//TODO move this vars into an array.
-	t.geometry.nvert = t.nvert = t.stream.readInt();
-	t.geometry.nface = t.nface = t.stream.readInt();
-}
-
-CortoDecoder.prototype = {
-
-decode: function() {
-	var t = this;
-
-	t.last = new Uint32Array(t.nvert*3); //for parallelogram prediction
-	t.last_count = 0;
-
-	for(var i in t.attributes)
-		t.attributes[i].init(t.nvert, t.nface);
-
-	if(t.nface == 0)
-		t.decodePointCloud();
-	else
-		t.decodeMesh();
-
-	return t.geometry;
-},
-
-decodePointCloud: function() {
-	var t = this;
-	t.index = new IndexAttr(t.nvert, t.nface, 0);
-	t.index.decodeGroups(t.stream);
-	t.geometry.groups = t.index.groups;
-	for(var i in t.attributes) {
-		var a = t.attributes[i];
-		a.decode(t.nvert, t.stream);
-		a.deltaDecode(t.nvert);
-		a.dequantize(t.nvert);
-		t.geometry[a.name] = a.buffer;
-	}
-},
-
-decodeMesh: function() {
-	var t = this;
-	t.index = new IndexAttr(t.nvert, t.nface);
-	t.index.decodeGroups(t.stream);
-	t.index.decode(t.stream);
-
-	t.vertex_count = 0;
-	var start = 0;
-	t.cler = 0;
-	for(var p = 0; p < t.index.groups.length; p++) {
-		var end = t.index.groups[p].end;
-		this.decodeFaces(start *3, end *3);
-		start = end;
-	}
-	t.geometry['index'] = t.index.faces;
-	t.geometry.groups = t.index.groups;
-	for(var i in t.attributes) 
-		t.attributes[i].decode(t.nvert, t.stream);
-	for(var i in t.attributes) 
-		t.attributes[i].deltaDecode(t.nvert, t.index.prediction);
-	for(var i in t.attributes) 
-		t.attributes[i].postDelta(t.nvert, t.nface, t.attributes, t.index);
-	for(var i in t.attributes) { 
-		var a = t.attributes[i];
-		a.dequantize(t.nvert);
-		t.geometry[a.name] = a.buffer;
-	}
-},
-
-/* an edge is:   uint16_t face, uint16_t side, uint32_t prev, next, bool deleted
-I do not want to create millions of small objects, I will use aUint32Array.
-Problem is how long, sqrt(nface) we will over blow using nface.
-*/
-
-ilog2: function(p) {
-	var k = 0;
-	while ( p>>=1 ) { ++k; }
-	return k;
-},
-
-
-decodeFaces: function(start, end) {
-
-	var t = this;
-	var clers = t.index.clers;
-	var bitstream = t.index.bitstream;
-
-	var front = t.index.front;
-	var front_count = 0; //count each integer so it's front_back*5
-
-	function addFront(_v0, _v1, _v2, _prev, _next) {
-		front[front_count] = _v0;
-		front[front_count+1] = _v1;
-		front[front_count+2] = _v2;
-		front[front_count+3] = _prev;
-		front[front_count+4] = _next;
-		front_count += 5;
-	}
-
-	var faceorder = new Uint32Array((end - start));
-	var order_front = 0;
-	var order_back = 0;
-
-	var delayed = [];
-
-	var splitbits = t.ilog2(t.nvert) + 1;
-
-	var new_edge = -1;
-
-	var prediction = t.index.prediction;
-
-	while(start < end) {
-
-		if(new_edge == -1 && order_front >= order_back && !delayed.length) {
-
-			var last_index = t.vertex_count-1;
-			var vindex = [];
-
-			var split = 0;
-			if(clers[t.cler++] == 6) { //split look ahead
-				split = bitstream.read(3);
-			}
-
-			for(var k = 0; k < 3; k++) {
-				var v;
-				if(split & (1<<k))
-					v = bitstream.read(splitbits);
-				else {
-					prediction[t.vertex_count*3] = prediction[t.vertex_count*3+1] = prediction[t.vertex_count*3+2] = last_index;
-					last_index = v = t.vertex_count++;
-				}
-				vindex[k] = v;
-				t.index.faces[start++] = v;
-			}
-
-			var current_edge = front_count;
-			faceorder[order_back++] = front_count;
-			addFront(vindex[1], vindex[2], vindex[0], current_edge + 2*5, current_edge + 1*5);
-			faceorder[order_back++] = front_count;
-			addFront(vindex[2], vindex[0], vindex[1], current_edge + 0*5, current_edge + 2*5);
-			faceorder[order_back++] = front_count;
-			addFront(vindex[0], vindex[1], vindex[2], current_edge + 1*5, current_edge + 0*5);
-			continue;
-		}
-		var edge;
-		if(new_edge != -1) {
-			edge = new_edge;
-			new_edge = -1;
-		} else if(order_front < order_back) {
-			edge = faceorder[order_front++];
-		} else {
-			edge = delayed.pop();
-		}
-		if(typeof(edge) == "undefined")
-			throw "aarrhhj";
-
-		if(front[edge] < 0) continue; //deleted
-
-		var c = clers[t.cler++];
-		if(c == 4) continue; //BOUNDARY
-
-		var v0   = front[edge + 0];
-		var v1   = front[edge + 1];
-		var v2   = front[edge + 2];
-		var prev = front[edge + 3];
-		var next = front[edge + 4];
-
-		new_edge = front_count; //points to new edge to be inserted
-		var opposite = -1;
-		if(c == 0 || c == 6) { //VERTEX
-			if(c == 6) { //split
-				opposite = bitstream.read(splitbits);
-			} else {
-				prediction[t.vertex_count*3] = v1;
-				prediction[t.vertex_count*3+1] = v0;
-				prediction[t.vertex_count*3+2] = v2;
-				opposite = t.vertex_count++;
-			}
-
-			front[prev + 4] = new_edge;
-			front[next + 3] = new_edge + 5;
-
-			front[front_count] = v0;
-			front[front_count + 1] = opposite;
-			front[front_count + 2] = v1;
-			front[front_count + 3] = prev;
-			front[front_count + 4] = new_edge+5;
-			front_count += 5; 
-
-			faceorder[order_back++] = front_count;
-
-			front[front_count] = opposite;
-			front[front_count + 1] = v1;
-			front[front_count + 2] = v0;
-			front[front_count + 3] = new_edge; 
-			front[front_count + 4] = next;
-			front_count += 5; 
-
-		} else if(c == 1) { //LEFT
-
-			front[front[prev + 3] + 4] = new_edge;
-			front[next + 3] = new_edge;
-			opposite = front[prev];
-
-			front[front_count] = opposite;
-			front[front_count + 1] = v1;
-			front[front_count + 2] = v0;
-			front[front_count + 3] = front[prev + 3];
-			front[front_count + 4] = next;
-			front_count += 5; 
-
-			front[prev] = -1; //deleted
-
-		} else if(c == 2) { //RIGHT
-			front[front[next + 4] + 3] = new_edge;
-			front[prev + 4] = new_edge;
-			opposite = front[next + 1];
-
-			front[front_count] = v0;
-			front[front_count + 1] = opposite;
-			front[front_count + 2] = v1;
-			front[front_count + 3] = prev;
-			front[front_count + 4] = front[next+4];
-			front_count += 5; 
-
-			front[next] = -1;
-
-		} else if(c == 5) { //DELAY
-			delayed.push(edge);
-			new_edge = -1;
-
-			continue;
-
-		} else if(c == 3) { //END
-			front[front[prev + 3] + 4] = front[next + 4];
-			front[front[next + 4] + 3] = front[prev + 3];
-			
-			opposite = front[prev];
-
-			front[prev] = -1;
-			front[next] = -1;
-			new_edge = -1;
-
-		} else {
-			throw "INVALID CLER!";
-		}
-		if(v1 >= t.nvert || v0 >= t.nvert || opposite >= t.nvert)
-			throw "Topological error";
-		t.index.faces[start] = v1;
-		t.index.faces[start+1] = v0;
-		t.index.faces[start+2] = opposite;
-		start += 3;
-	}
-}
-
-};
-
-
-
-/*
-Corto
-
-Copyright(C) 2017 - Federico Ponchio
-ISTI - Italian National Research Council - Visual Computing Lab
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  You should have received 
-a copy of the GNU General Public License along with Corto.
-If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
-THREE.CORTOLoader = function(options, manager) {
-	this.manager = (manager !== undefined) ? manager : THREE.DefaultLoadingManager;
-
-	if(!options)
-		options = {};
-	this.path = options.path;
-	this.loadMaterial = options.loadMaterial ? options.loadMaterial : true;
-};
-
-
-THREE.CORTOLoader.prototype = {
-
-	constructor: THREE.CORTOLoader,
-
-	load: function(url, onLoad, onProgress, onError) {
-		const scope = this;
-		const loader = new THREE.FileLoader(scope.manager);
-		if(!this.path) {
-			this.path = url.substr(0, url.lastIndexOf('/')+1);
-			url = url.substr(url.lastIndexOf('/')+1);
-		}
-		loader.setPath(this.path);
-		loader.setResponseType('arraybuffer');
-		loader.load(url, function(blob) {
-
-			var now = performance.now();
-			var decoder = new CortoDecoder(blob);
-			var model = decoder.decode();
-
-			/*used for debug and profiling */
-			var ms = performance.now() - now;
-			scope.blob = blob;
-			scope.decode_time = ms;
-			console.log((model.nvert/1024.0).toFixed(1) + "KV", ms.toFixed(1) + "ms", ((model.nvert/1000)/ms).toFixed(2) + "MV/s");
-
-			var geometry = scope.geometry(model);
-			if(model.nface) {
-				var mesh = new THREE.Mesh(geometry);
-			} else {
-				var mesh = new THREE.Points(geometry);
-			}
-
-			if(scope.loadMaterial)
-				scope.materials(model, mesh);
-
-			onLoad(mesh);
-
-		}, onProgress, onError);
-	},
-
-	geometry: function(model) {
-		var geometry = new THREE.BufferGeometry();
-		if (model.nface)
-			geometry.setIndex(new THREE.BufferAttribute(model.index, 1));
-
-		if(model.groups.length > 0) {
-			var start = 0;
-			for(var i = 0; i < model.groups.length; i++) {
-				var g = model.groups[i];
-				geometry.addGroup(start*3, g.end*3, i);
-				start = g.end;
-			}
-		}
-
-		geometry.addAttribute('position', new THREE.BufferAttribute(model.position, 3));
-		if(model.color)
-			geometry.addAttribute('color', new THREE.BufferAttribute(model.color, 3, true));
-		if (model.normal)
-			geometry.addAttribute('normal', new THREE.BufferAttribute(model.normal, 3, true));
-		if (model.uv)
-			geometry.addAttribute('uv', new THREE.BufferAttribute(model.uv, 2));
-		return geometry;
-	},
-
-	materials: function(model, mesh) {
-
-		var promise = { waiting: 0 }
-		var options = {}
-		options.shading = model.normal? THREE.SmoothShading : THREE.FlatShading;
-		if(model.color)
-			options.vertexColors = THREE.VertexColors;
-		else
-			options.color = 0xffffffff;
-
-		if(model.nface) {
-			options.side = THREE.DoubleSide;
-
-			var materials = [];
-			for(var i = 0; i < model.groups.length; i++) {
-				var opt = Object.assign({}, options);
-				var group = model.groups[i];
-				if(group.properties.texture) {
-					var textureLoader = new THREE.TextureLoader();
-					promise.waiting++;
-					opt.map = textureLoader.load(this.path + group.properties.texture, 
-						function() { mesh.dispatchEvent({ type: "change" }); });
-				}
-				//use diffuse only when normals present and no texture.
-				if(group.properties.texture && !model.normal)
-					materials.push(new THREE.MeshStandardMaterial(opt));
-				else
-					materials.push(new THREE.MeshStandardMaterial(opt));
-			}
-			mesh.material = new THREE.MultiMaterial(materials);
-
-		} else {
-			options.size = 2;
-			options.sizeAttenuation = false;
-			mesh.material = new THREE.PointsMaterial(options);
-
-		}
-
-
-		//replace default material with mtl from lib if present
-		if(model.mtllib) {
-			var scope = this;
-			var mtlLoader = new THREE.MTLLoader();
-			mtlLoader.setPath( this.path );
-			mtlLoader.load(model.mtllib, function( matcreator ) {
-				matcreator.preload();
-				if(model.nface == 0)
-					mesh.material = new THREE.MultiMaterial(materials); //point cloud has a mesh.material...
-				for(var i = 0; i < model.groups.length; i++) {
-					var group = model.groups[i];
-					if(group.properties.material) {
-						var mat = mesh.material.materials[i] = matcreator.create(group.properties.material);
-						function checkTex() {
-							if(mat.map.image && mat.map.image.complete)
-								mesh.dispatchEvent({type: "change"});
-							else
-								setTimeout(checkTex, 10);
-						}
-						if(mat.map)
-							checkTex();
-					}
-				}
-				mesh.dispatchEvent({type: "change"});
-			});
-		}
-	}
-};
 
 /**
  * @author Rich Tibbett / https://github.com/richtr
@@ -6490,6 +5201,508 @@ THREE.OBJLoader = ( function () {
 } )();
 
 /**
+ * @author Wei Meng / http://about.me/menway
+ *
+ * Description: A THREE loader for PLY ASCII files (known as the Polygon
+ * File Format or the Stanford Triangle Format).
+ *
+ * Limitations: ASCII decoding assumes file is UTF-8.
+ *
+ * Usage:
+ *	var loader = new THREE.PLYLoader();
+ *	loader.load('./models/ply/ascii/dolphins.ply', function (geometry) {
+ *
+ *		scene.add( new THREE.Mesh( geometry ) );
+ *
+ *	} );
+ *
+ * If the PLY file uses non standard property names, they can be mapped while
+ * loading. For example, the following maps the properties
+ * “diffuse_(red|green|blue)” in the file to standard color names.
+ *
+ * loader.setPropertyNameMapping( {
+ *	diffuse_red: 'red',
+ *	diffuse_green: 'green',
+ *	diffuse_blue: 'blue'
+ * } );
+ *
+ */
+
+
+THREE.PLYLoader = function ( manager ) {
+
+	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+
+	this.propertyNameMapping = {};
+
+};
+
+THREE.PLYLoader.prototype = {
+
+	constructor: THREE.PLYLoader,
+
+	load: function ( url, onLoad, onProgress, onError ) {
+
+		var scope = this;
+
+		var loader = new THREE.FileLoader( this.manager );
+		loader.setResponseType( 'arraybuffer' );
+		loader.load( url, function ( text ) {
+
+			onLoad( scope.parse( text ) );
+
+		}, onProgress, onError );
+
+	},
+
+	setPropertyNameMapping: function ( mapping ) {
+
+		this.propertyNameMapping = mapping;
+
+	},
+
+	parse: function ( data ) {
+
+		function bin2str( buf ) {
+
+			var array_buffer = new Uint8Array( buf );
+
+			if ( window.TextDecoder !== undefined ) {
+
+				return new TextDecoder().decode( array_buffer );
+
+			}
+
+			var str = '';
+
+			for ( var i = 0, il = buf.byteLength; i < il; i ++ ) {
+
+				str += String.fromCharCode( array_buffer[ i ] ); // implicitly assumes little-endian
+
+			}
+
+			return str;
+
+		}
+
+		function parseHeader( data ) {
+
+			var patternHeader = /ply([\s\S]*)end_header\s/;
+			var headerText = '';
+			var headerLength = 0;
+			var result = patternHeader.exec( data );
+
+			if ( result !== null ) {
+
+				headerText = result [ 1 ];
+				headerLength = result[ 0 ].length;
+
+			}
+
+			var header = {
+				comments: [],
+				elements: [],
+				headerLength: headerLength
+			};
+
+			var lines = headerText.split( '\n' );
+			var currentElement;
+			var lineType, lineValues;
+
+			function make_ply_element_property( propertValues, propertyNameMapping ) {
+
+				var property = { type: propertValues[ 0 ] };
+
+				if ( property.type === 'list' ) {
+
+					property.name = propertValues[ 3 ];
+					property.countType = propertValues[ 1 ];
+					property.itemType = propertValues[ 2 ];
+
+				} else {
+
+					property.name = propertValues[ 1 ];
+
+				}
+
+				if ( property.name in propertyNameMapping ) {
+
+					property.name = propertyNameMapping[ property.name ];
+
+				}
+
+				return property;
+
+			}
+
+			for ( var i = 0; i < lines.length; i ++ ) {
+
+				var line = lines[ i ];
+				line = line.trim();
+
+				if ( line === '' ) continue;
+
+				lineValues = line.split( /\s+/ );
+				lineType = lineValues.shift();
+				line = lineValues.join( ' ' );
+
+				switch ( lineType ) {
+
+					case 'format':
+
+						header.format = lineValues[ 0 ];
+						header.version = lineValues[ 1 ];
+
+						break;
+
+					case 'comment':
+
+						header.comments.push( line );
+
+						break;
+
+					case 'element':
+
+						if ( currentElement !== undefined ) {
+
+							header.elements.push( currentElement );
+
+						}
+
+						currentElement = {};
+						currentElement.name = lineValues[ 0 ];
+						currentElement.count = parseInt( lineValues[ 1 ] );
+						currentElement.properties = [];
+
+						break;
+
+					case 'property':
+
+						currentElement.properties.push( make_ply_element_property( lineValues, scope.propertyNameMapping ) );
+
+						break;
+
+
+					default:
+
+						console.log( 'unhandled', lineType, lineValues );
+
+				}
+
+			}
+
+			if ( currentElement !== undefined ) {
+
+				header.elements.push( currentElement );
+
+			}
+
+			return header;
+
+		}
+
+		function parseASCIINumber( n, type ) {
+
+			switch ( type ) {
+
+			case 'char': case 'uchar': case 'short': case 'ushort': case 'int': case 'uint':
+			case 'int8': case 'uint8': case 'int16': case 'uint16': case 'int32': case 'uint32':
+
+				return parseInt( n );
+
+			case 'float': case 'double': case 'float32': case 'float64':
+
+				return parseFloat( n );
+
+			}
+
+		}
+
+		function parseASCIIElement( properties, line ) {
+
+			var values = line.split( /\s+/ );
+
+			var element = {};
+
+			for ( var i = 0; i < properties.length; i ++ ) {
+
+				if ( properties[ i ].type === 'list' ) {
+
+					var list = [];
+					var n = parseASCIINumber( values.shift(), properties[ i ].countType );
+
+					for ( var j = 0; j < n; j ++ ) {
+
+						list.push( parseASCIINumber( values.shift(), properties[ i ].itemType ) );
+
+					}
+
+					element[ properties[ i ].name ] = list;
+
+				} else {
+
+					element[ properties[ i ].name ] = parseASCIINumber( values.shift(), properties[ i ].type );
+
+				}
+
+			}
+
+			return element;
+
+		}
+
+		function parseASCII( data, header ) {
+
+			// PLY ascii format specification, as per http://en.wikipedia.org/wiki/PLY_(file_format)
+
+			var buffer = {
+				indices : [],
+				vertices : [],
+				normals : [],
+				uvs : [],
+				colors : []
+			};
+
+			var result;
+
+			var patternBody = /end_header\s([\s\S]*)$/;
+			var body = '';
+			if ( ( result = patternBody.exec( data ) ) !== null ) {
+
+				body = result [ 1 ];
+
+			}
+
+			var lines = body.split( '\n' );
+			var currentElement = 0;
+			var currentElementCount = 0;
+
+			for ( var i = 0; i < lines.length; i ++ ) {
+
+				var line = lines[ i ];
+				line = line.trim();
+				if ( line === '' ) {
+
+					continue;
+
+				}
+
+				if ( currentElementCount >= header.elements[ currentElement ].count ) {
+
+					currentElement ++;
+					currentElementCount = 0;
+
+				}
+
+				var element = parseASCIIElement( header.elements[ currentElement ].properties, line );
+
+				handleElement( buffer, header.elements[ currentElement ].name, element );
+
+				currentElementCount ++;
+
+			}
+
+			return postProcess( buffer );
+
+		}
+
+		function postProcess( buffer ) {
+
+			var geometry = new THREE.BufferGeometry();
+
+			// mandatory buffer data
+
+			if ( buffer.indices.length > 0 ) {
+
+				geometry.setIndex( buffer.indices );
+
+			}
+
+			geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( buffer.vertices, 3 ) );
+
+			// optional buffer data
+
+			if ( buffer.normals.length > 0 ) {
+
+				geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( buffer.normals, 3 ) );
+
+			}
+
+			if ( buffer.uvs.length > 0 ) {
+
+				geometry.addAttribute( 'uv', new THREE.Float32BufferAttribute( buffer.uvs, 2 ) );
+
+			}
+
+			if ( buffer.colors.length > 0 ) {
+
+				geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( buffer.colors, 3 ) );
+
+			}
+
+			geometry.computeBoundingSphere();
+
+			return geometry;
+
+		}
+
+		function handleElement( buffer, elementName, element ) {
+
+			if ( elementName === 'vertex' ) {
+
+				buffer.vertices.push( element.x, element.y, element.z );
+
+				if ( 'nx' in element && 'ny' in element && 'nz' in element ) {
+
+					buffer.normals.push( element.nx, element.ny, element.nz );
+
+				}
+
+				if ( 's' in element && 't' in element ) {
+
+					buffer.uvs.push( element.s, element.t );
+
+				}
+
+				if ( 'red' in element && 'green' in element && 'blue' in element ) {
+
+					buffer.colors.push( element.red / 255.0, element.green / 255.0, element.blue / 255.0 );
+
+				}
+
+			} else if ( elementName === 'face' ) {
+
+				var vertex_indices = element.vertex_indices || element.vertex_index; // issue #9338
+
+				if ( vertex_indices.length === 3 ) {
+
+					buffer.indices.push( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 2 ] );
+
+				} else if ( vertex_indices.length === 4 ) {
+
+					buffer.indices.push( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 3 ] );
+					buffer.indices.push( vertex_indices[ 1 ], vertex_indices[ 2 ], vertex_indices[ 3 ] );
+
+				}
+
+			}
+
+		}
+
+		function binaryRead( dataview, at, type, little_endian ) {
+
+			switch ( type ) {
+
+				// corespondences for non-specific length types here match rply:
+				case 'int8':		case 'char':	 return [ dataview.getInt8( at ), 1 ];
+				case 'uint8':		case 'uchar':	 return [ dataview.getUint8( at ), 1 ];
+				case 'int16':		case 'short':	 return [ dataview.getInt16( at, little_endian ), 2 ];
+				case 'uint16':	case 'ushort': return [ dataview.getUint16( at, little_endian ), 2 ];
+				case 'int32':		case 'int':		 return [ dataview.getInt32( at, little_endian ), 4 ];
+				case 'uint32':	case 'uint':	 return [ dataview.getUint32( at, little_endian ), 4 ];
+				case 'float32': case 'float':	 return [ dataview.getFloat32( at, little_endian ), 4 ];
+				case 'float64': case 'double': return [ dataview.getFloat64( at, little_endian ), 8 ];
+
+			}
+
+		}
+
+		function binaryReadElement( dataview, at, properties, little_endian ) {
+
+			var element = {};
+			var result, read = 0;
+
+			for ( var i = 0; i < properties.length; i ++ ) {
+
+				if ( properties[ i ].type === 'list' ) {
+
+					var list = [];
+
+					result = binaryRead( dataview, at + read, properties[ i ].countType, little_endian );
+					var n = result[ 0 ];
+					read += result[ 1 ];
+
+					for ( var j = 0; j < n; j ++ ) {
+
+						result = binaryRead( dataview, at + read, properties[ i ].itemType, little_endian );
+						list.push( result[ 0 ] );
+						read += result[ 1 ];
+
+					}
+
+					element[ properties[ i ].name ] = list;
+
+				} else {
+
+					result = binaryRead( dataview, at + read, properties[ i ].type, little_endian );
+					element[ properties[ i ].name ] = result[ 0 ];
+					read += result[ 1 ];
+
+				}
+
+			}
+
+			return [ element, read ];
+
+		}
+
+		function parseBinary( data, header ) {
+
+			var buffer = {
+				indices : [],
+				vertices : [],
+				normals : [],
+				uvs : [],
+				colors : []
+			};
+
+			var little_endian = ( header.format === 'binary_little_endian' );
+			var body = new DataView( data, header.headerLength );
+			var result, loc = 0;
+
+			for ( var currentElement = 0; currentElement < header.elements.length; currentElement ++ ) {
+
+				for ( var currentElementCount = 0; currentElementCount < header.elements[ currentElement ].count; currentElementCount ++ ) {
+
+					result = binaryReadElement( body, loc, header.elements[ currentElement ].properties, little_endian );
+					loc += result[ 1 ];
+					var element = result[ 0 ];
+
+					handleElement( buffer, header.elements[ currentElement ].name, element );
+
+				}
+
+			}
+
+			return postProcess( buffer );
+
+		}
+
+		//
+
+		var geometry;
+		var scope = this;
+
+		if ( data instanceof ArrayBuffer ) {
+
+			var text = bin2str( data );
+			var header = parseHeader( text );
+
+			geometry = header.format === 'ascii' ? parseASCII( text, header ) : parseBinary( data, header );
+
+		} else {
+
+			geometry = parseASCII( data, parseHeader( data ) );
+
+		}
+
+		return geometry;
+
+	}
+
+};
+
+/**
  * @author alteredq / http://alteredqualia.com/
  * @author mr.doob / http://mrdoob.com/
  */
@@ -6755,8 +5968,9 @@ var WEBVR = {
 
 };
 
-// key-codes v0.0.5 https://github.com/edsilv/key-codes
+// key-codes v0.0.7 https://github.com/edsilv/key-codes
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.keyCodes = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
 var KeyCodes;
 (function (KeyCodes) {
     var KeyDown;
@@ -6879,7 +6093,6 @@ var KeyCodes;
         KeyPress.Spacebar = 32;
         KeyPress.Hash = 35;
         KeyPress.GraveAccent = 39;
-        KeyPress.ForwardSlash = 32;
         KeyPress.DoubleQuote = 34;
         KeyPress.Asterisk = 42;
         KeyPress.Plus = 43;
@@ -6939,7 +6152,13 @@ var KeyCodes;
         KeyPress.Tilde = 126;
     })(KeyPress = KeyCodes.KeyPress || (KeyCodes.KeyPress = {}));
 })(KeyCodes || (KeyCodes = {}));
+(function (g) {
+    if (!g.KeyCodes) {
+        g.KeyCodes = KeyCodes;
+    }
+})(global);
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1])(1)
 });
-!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.virtex=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var Virtex;!function(Virtex){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();Virtex.StringValue=StringValue}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(Virtex){var FileType=function(_super){function FileType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(FileType,_super),FileType.DRACO=new FileType("application/draco"),FileType.CORTO=new FileType("application/corto"),FileType.GLTF=new FileType("model/gltf+json"),FileType.OBJ=new FileType("text/plain"),FileType.THREEJS=new FileType("application/vnd.threejs+json"),FileType}(Virtex.StringValue);Virtex.FileType=FileType}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var CORTOFileTypeHandler=function(){function CORTOFileTypeHandler(){}return CORTOFileTypeHandler.setup=function(viewport,obj,cb){var bufferGeometry=obj.geometry;bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;obj.scale.multiplyScalar(scale),obj.position.x=-midX*scale,obj.position.y=-midY*scale,obj.position.z=-midZ*scale,obj.castShadow=!0,obj.receiveShadow=!0,viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},CORTOFileTypeHandler}();Virtex.CORTOFileTypeHandler=CORTOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var DRACOFileTypeHandler=function(){function DRACOFileTypeHandler(){}return DRACOFileTypeHandler.setup=function(viewport,obj,cb){var geometry,bufferGeometry=obj,material=new THREE.MeshStandardMaterial({vertexColors:THREE.VertexColors});null==bufferGeometry.index?geometry=new THREE.Points(bufferGeometry,material):(bufferGeometry.computeVertexNormals(),geometry=new THREE.Mesh(bufferGeometry,material)),bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;geometry.scale.multiplyScalar(scale),geometry.position.x=-midX*scale,geometry.position.y=-midY*scale,geometry.position.z=-midZ*scale,geometry.castShadow=!0,geometry.receiveShadow=!0,obj=geometry,viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},DRACOFileTypeHandler}();Virtex.DRACOFileTypeHandler=DRACOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var glTFFileTypeHandler=function(){function glTFFileTypeHandler(){}return glTFFileTypeHandler.setup=function(viewport,obj,cb){if(viewport.objectGroup.add(obj.scene),obj.animations)for(var animations=obj.animations,i=0,l=animations.length;i<l;i++);viewport.scene=obj.scene,obj.cameras&&obj.cameras.length&&(viewport.camera=obj.cameras[0]),cb(obj)},glTFFileTypeHandler}();Virtex.glTFFileTypeHandler=glTFFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ObjFileTypeHandler=function(){function ObjFileTypeHandler(){}return ObjFileTypeHandler.setup=function(viewport,objpath,obj,cb){var imgloader=new THREE.MTLLoader;imgloader.setCrossOrigin(!0),imgloader.setPath(objpath.substring(0,objpath.lastIndexOf("/")+1)),imgloader.load(obj.materialLibraries[0],function(materials){var objLoader=new THREE.OBJLoader;objLoader.setMaterials(materials),objLoader.load(objpath,function(obj){var bufferGeometry=obj.children[0].geometry;bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;obj.scale.multiplyScalar(scale),obj.position.x=-midX*scale,obj.position.y=-midY*scale,obj.position.z=-midZ*scale,obj.castShadow=!0,obj.receiveShadow=!0,viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},function(){},function(){})},function(){},function(){})},ObjFileTypeHandler}();Virtex.ObjFileTypeHandler=ObjFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ThreeJSFileTypeHandler=function(){function ThreeJSFileTypeHandler(){}return ThreeJSFileTypeHandler.setup=function(viewport,obj,cb){viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},ThreeJSFileTypeHandler}();Virtex.ThreeJSFileTypeHandler=ThreeJSFileTypeHandler}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}(),requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(callback){window.setTimeout(callback,5)}}();!function(Virtex){var Viewport=function(_super){function Viewport(options){var _this=_super.call(this,options)||this;_this._raycastObjectCache=null,_this._viewportCenter=new THREE.Vector2,_this._isFullscreen=!1,_this._isMouseDown=!1,_this._isVRMode=!1,_this._isMouseOver=!1,_this._mousePos=new THREE.Vector2,_this._mousePosNorm=new THREE.Vector2((-1),(-1)),_this._mousePosOnMouseDown=new THREE.Vector2,_this._pinchStart=new THREE.Vector2,_this._targetRotationOnMouseDown=new THREE.Vector2,_this._targetRotation=new THREE.Vector2,_this._vrEnabled=!0;var success=_this._init();return _this._resize(),success&&_this._tick(),_this}return __extends(Viewport,_super),Viewport.prototype._init=function(){var success=_super.prototype._init.call(this);return success?Detector.webgl?(this._$element.append('<div class="viewport"></div><div class="loading"><div class="bar"></div></div>'),this._$viewport=this._$element.find(".viewport"),this._$loading=this._$element.find(".loading"),this._$loadingBar=this._$loading.find(".bar"),this._$loading.hide(),this.scene=new THREE.Scene,this.objectGroup=new THREE.Object3D,this.scene.add(this.objectGroup),this._raycaster=new THREE.Raycaster,this._createLights(),this.createCamera(),this._createControls(),this._createRenderer(),this._createEventListeners(),this._loadObject(this.options.data.file),this.options.data.showStats&&(this._stats=new Stats,this._stats.domElement.style.position="absolute",this._stats.domElement.style.top="0px",this._$viewport.append(this._stats.domElement)),!0):(Detector.addGetWebGLMessage(),this._$oldie=$("#oldie"),this._$oldie.appendTo(this._$element),!1):(console.error("Virtex failed to initialise"),!1)},Viewport.prototype.data=function(){return{alpha:!0,ambientLightColor:13684944,ambientLightIntensity:1,antialias:!0,cameraZ:4.5,directionalLight1Color:16777215,directionalLight1Intensity:.75,directionalLight2Color:10584,directionalLight2Intensity:.5,doubleSided:!0,fadeSpeed:1750,far:1e4,file:"",fullscreenEnabled:!0,maxZoom:10,minZoom:2,near:.05,shading:THREE.SmoothShading,showStats:!1,type:Virtex.FileType.THREEJS,vrBackgroundColor:0,zoomSpeed:1}},Viewport.prototype._getVRDisplay=function(){return new Promise(function(resolve){navigator.getVRDisplays().then(function(devices){for(var i=0;i<devices.length;i++)if(devices[i]instanceof VRDisplay){resolve(devices[i]);break}resolve(void 0)},function(){resolve(void 0)})})},Viewport.prototype._createLights=function(){this._lightGroup=new THREE.Object3D,this.scene.add(this._lightGroup);var light1=new THREE.DirectionalLight(this.options.data.directionalLight1Color,this.options.data.directionalLight1Intensity);light1.position.set(1,1,1),this._lightGroup.add(light1);var light2=new THREE.DirectionalLight(this.options.data.directionalLight2Color,this.options.data.directionalLight2Intensity);light2.position.set(-1,-1,-1),this._lightGroup.add(light2);var ambientLight=new THREE.AmbientLight(this.options.data.ambientLightColor,this.options.data.ambientLightIntensity);this._lightGroup.add(ambientLight)},Viewport.prototype.createCamera=function(){this.camera=new THREE.PerspectiveCamera(this._getFov(),this._getAspectRatio(),this.options.data.near,this.options.data.far);var cameraZ=this._getCameraZ();this.camera.position.z=this._targetZoom=cameraZ},Viewport.prototype._createRenderer=function(){this._renderer=new THREE.WebGLRenderer({antialias:this.options.data.antialias,alpha:this.options.data.alpha}),this._isVRMode?(this._renderer.setClearColor(this.options.data.vrBackgroundColor),this._vrEffect=new THREE.VREffect(this._renderer),this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height())):(this._renderer.setClearColor(this.options.data.vrBackgroundColor,0),this._renderer.setSize(this._$viewport.width(),this._$viewport.height())),this._$viewport.empty().append(this._renderer.domElement)},Viewport.prototype._createControls=function(){this._isVRMode&&(this._vrControls=new THREE.VRControls(this.camera))},Viewport.prototype._createEventListeners=function(){var _this=this;this.options.data.fullscreenEnabled&&$(document).on("webkitfullscreenchange mozfullscreenchange fullscreenchange",function(){_this._fullscreenChanged()}),this._$element.on("mousedown",function(e){_this._onMouseDown(e.originalEvent)}),this._$element.on("mousemove",function(e){_this._onMouseMove(e.originalEvent)}),this._$element.on("mouseup",function(){_this._onMouseUp()}),this._$element.on("mouseout",function(){_this._onMouseOut()}),this._$element.on("mousewheel",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("DOMMouseScroll",function(e){_this._onMouseWheel(e.originalEvent)}),this._$element.on("touchstart",function(e){_this._onTouchStart(e.originalEvent)}),this._$element.on("touchmove",function(e){_this._onTouchMove(e.originalEvent)}),this._$element.on("touchend",function(){_this._onTouchEnd()}),window.addEventListener("resize",function(){return _this._resize()},!1)},Viewport.prototype._loadObject=function(objectPath){var _this=this;this._$loading.show();var loader;switch(this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():loader=new THREE.DRACOLoader;break;case Virtex.FileType.CORTO.toString():loader=new THREE.CORTOLoader;break;case Virtex.FileType.GLTF.toString():loader=new THREE.GLTFLoader;break;case Virtex.FileType.OBJ.toString():loader=new THREE.OBJLoader;break;case Virtex.FileType.THREEJS.toString():loader=new THREE.ObjectLoader}loader.setCrossOrigin&&loader.setCrossOrigin("anonymous"),loader.load(objectPath,function(obj){switch(_this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():Virtex.DRACOFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.CORTO.toString():Virtex.CORTOFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.GLTF.toString():Virtex.glTFFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.THREEJS.toString():Virtex.ThreeJSFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.OBJ.toString():Virtex.ObjFileTypeHandler.setup(_this,objectPath,obj,_this._loaded.bind(_this))}},function(e){e.lengthComputable&&_this._loadProgress(e.loaded/e.total)},function(e){console.error(e)})},Viewport.prototype._loaded=function(obj){this._$loading.fadeOut(this.options.data.fadeSpeed),this.fire(Events.LOADED,obj)},Viewport.prototype._getBoundingBox=function(){return(new THREE.Box3).setFromObject(this.objectGroup)},Viewport.prototype._getBoundingWidth=function(){return this._getBoundingBox().getSize().x},Viewport.prototype._getBoundingHeight=function(){return this._getBoundingBox().getSize().y},Viewport.prototype._getCameraZ=function(){return this._getBoundingWidth()*this.options.data.cameraZ},Viewport.prototype._getFov=function(){if(!this.camera)return 1;var width=this._getBoundingWidth(),height=this._getBoundingHeight(),dist=this._getCameraZ()-width,fov=2*Math.atan(height/(2*dist))*(180/Math.PI);return fov},Viewport.prototype._loadProgress=function(progress){var fullWidth=this._$loading.width(),width=Math.floor(fullWidth*progress);this._$loadingBar.width(width)},Viewport.prototype._fullscreenChanged=function(){this._isFullscreen?(this.exitFullscreen(),this._$element.width(this._lastWidth),this._$element.height(this._lastHeight)):(this._lastWidth=this._getWidth(),this._lastHeight=this._getHeight()),this._isFullscreen=!this._isFullscreen,this._resize()},Viewport.prototype._onMouseDown=function(event){event.preventDefault(),this._isMouseDown=!0,this._mousePosOnMouseDown.x=event.clientX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=event.clientY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y},Viewport.prototype._onMouseMove=function(event){this._mousePos.x=event.clientX-this._viewportCenter.x,this._mousePos.y=event.clientY-this._viewportCenter.y,this._mousePosNorm.x=event.clientX/this._getWidth()*2-1,this._mousePosNorm.y=2*-(event.clientY/this._getHeight())+1,this._isMouseDown&&(this._targetRotation.y=this._targetRotationOnMouseDown.y+.02*(this._mousePos.y-this._mousePosOnMouseDown.y),this._targetRotation.x=this._targetRotationOnMouseDown.x+.02*(this._mousePos.x-this._mousePosOnMouseDown.x))},Viewport.prototype._onMouseUp=function(){this._isMouseDown=!1},Viewport.prototype._onMouseOut=function(){this._isMouseDown=!1},Viewport.prototype._onMouseWheel=function(event){event.preventDefault(),event.stopPropagation();var delta=0;void 0!==event.wheelDelta?delta=event.wheelDelta:void 0!==event.detail&&(delta=-event.detail),delta>0?this.zoomIn():delta<0&&this.zoomOut()},Viewport.prototype._onTouchStart=function(event){var touches=event.touches;1===touches.length&&(this._isMouseDown=!0,event.preventDefault(),this._mousePosOnMouseDown.x=touches[0].pageX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=touches[0].pageY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y)},Viewport.prototype._onTouchMove=function(event){event.preventDefault(),event.stopPropagation();var touches=event.touches;switch(touches.length){case 1:event.preventDefault(),this._mousePos.x=touches[0].pageX-this._viewportCenter.x,this._targetRotation.x=this._targetRotationOnMouseDown.x+.05*(this._mousePos.x-this._mousePosOnMouseDown.x),this._mousePos.y=touches[0].pageY-this._viewportCenter.y,this._targetRotation.y=this._targetRotationOnMouseDown.y+.05*(this._mousePos.y-this._mousePosOnMouseDown.y);break;case 2:var dx=touches[0].pageX-touches[1].pageX,dy=touches[0].pageY-touches[1].pageY,distance=Math.sqrt(dx*dx+dy*dy),pinchEnd=new THREE.Vector2(0,distance),pinchDelta=new THREE.Vector2;pinchDelta.subVectors(pinchEnd,this._pinchStart),pinchDelta.y>0?this.zoomIn():pinchDelta.y<0&&this.zoomOut(),this._pinchStart.copy(pinchEnd);break;case 3:}},Viewport.prototype._onTouchEnd=function(){this._isMouseDown=!1},Viewport.prototype._tick=function(){var _this=this;requestAnimFrame(function(){return _this._tick()}),this._update(),this._draw(),this.options.data.showStats&&this._stats.update()},Viewport.prototype.rotateY=function(radians){var rotation=this.objectGroup.rotation.y+radians;this.objectGroup.rotation.y=rotation},Viewport.prototype._update=function(){if(this._isVRMode)this._vrControls.update();else{this.rotateY(.1*(this._targetRotation.x-this.objectGroup.rotation.y));var finalRotationY=this._targetRotation.y-this.objectGroup.rotation.x;this.objectGroup.rotation.x<=1&&this.objectGroup.rotation.x>=-1&&(this.objectGroup.rotation.x+=.1*finalRotationY),this.objectGroup.rotation.x>1?this.objectGroup.rotation.x=1:this.objectGroup.rotation.x<-1&&(this.objectGroup.rotation.x=-1);var zoomDelta=.1*(this._targetZoom-this.camera.position.z);if(this.camera.position.z+=zoomDelta,this.objectGroup.children.length){this._raycaster.setFromCamera(this._mousePosNorm,this.camera);var obj=this._getRaycastObject();if(obj){var intersects=this._raycaster.intersectObject(obj);intersects.length>0?this._isMouseOver=!0:this._isMouseOver=!1}}}},Viewport.prototype._draw=function(){this._isVRMode?this._vrEffect.render(this.scene,this.camera):(this._renderer.render(this.scene,this.camera),this._isMouseOver?(this._$element.addClass("grabbable"),this._isMouseDown?this._$element.addClass("grabbing"):this._$element.removeClass("grabbing")):(this._$element.removeClass("grabbable"),this._$element.removeClass("grabbing")))},Viewport.prototype._getRaycastObject=function(){var _this=this;return this._raycastObjectCache?this._raycastObjectCache:(this.objectGroup.traverse(function(child){child instanceof THREE.Mesh&&(_this._raycastObjectCache=child)}),this._raycastObjectCache)},Viewport.prototype._getWidth=function(){return this._isFullscreen?window.innerWidth:this._$element.width()},Viewport.prototype._getHeight=function(){return this._isFullscreen?window.innerHeight:this._$element.height()},Viewport.prototype._getZoomSpeed=function(){return this._getBoundingWidth()*this.options.data.zoomSpeed},Viewport.prototype._getMaxZoom=function(){return this._getBoundingWidth()*this.options.data.maxZoom},Viewport.prototype._getMinZoom=function(){return this._getBoundingWidth()*this.options.data.minZoom},Viewport.prototype.zoomIn=function(){var targetZoom=this.camera.position.z-this._getZoomSpeed();targetZoom>this._getMinZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMinZoom()},Viewport.prototype.zoomOut=function(){var targetZoom=this.camera.position.z+this._getZoomSpeed();targetZoom<this._getMaxZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMaxZoom()},Viewport.prototype.enterVR=function(){var _this=this;this._vrEnabled&&(this._isVRMode=!0,this._prevCameraPosition=this.camera.position.clone(),this._prevCameraRotation=this.camera.rotation.clone(),this._createControls(),this._createRenderer(),this._getVRDisplay().then(function(display){display&&(_this._vrEffect.setVRDisplay(display),_this._vrControls.setVRDisplay(display),_this._vrEffect.setFullScreen(!0))}))},Viewport.prototype.exitVR=function(){this._vrEnabled&&(this._isVRMode=!1,this.camera.position.copy(this._prevCameraPosition),this.camera.rotation.copy(this._prevCameraRotation),this._createRenderer())},Viewport.prototype.toggleVR=function(){this._vrEnabled&&(this._isVRMode?this.exitVR():this.enterVR())},Viewport.prototype.enterFullscreen=function(){if(this.options.data.fullscreenEnabled){var elem=this._$element[0],requestFullScreen=this._getRequestFullScreen(elem);requestFullScreen&&requestFullScreen.call(elem)}},Viewport.prototype.exitFullscreen=function(){var exitFullScreen=this._getExitFullScreen();exitFullScreen&&exitFullScreen.call(document)},Viewport.prototype._getRequestFullScreen=function(elem){return elem.requestFullscreen?elem.requestFullscreen:elem.msRequestFullscreen?elem.msRequestFullscreen:elem.mozRequestFullScreen?elem.mozRequestFullScreen:!!elem.webkitRequestFullscreen&&elem.webkitRequestFullscreen},Viewport.prototype._getExitFullScreen=function(){return document.exitFullscreen?document.exitFullscreen:document.msExitFullscreen?document.msExitFullscreen:document.mozCancelFullScreen?document.mozCancelFullScreen:!!document.webkitExitFullscreen&&document.webkitExitFullscreen},Viewport.prototype._getAspectRatio=function(){return this._$viewport.width()/this._$viewport.height()},Viewport.prototype.resize=function(){this._resize()},Viewport.prototype._resize=function(){this._$element&&this._$viewport?(this._$element.width(this._getWidth()),this._$element.height(this._getHeight()),this._$viewport.width(this._getWidth()),this._$viewport.height(this._getHeight()),this._viewportCenter.x=this._$viewport.width()/2,this._viewportCenter.y=this._$viewport.height()/2,this.camera.aspect=this._getAspectRatio(),this.camera.updateProjectionMatrix(),this._isVRMode?this._vrEffect.setSize(this._$viewport.width(),this._$viewport.height()):this._renderer.setSize(this._$viewport.width(),this._$viewport.height()),this._$loading.css({left:this._viewportCenter.x-this._$loading.width()/2,top:this._viewportCenter.y-this._$loading.height()/2})):this._$oldie&&this._$oldie.css({left:this._$element.width()/2-this._$oldie.outerWidth()/2,top:this._$element.height()/2-this._$oldie.outerHeight()/2})},Viewport}(_Components.BaseComponent);Virtex.Viewport=Viewport;var Events=function(){function Events(){}return Events.LOADED="loaded",Events}();Virtex.Events=Events}(Virtex||(Virtex={})),function(g){g.Virtex||(g.Virtex=Virtex)}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});
+!function(f){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=f();else if("function"==typeof define&&define.amd)define([],f);else{var g;g="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,g.virtex=f()}}(function(){return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){(function(global){var Virtex;!function(Virtex){var StringValue=function(){function StringValue(value){this.value="",value&&(this.value=value.toLowerCase())}return StringValue.prototype.toString=function(){return this.value},StringValue}();Virtex.StringValue=StringValue}(Virtex||(Virtex={}));var Virtex,__extends=this&&this.__extends||function(){var extendStatics=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(d,b){d.__proto__=b}||function(d,b){for(var p in b)b.hasOwnProperty(p)&&(d[p]=b[p])};return function(d,b){function __(){this.constructor=d}extendStatics(d,b),d.prototype=null===b?Object.create(b):(__.prototype=b.prototype,new __)}}();!function(Virtex){var FileType=function(_super){function FileType(){return null!==_super&&_super.apply(this,arguments)||this}return __extends(FileType,_super),FileType.DRACO=new FileType("application/draco"),FileType.CORTO=new FileType("application/corto"),FileType.GLTF=new FileType("model/gltf+json"),FileType.OBJ=new FileType("text/plain"),FileType.PLY=new FileType("application/ply"),FileType.THREEJS=new FileType("application/vnd.threejs+json"),FileType}(Virtex.StringValue);Virtex.FileType=FileType}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var CORTOFileTypeHandler=function(){function CORTOFileTypeHandler(){}return CORTOFileTypeHandler.setup=function(viewport,obj,cb){var bufferGeometry=obj.geometry;bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;obj.scale.multiplyScalar(scale),obj.position.x=-midX*scale,obj.position.y=-midY*scale,obj.position.z=-midZ*scale,obj.castShadow=!0,obj.receiveShadow=!0,viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},CORTOFileTypeHandler}();Virtex.CORTOFileTypeHandler=CORTOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var DRACOFileTypeHandler=function(){function DRACOFileTypeHandler(){}return DRACOFileTypeHandler.setup=function(viewport,obj,cb){var geometry,bufferGeometry=obj,material=new THREE.MeshStandardMaterial({vertexColors:THREE.VertexColors});null==bufferGeometry.index?geometry=new THREE.Points(bufferGeometry,material):(bufferGeometry.computeVertexNormals(),geometry=new THREE.Mesh(bufferGeometry,material)),bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;geometry.scale.multiplyScalar(scale),geometry.position.x=-midX*scale,geometry.position.y=-midY*scale,geometry.position.z=-midZ*scale,geometry.castShadow=!0,geometry.receiveShadow=!0,obj=geometry,viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},DRACOFileTypeHandler}();Virtex.DRACOFileTypeHandler=DRACOFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var glTFFileTypeHandler=function(){function glTFFileTypeHandler(){}return glTFFileTypeHandler.setup=function(viewport,obj,cb){if(viewport.objectGroup.add(obj.scene),obj.animations)for(var animations=obj.animations,i=0,l=animations.length;i<l;i++);viewport.scene=obj.scene,obj.cameras&&obj.cameras.length&&(viewport.camera=obj.cameras[0]),cb(obj)},glTFFileTypeHandler}();Virtex.glTFFileTypeHandler=glTFFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ObjFileTypeHandler=function(){function ObjFileTypeHandler(){}return ObjFileTypeHandler.setup=function(viewport,objpath,obj,cb){var imgloader=new THREE.MTLLoader;imgloader.setCrossOrigin(!0),imgloader.setPath(objpath.substring(0,objpath.lastIndexOf("/")+1)),imgloader.load(obj.materialLibraries[0],function(materials){var objLoader=new THREE.OBJLoader;objLoader.setMaterials(materials),objLoader.load(objpath,function(obj){var bufferGeometry=obj.children[0].geometry;bufferGeometry.computeBoundingBox();var sizeX=bufferGeometry.boundingBox.max.x-bufferGeometry.boundingBox.min.x,sizeY=bufferGeometry.boundingBox.max.y-bufferGeometry.boundingBox.min.y,sizeZ=bufferGeometry.boundingBox.max.z-bufferGeometry.boundingBox.min.z,diagonalSize=Math.sqrt(sizeX*sizeX+sizeY*sizeY+sizeZ*sizeZ),scale=1/diagonalSize,midX=(bufferGeometry.boundingBox.min.x+bufferGeometry.boundingBox.max.x)/2,midY=(bufferGeometry.boundingBox.min.y+bufferGeometry.boundingBox.max.y)/2,midZ=(bufferGeometry.boundingBox.min.z+bufferGeometry.boundingBox.max.z)/2;obj.scale.multiplyScalar(scale),obj.position.x=-midX*scale,obj.position.y=-midY*scale,obj.position.z=-midZ*scale,obj.castShadow=!0,obj.receiveShadow=!0,viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},function(){},function(){})},function(){},function(){})},ObjFileTypeHandler}();Virtex.ObjFileTypeHandler=ObjFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var PLYFileTypeHandler=function(){function PLYFileTypeHandler(){}return PLYFileTypeHandler.setup=function(viewport,geometry,cb){var material=new THREE.PointsMaterial({vertexColors:THREE.VertexColors}),mesh=new THREE.Points(geometry,material);viewport.objectGroup.add(mesh),viewport.createCamera(),cb(mesh)},PLYFileTypeHandler}();Virtex.PLYFileTypeHandler=PLYFileTypeHandler}(Virtex||(Virtex={}));var Virtex;!function(Virtex){var ThreeJSFileTypeHandler=function(){function ThreeJSFileTypeHandler(){}return ThreeJSFileTypeHandler.setup=function(viewport,obj,cb){viewport.objectGroup.add(obj),viewport.createCamera(),cb(obj)},ThreeJSFileTypeHandler}();Virtex.ThreeJSFileTypeHandler=ThreeJSFileTypeHandler}(Virtex||(Virtex={}));var Virtex,requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(callback){window.setTimeout(callback,5)}}();!function(Virtex){var Viewport=function(){function Viewport(options){this._raycastObjectCache=null,this._viewportCenter=new THREE.Vector2,this._isFullscreen=!1,this._isMouseDown=!1,this._isVRMode=!1,this._isMouseOver=!1,this._mousePos=new THREE.Vector2,this._mousePosNorm=new THREE.Vector2((-1),(-1)),this._mousePosOnMouseDown=new THREE.Vector2,this._pinchStart=new THREE.Vector2,this._targetRotationOnMouseDown=new THREE.Vector2,this._targetRotation=new THREE.Vector2,this._vrEnabled=!0,this.options=options,this.options.data=Object.assign({},this.data(),options.data);var success=this._init();this._resize(),success&&this._tick()}return Viewport.prototype._init=function(){return this._element=this.options.target,this._element?(this._element.innerHTML="",Detector.webgl?(this._viewport=document.createElement("div"),this._viewport.classList.add("viewport"),this._loading=document.createElement("div"),this._loading.classList.add("loading"),this._loadingBar=document.createElement("div"),this._loadingBar.classList.add("bar"),this._element.appendChild(this._viewport),this.scene=new THREE.Scene,this.objectGroup=new THREE.Object3D,this.scene.add(this.objectGroup),this._raycaster=new THREE.Raycaster,this._createLights(),this.createCamera(),this._createControls(),this._createRenderer(),this._createEventListeners(),this._viewport.appendChild(this._loading),this._loading.appendChild(this._loadingBar),this._loading.classList.add("beforeload"),this._loadObject(this.options.data.file),this.options.data.showStats&&(this._stats=new Stats,this._stats.domElement.style.position="absolute",this._stats.domElement.style.top="0px",this._viewport.appendChild(this._stats.domElement)),!0):(Detector.addGetWebGLMessage(),this._oldie=document.querySelector("#oldie"),this._element.appendChild(this._oldie),!1)):(console.warn("target not found"),!1)},Viewport.prototype.data=function(){return{alpha:!0,ambientLightColor:13684944,ambientLightIntensity:1,antialias:!0,cameraZ:4.5,directionalLight1Color:16777215,directionalLight1Intensity:.75,directionalLight2Color:10584,directionalLight2Intensity:.5,doubleSided:!0,fadeSpeed:1750,far:1e4,file:"",fullscreenEnabled:!0,maxZoom:10,minZoom:2,near:.05,shading:THREE.SmoothShading,showStats:!1,type:Virtex.FileType.OBJ,vrBackgroundColor:0,zoomSpeed:1}},Viewport.prototype._getVRDisplay=function(){return new Promise(function(resolve){navigator.getVRDisplays().then(function(devices){for(var i=0;i<devices.length;i++)if(devices[i]instanceof VRDisplay){resolve(devices[i]);break}resolve(void 0)},function(){resolve(void 0)})})},Viewport.prototype._createLights=function(){this._lightGroup=new THREE.Object3D,this.scene.add(this._lightGroup);var light1=new THREE.DirectionalLight(this.options.data.directionalLight1Color,this.options.data.directionalLight1Intensity);light1.position.set(1,1,1),this._lightGroup.add(light1);var light2=new THREE.DirectionalLight(this.options.data.directionalLight2Color,this.options.data.directionalLight2Intensity);light2.position.set(-1,-1,-1),this._lightGroup.add(light2);var ambientLight=new THREE.AmbientLight(this.options.data.ambientLightColor,this.options.data.ambientLightIntensity);this._lightGroup.add(ambientLight)},Viewport.prototype.createCamera=function(){this.camera=new THREE.PerspectiveCamera(this._getFov(),this._getAspectRatio(),this.options.data.near,this.options.data.far);var cameraZ=this._getCameraZ();this.camera.position.z=this._targetZoom=cameraZ},Viewport.prototype._createRenderer=function(){this._renderer=new THREE.WebGLRenderer({antialias:this.options.data.antialias,alpha:this.options.data.alpha}),this._isVRMode?(this._renderer.setClearColor(this.options.data.vrBackgroundColor),this._vrEffect=new THREE.VREffect(this._renderer),this._vrEffect.setSize(this._viewport.offsetWidth,this._viewport.offsetHeight)):(this._renderer.setClearColor(this.options.data.vrBackgroundColor,0),this._renderer.setSize(this._viewport.offsetWidth,this._viewport.offsetHeight)),this._viewport.innerHTML="",this._viewport.appendChild(this._renderer.domElement)},Viewport.prototype._createControls=function(){this._isVRMode&&(this._vrControls=new THREE.VRControls(this.camera))},Viewport.prototype._createEventListeners=function(){var _this=this;this.options.data.fullscreenEnabled&&(document.addEventListener("webkitfullscreenchange",function(){_this._fullscreenChanged()}),document.addEventListener("mozfullscreenchange",function(){_this._fullscreenChanged()}),document.addEventListener("fullscreenchange",function(){_this._fullscreenChanged()})),this._element.addEventListener("mousedown",function(e){_this._onMouseDown(e)}),this._element.addEventListener("mousemove",function(e){_this._onMouseMove(e)}),this._element.addEventListener("mouseup",function(){_this._onMouseUp()}),this._element.addEventListener("mouseout",function(){_this._onMouseOut()}),this._element.addEventListener("mousewheel",function(e){_this._onMouseWheel(e)}),this._element.addEventListener("DOMMouseScroll",function(e){_this._onMouseWheel(e)}),this._element.addEventListener("touchstart",function(e){_this._onTouchStart(e)}),this._element.addEventListener("touchmove",function(e){_this._onTouchMove(e)}),this._element.addEventListener("touchend",function(){_this._onTouchEnd()}),window.addEventListener("resize",function(){return _this._resize()},!1)},Viewport.prototype._loadObject=function(objectPath){var _this=this;this._loading.classList.remove("beforeload"),this._loading.classList.add("duringload");var loader;switch(this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():loader=new THREE.DRACOLoader;break;case Virtex.FileType.CORTO.toString():loader=new THREE.CORTOLoader;break;case Virtex.FileType.GLTF.toString():loader=new THREE.GLTFLoader;break;case Virtex.FileType.OBJ.toString():loader=new THREE.OBJLoader;break;case Virtex.FileType.THREEJS.toString():loader=new THREE.ObjectLoader;break;case Virtex.FileType.PLY.toString():loader=new THREE.PLYLoader}loader.setCrossOrigin&&loader.setCrossOrigin("anonymous"),loader.load(objectPath,function(obj){switch(_this.options.data.type.toString()){case Virtex.FileType.DRACO.toString():Virtex.DRACOFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.CORTO.toString():Virtex.CORTOFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.GLTF.toString():Virtex.glTFFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.THREEJS.toString():Virtex.ThreeJSFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this));break;case Virtex.FileType.OBJ.toString():Virtex.ObjFileTypeHandler.setup(_this,objectPath,obj,_this._loaded.bind(_this));break;case Virtex.FileType.PLY.toString():Virtex.PLYFileTypeHandler.setup(_this,obj,_this._loaded.bind(_this))}},function(e){e.lengthComputable&&_this._loadProgress(e.loaded/e.total)},function(e){console.error(e)})},Viewport.prototype._loaded=function(obj){this._loading.classList.remove("duringload"),this._loading.classList.add("afterload"),this.fire(Events.LOADED,obj)},Viewport.prototype._getBoundingBox=function(){return(new THREE.Box3).setFromObject(this.objectGroup)},Viewport.prototype._getBoundingWidth=function(){return this._getBoundingBox().getSize().x},Viewport.prototype._getBoundingHeight=function(){return this._getBoundingBox().getSize().y},Viewport.prototype._getCameraZ=function(){return this._getBoundingWidth()*this.options.data.cameraZ},Viewport.prototype._getFov=function(){if(!this.camera)return 1;var width=this._getBoundingWidth(),height=this._getBoundingHeight(),dist=this._getCameraZ()-width,fov=2*Math.atan(height/(2*dist))*(180/Math.PI);return fov},Viewport.prototype._loadProgress=function(progress){var fullWidth=this._loading.offsetWidth,width=Math.floor(fullWidth*progress);this._loadingBar.style.width=String(width)+"px"},Viewport.prototype._fullscreenChanged=function(){this._isFullscreen?(this.exitFullscreen(),this._element.style.width=String(this._lastWidth),this._element.style.height=String(this._lastHeight)):(this._lastWidth=this._getWidth(),this._lastHeight=this._getHeight()),this._isFullscreen=!this._isFullscreen,this._resize()},Viewport.prototype._onMouseDown=function(event){event.preventDefault(),this._isMouseDown=!0,this._mousePosOnMouseDown.x=event.clientX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=event.clientY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y},Viewport.prototype._onMouseMove=function(event){this._mousePos.x=event.clientX-this._viewportCenter.x,this._mousePos.y=event.clientY-this._viewportCenter.y,this._mousePosNorm.x=event.clientX/this._getWidth()*2-1,this._mousePosNorm.y=2*-(event.clientY/this._getHeight())+1,this._isMouseDown&&(this._targetRotation.y=this._targetRotationOnMouseDown.y+.02*(this._mousePos.y-this._mousePosOnMouseDown.y),this._targetRotation.x=this._targetRotationOnMouseDown.x+.02*(this._mousePos.x-this._mousePosOnMouseDown.x))},Viewport.prototype._onMouseUp=function(){this._isMouseDown=!1},Viewport.prototype._onMouseOut=function(){this._isMouseDown=!1},Viewport.prototype._onMouseWheel=function(event){event.preventDefault(),event.stopPropagation();var delta=0;void 0!==event.wheelDelta?delta=event.wheelDelta:void 0!==event.detail&&(delta=-event.detail),delta>0?this.zoomIn():delta<0&&this.zoomOut()},Viewport.prototype._onTouchStart=function(event){var touches=event.touches;1===touches.length&&(this._isMouseDown=!0,event.preventDefault(),this._mousePosOnMouseDown.x=touches[0].pageX-this._viewportCenter.x,this._targetRotationOnMouseDown.x=this._targetRotation.x,this._mousePosOnMouseDown.y=touches[0].pageY-this._viewportCenter.y,this._targetRotationOnMouseDown.y=this._targetRotation.y)},Viewport.prototype._onTouchMove=function(event){event.preventDefault(),event.stopPropagation();var touches=event.touches;switch(touches.length){case 1:event.preventDefault(),this._mousePos.x=touches[0].pageX-this._viewportCenter.x,this._targetRotation.x=this._targetRotationOnMouseDown.x+.05*(this._mousePos.x-this._mousePosOnMouseDown.x),this._mousePos.y=touches[0].pageY-this._viewportCenter.y,this._targetRotation.y=this._targetRotationOnMouseDown.y+.05*(this._mousePos.y-this._mousePosOnMouseDown.y);break;case 2:var dx=touches[0].pageX-touches[1].pageX,dy=touches[0].pageY-touches[1].pageY,distance=Math.sqrt(dx*dx+dy*dy),pinchEnd=new THREE.Vector2(0,distance),pinchDelta=new THREE.Vector2;pinchDelta.subVectors(pinchEnd,this._pinchStart),pinchDelta.y>0?this.zoomIn():pinchDelta.y<0&&this.zoomOut(),this._pinchStart.copy(pinchEnd);break;case 3:}},Viewport.prototype._onTouchEnd=function(){this._isMouseDown=!1},Viewport.prototype._tick=function(){var _this=this;requestAnimFrame(function(){return _this._tick()}),this._update(),this._draw(),this.options.data.showStats&&this._stats.update()},Viewport.prototype.rotateY=function(radians){var rotation=this.objectGroup.rotation.y+radians;this.objectGroup.rotation.y=rotation},Viewport.prototype._update=function(){if(this._isVRMode)this._vrControls.update();else{this.rotateY(.1*(this._targetRotation.x-this.objectGroup.rotation.y));var finalRotationY=this._targetRotation.y-this.objectGroup.rotation.x;this.objectGroup.rotation.x<=1&&this.objectGroup.rotation.x>=-1&&(this.objectGroup.rotation.x+=.1*finalRotationY),this.objectGroup.rotation.x>1?this.objectGroup.rotation.x=1:this.objectGroup.rotation.x<-1&&(this.objectGroup.rotation.x=-1);var zoomDelta=.1*(this._targetZoom-this.camera.position.z);if(this.camera.position.z+=zoomDelta,this.objectGroup.children.length){this._raycaster.setFromCamera(this._mousePosNorm,this.camera);var obj=this._getRaycastObject();if(obj){var intersects=this._raycaster.intersectObject(obj);intersects.length>0?this._isMouseOver=!0:this._isMouseOver=!1}}}},Viewport.prototype._draw=function(){this._isVRMode?this._vrEffect.render(this.scene,this.camera):(this._renderer.render(this.scene,this.camera),this._isMouseOver?(this._element.classList.add("grabbable"),this._isMouseDown?this._element.classList.add("grabbing"):this._element.classList.remove("grabbing")):(this._element.classList.remove("grabbable"),this._element.classList.remove("grabbing")))},Viewport.prototype._getRaycastObject=function(){var _this=this;return this._raycastObjectCache?this._raycastObjectCache:(this.objectGroup.traverse(function(child){child instanceof THREE.Mesh&&(_this._raycastObjectCache=child)}),this._raycastObjectCache)},Viewport.prototype._getWidth=function(){return this._isFullscreen?window.innerWidth:this._element.offsetWidth},Viewport.prototype._getHeight=function(){return this._isFullscreen?window.innerHeight:this._element.offsetHeight},Viewport.prototype._getZoomSpeed=function(){return this._getBoundingWidth()*this.options.data.zoomSpeed},Viewport.prototype._getMaxZoom=function(){return this._getBoundingWidth()*this.options.data.maxZoom},Viewport.prototype._getMinZoom=function(){return this._getBoundingWidth()*this.options.data.minZoom},Viewport.prototype.zoomIn=function(){var targetZoom=this.camera.position.z-this._getZoomSpeed();targetZoom>this._getMinZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMinZoom()},Viewport.prototype.zoomOut=function(){var targetZoom=this.camera.position.z+this._getZoomSpeed();targetZoom<this._getMaxZoom()?this._targetZoom=targetZoom:this._targetZoom=this._getMaxZoom()},Viewport.prototype.enterVR=function(){var _this=this;this._vrEnabled&&(this._isVRMode=!0,this._prevCameraPosition=this.camera.position.clone(),this._prevCameraRotation=this.camera.rotation.clone(),this._createControls(),this._createRenderer(),this._getVRDisplay().then(function(display){display&&(_this._vrEffect.setVRDisplay(display),_this._vrControls.setVRDisplay(display),_this._vrEffect.setFullScreen(!0))}))},Viewport.prototype.exitVR=function(){this._vrEnabled&&(this._isVRMode=!1,this.camera.position.copy(this._prevCameraPosition),this.camera.rotation.copy(this._prevCameraRotation),this._createRenderer())},Viewport.prototype.toggleVR=function(){this._vrEnabled&&(this._isVRMode?this.exitVR():this.enterVR())},Viewport.prototype.enterFullscreen=function(){if(this.options.data.fullscreenEnabled){var elem=this._element,requestFullScreen=this._getRequestFullScreen(elem);requestFullScreen&&requestFullScreen.call(elem)}},Viewport.prototype.exitFullscreen=function(){var exitFullScreen=this._getExitFullScreen();exitFullScreen&&exitFullScreen.call(document)},Viewport.prototype._getRequestFullScreen=function(elem){return elem.requestFullscreen?elem.requestFullscreen:elem.msRequestFullscreen?elem.msRequestFullscreen:elem.mozRequestFullScreen?elem.mozRequestFullScreen:!!elem.webkitRequestFullscreen&&elem.webkitRequestFullscreen},Viewport.prototype._getExitFullScreen=function(){return document.exitFullscreen?document.exitFullscreen:document.msExitFullscreen?document.msExitFullscreen:document.mozCancelFullScreen?document.mozCancelFullScreen:!!document.webkitExitFullscreen&&document.webkitExitFullscreen},Viewport.prototype._getAspectRatio=function(){return this._viewport.offsetWidth/this._viewport.offsetHeight},Viewport.prototype.on=function(name,callback,ctx){var e=this._e||(this._e={});(e[name]||(e[name]=[])).push({fn:callback,ctx:ctx})},Viewport.prototype.fire=function(name){for(var args=[],_i=1;_i<arguments.length;_i++)args[_i-1]=arguments[_i];var data=[].slice.call(args,1),evtArr=((this._e||(this._e={}))[name]||[]).slice(),i=0,len=evtArr.length;for(i;i<len;i++)evtArr[i].fn.apply(evtArr[i].ctx,data)},Viewport.prototype.resize=function(){this._resize()},Viewport.prototype._resize=function(){if(this._element&&this._viewport){var width=String(this._getWidth()+"px"),height=String(this._getHeight()+"px");this._element.style.width=width,this._element.style.height=height,this._viewport.style.width=width,this._viewport.style.height=height,this._viewportCenter.x=this._viewport.offsetWidth/2,this._viewportCenter.y=this._viewport.offsetHeight/2,this.camera.aspect=this._getAspectRatio(),this.camera.updateProjectionMatrix(),this._isVRMode?this._vrEffect.setSize(this._viewport.offsetWidth,this._viewport.offsetHeight):this._renderer.setSize(this._viewport.offsetWidth,this._viewport.offsetHeight),this._loading.style.left=String(this._viewportCenter.x-this._loading.offsetWidth/2)+"px",this._loading.style.top=String(this._viewportCenter.y-this._loading.offsetHeight/2)+"px"}else this._oldie&&(this._oldie.style.left=String(this._element.offsetWidth/2-this._oldie.offsetWidth/2)+"px",this._oldie.style.top=String(this._element.offsetHeight/2-this._oldie.offsetHeight/2)+"px")},Viewport}();Virtex.Viewport=Viewport;var Events=function(){function Events(){}return Events.LOADED="loaded",Events}();Virtex.Events=Events}(Virtex||(Virtex={})),function(g){g.Virtex||(g.Virtex=Virtex)}(global)}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}]},{},[1])(1)});
