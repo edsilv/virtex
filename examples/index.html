@@ -106,9 +106,9 @@
             }
         };
         
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', function() {
 
-            const isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+            var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
             viewport = new Virtex.Viewport({
                 target: document.querySelector('#viewer'),
