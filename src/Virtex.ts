@@ -39,8 +39,8 @@ namespace Virtex {
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
         private _isVRMode: boolean = false;
-        private _lastHeight: number;
-        private _lastWidth: number;
+        private _lastHeight: string;
+        private _lastWidth: string;
         private _isMouseOver: boolean = false;
         private _mousePos: THREE.Vector2 = new THREE.Vector2();
         private _mousePosNorm: THREE.Vector2 = new THREE.Vector2(-1, -1);
@@ -400,12 +400,12 @@ namespace Virtex {
             if (this._isFullscreen) { 
                 // exiting fullscreen
                 this.exitFullscreen();
-                this._element.style.width = String(this._lastWidth);
-                this._element.style.height = String(this._lastHeight);
+                this._element.style.width = this._lastWidth;
+                this._element.style.height = this._lastHeight;
             } else { 
                 // entering fullscreen
-                this._lastWidth = this._getWidth();
-                this._lastHeight = this._getHeight();
+                this._lastWidth = this._getWidth() + "px";
+                this._lastHeight = this._getHeight() + "px";
             }
             
             this._isFullscreen = !this._isFullscreen;
