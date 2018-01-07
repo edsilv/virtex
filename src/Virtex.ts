@@ -199,11 +199,11 @@ namespace Virtex {
             });
 
             if (this._isVRMode) {
-                this._renderer.setClearColor(this.options.data.vrBackgroundColor);
+                this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor);
                 this._vrEffect = new THREE.VREffect(this._renderer);
                 this._vrEffect.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
             } else {
-                this._renderer.setClearColor(this.options.data.vrBackgroundColor, 0);
+                this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor, 0);
                 this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
             }
 
@@ -282,7 +282,7 @@ namespace Virtex {
 
             let loader: any;
             
-            switch (this.options.data.type.toString()) {
+            switch ((<FileType>this.options.data.type).toString()) {
                 case FileType.DRACO.toString() :
                     loader = new (<any>THREE).DRACOLoader();
                     break;
@@ -310,7 +310,7 @@ namespace Virtex {
             loader.load(objectPath,
                 (obj: any) => {
 
-                    switch (this.options.data.type.toString()) {
+                    switch ((<FileType>this.options.data.type).toString()) {
                         case FileType.DRACO.toString() :
                             DRACOFileTypeHandler.setup(this, obj, this._loaded.bind(this));
                             break;
@@ -372,7 +372,7 @@ namespace Virtex {
         // }
 
         private _getCameraZ(): number {
-            return this._getBoundingWidth() * this.options.data.cameraZ;
+            return this._getBoundingWidth() * <number>this.options.data.cameraZ;
         }
 
         private _getFov(): number {
@@ -687,15 +687,15 @@ namespace Virtex {
         }
 
         private _getZoomSpeed(): number {
-            return this._getBoundingWidth() * this.options.data.zoomSpeed;
+            return this._getBoundingWidth() * <number>this.options.data.zoomSpeed;
         }
 
         private _getMaxZoom(): number {
-            return this._getBoundingWidth() * this.options.data.maxZoom;
+            return this._getBoundingWidth() * <number>this.options.data.maxZoom;
         }
 
         private _getMinZoom(): number {
-            return this._getBoundingWidth() * this.options.data.minZoom;
+            return this._getBoundingWidth() * <number>this.options.data.minZoom;
         }
 
         public zoomIn(): void {

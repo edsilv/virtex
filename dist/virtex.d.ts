@@ -1,4 +1,4 @@
-// virtex v0.3.4 https://github.com/edsilv/virtex#readme
+// virtex v0.3.6 https://github.com/edsilv/virtex#readme
 declare var global: any;
 declare var Stats: any;
 interface Document {
@@ -47,27 +47,27 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     interface IVirtexData {
-        alpha: boolean;
-        ambientLightColor: number;
-        ambientLightIntensity: number;
-        antialias: boolean;
-        cameraZ: number;
-        directionalLight1Color: number;
-        directionalLight1Intensity: number;
-        directionalLight2Color: number;
-        directionalLight2Intensity: number;
-        fadeSpeed: number;
-        far: number;
+        alpha?: boolean;
+        ambientLightColor?: number;
+        ambientLightIntensity?: number;
+        antialias?: boolean;
+        cameraZ?: number;
+        directionalLight1Color?: number;
+        directionalLight1Intensity?: number;
+        directionalLight2Color?: number;
+        directionalLight2Intensity?: number;
+        fadeSpeed?: number;
+        far?: number;
         file: string;
-        fullscreenEnabled: boolean;
-        maxZoom: number;
-        minZoom: number;
-        near: number;
-        shading: THREE.Shading;
-        showStats: boolean;
-        type: FileType;
-        vrBackgroundColor: number;
-        zoomSpeed: number;
+        fullscreenEnabled?: boolean;
+        maxZoom?: number;
+        minZoom?: number;
+        near?: number;
+        shading?: THREE.Shading;
+        showStats?: boolean;
+        type?: FileType;
+        vrBackgroundColor?: number;
+        zoomSpeed?: number;
     }
     interface IVirtexOptions {
         target: HTMLElement;
