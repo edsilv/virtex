@@ -130,9 +130,8 @@ declare namespace Virtex {
         private _targetRotation;
         private _targetZoom;
         constructor(options: IVirtexOptions);
-        protected _init(): boolean;
+        protected _init(): void;
         data(): IVirtexData;
-        private _createTestCubes();
         private _animate();
         private _onPointerRestricted();
         private _onPointerUnrestricted();
@@ -158,9 +157,7 @@ declare namespace Virtex {
         private _onTouchMove(event);
         private _onTouchEnd();
         rotateY(radians: number): void;
-        private _update();
         private _render();
-        private _draw();
         private _getRaycastObject();
         private _getWidth();
         private _getHeight();

@@ -27,7 +27,7 @@ namespace Virtex {
 
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
-        private _isVRMode: boolean = false;
+        private _isVRMode: boolean = true;
         private _lastHeight: string;
         private _lastWidth: string;
         private _isMouseOver: boolean = false;
@@ -48,13 +48,13 @@ namespace Virtex {
             this._resize();
         }
 
-        protected _init(): boolean {
+        protected _init(): void {
 
             this._element = this.options.target;
             
             if (!this._element) {
                 console.warn('target not found');
-                return false;
+                return;
             }
 
             this._element.innerHTML = '';
@@ -63,7 +63,7 @@ namespace Virtex {
                 Detector.addGetWebGLMessage();
                 this._oldie = <HTMLElement>document.querySelector('#oldie');
                 this._element.appendChild(this._oldie);
-                return false;
+                return;
             }
 
             this._viewport = document.createElement('div');
@@ -131,6 +131,7 @@ namespace Virtex {
             }
         }
         
+        /*
         private _createTestCubes(): void {
 
             const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
@@ -154,6 +155,7 @@ namespace Virtex {
                 this.objectGroup.add( object );
             }
         }
+        */
 
         private _animate(): void {
             (<any>this._renderer).animate(this._render.bind(this));
@@ -564,15 +566,6 @@ namespace Virtex {
             this._isMouseDown = false;
         }
 
-        // private _tick(): void {
-        //     requestAnimFrame(() => this._tick());
-        //     this._update();
-        //     this._draw();
-        //     if (this.options.data.showStats) {
-        //         this._stats.update();
-        //     }
-        // }
-
         public rotateY(radians: number): void {
             const rotation: number = this.objectGroup.rotation.y + radians;
             this.objectGroup.rotation.y = rotation;
@@ -589,27 +582,11 @@ namespace Virtex {
         //     this.objectGroup.updateMatrix();
         // }
 
-        private _update(): void {
+        private _render(): void {
             
-            // switch (this.options.data.type.toString()) {
-            //     case FileType.DRACO.toString() :
-            //         break;
-            //     case FileType.GLTF.toString() :
-            //         //THREE.GLTFLoader.Animations.update();
-			//         THREE.GLTFLoader.Shaders.update(this.scene, this.camera);
-            //         break;
-            //     case FileType.THREEJS.toString() :
-            //         break;
-            // }
-            
-            if (this._isVRMode){
-                // if (this._isMouseDown) {
-                //     this.rotateY(0.1);
-                // }
+            //const delta: number = this._clock.getDelta() * 60;
 
-                // Update VR headset position and apply to camera.
-                //this._vrControls.update();  
-            } else {
+            if (!this._isVRMode) {
                 // horizontal rotation
                 this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
 
@@ -655,31 +632,20 @@ namespace Virtex {
                 }
                 
             }
-        }
 
-        private _render(): void {
-            const delta: number = this._clock.getDelta() * 60;
-            this._renderer.render(this.scene, this.camera);
-        }
-
-        private _draw(): void {
-            // if (this._isVRMode) {
-            //     this._vrEffect.render(this.scene, this.camera);                
-            // } else {
-                this._renderer.render(this.scene, this.camera);
-
-                if (this._isMouseOver) {
-                    this._element.classList.add('grabbable');
-                    if (this._isMouseDown) {
-                        this._element.classList.add('grabbing');
-                    } else {
-                        this._element.classList.remove('grabbing');
-                    }
+            if (this._isMouseOver) {
+                this._element.classList.add('grabbable');
+                if (this._isMouseDown) {
+                    this._element.classList.add('grabbing');
                 } else {
-                    this._element.classList.remove('grabbable');
                     this._element.classList.remove('grabbing');
                 }
-            //}
+            } else {
+                this._element.classList.remove('grabbable');
+                this._element.classList.remove('grabbing');
+            }
+
+            this._renderer.render(this.scene, this.camera);
         }
 
         private _getRaycastObject(): THREE.Object3D | null {
@@ -749,18 +715,7 @@ namespace Virtex {
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
      
-            //(<any>this._renderer).vr.enabled = true;
-
-            //this._createControls();
             this._createRenderer();
-
-            // this._getVRDisplay().then((display) => {
-            //     if (display) {
-            //         this._vrEffect.setVRDisplay(display);
-            //         this._vrControls.setVRDisplay(display);
-            //         this._vrEffect.setFullScreen(true);
-            //     }
-            // });
         }
         
         public exitVR(): void {            
@@ -771,8 +726,6 @@ namespace Virtex {
             this.camera.rotation.copy(this._prevCameraRotation);
             
             this._createRenderer();
-
-            (<any>this._renderer).vr.enabled = false;
         }
 
         public toggleVR(): void {
@@ -790,7 +743,7 @@ namespace Virtex {
             const elem: HTMLElement = this._element;
             const requestFullScreen: any = this._getRequestFullScreen(elem);
 
-            if (requestFullScreen){
+            if (requestFullScreen) {
                 requestFullScreen.call(elem);
             }
         }
@@ -862,13 +815,6 @@ namespace Virtex {
         public resize(): void {
             this._resize();
         }
-
-        // private _resize(): void {
-        //     this.camera.aspect = window.innerWidth / window.innerHeight;
-        //     this.camera.updateProjectionMatrix();
-
-        //     this._renderer.setSize( window.innerWidth, window.innerHeight );
-        // }
 
         protected _resize(): void {
 

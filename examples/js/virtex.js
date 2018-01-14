@@ -255,7 +255,7 @@ var Virtex;
             this._viewportCenter = new THREE.Vector2();
             this._isFullscreen = false;
             this._isMouseDown = false;
-            this._isVRMode = false;
+            this._isVRMode = true;
             this._isMouseOver = false;
             this._mousePos = new THREE.Vector2();
             this._mousePosNorm = new THREE.Vector2(-1, -1);
@@ -272,14 +272,14 @@ var Virtex;
             this._element = this.options.target;
             if (!this._element) {
                 console.warn('target not found');
-                return false;
+                return;
             }
             this._element.innerHTML = '';
             if (!Detector.webgl) {
                 Detector.addGetWebGLMessage();
                 this._oldie = document.querySelector('#oldie');
                 this._element.appendChild(this._oldie);
-                return false;
+                return;
             }
             this._viewport = document.createElement('div');
             this._viewport.classList.add('viewport');
@@ -338,22 +338,31 @@ var Virtex;
                 zoomSpeed: 1
             };
         };
-        Viewport.prototype._createTestCubes = function () {
-            var geometry = new THREE.BoxGeometry(0.15, 0.15, 0.15);
-            for (var i = 0; i < 200; i++) {
-                var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }));
+        /*
+        private _createTestCubes(): void {
+
+            const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
+
+            for ( var i = 0; i < 200; i ++ ) {
+
+                var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+
                 object.position.x = Math.random() * 4 - 2;
                 object.position.y = Math.random() * 4 - 2;
                 object.position.z = Math.random() * 4 - 2;
+
                 object.rotation.x = Math.random() * 2 * Math.PI;
                 object.rotation.y = Math.random() * 2 * Math.PI;
                 object.rotation.z = Math.random() * 2 * Math.PI;
+
                 object.scale.x = Math.random() + 0.5;
                 object.scale.y = Math.random() + 0.5;
                 object.scale.z = Math.random() + 0.5;
-                this.objectGroup.add(object);
+
+                this.objectGroup.add( object );
             }
-        };
+        }
+        */
         Viewport.prototype._animate = function () {
             this._renderer.animate(this._render.bind(this));
         };
@@ -661,14 +670,6 @@ var Virtex;
         Viewport.prototype._onTouchEnd = function () {
             this._isMouseDown = false;
         };
-        // private _tick(): void {
-        //     requestAnimFrame(() => this._tick());
-        //     this._update();
-        //     this._draw();
-        //     if (this.options.data.showStats) {
-        //         this._stats.update();
-        //     }
-        // }
         Viewport.prototype.rotateY = function (radians) {
             var rotation = this.objectGroup.rotation.y + radians;
             this.objectGroup.rotation.y = rotation;
@@ -681,25 +682,9 @@ var Virtex;
         //     this.objectGroup.scale.set( 1, 1, 1 );
         //     this.objectGroup.updateMatrix();
         // }
-        Viewport.prototype._update = function () {
-            // switch (this.options.data.type.toString()) {
-            //     case FileType.DRACO.toString() :
-            //         break;
-            //     case FileType.GLTF.toString() :
-            //         //THREE.GLTFLoader.Animations.update();
-            //         THREE.GLTFLoader.Shaders.update(this.scene, this.camera);
-            //         break;
-            //     case FileType.THREEJS.toString() :
-            //         break;
-            // }
-            if (this._isVRMode) {
-                // if (this._isMouseDown) {
-                //     this.rotateY(0.1);
-                // }
-                // Update VR headset position and apply to camera.
-                //this._vrControls.update();  
-            }
-            else {
+        Viewport.prototype._render = function () {
+            //const delta: number = this._clock.getDelta() * 60;
+            if (!this._isVRMode) {
                 // horizontal rotation
                 this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
                 // vertical rotation
@@ -734,16 +719,6 @@ var Virtex;
                     }
                 }
             }
-        };
-        Viewport.prototype._render = function () {
-            var delta = this._clock.getDelta() * 60;
-            this._renderer.render(this.scene, this.camera);
-        };
-        Viewport.prototype._draw = function () {
-            // if (this._isVRMode) {
-            //     this._vrEffect.render(this.scene, this.camera);                
-            // } else {
-            this._renderer.render(this.scene, this.camera);
             if (this._isMouseOver) {
                 this._element.classList.add('grabbable');
                 if (this._isMouseDown) {
@@ -757,7 +732,7 @@ var Virtex;
                 this._element.classList.remove('grabbable');
                 this._element.classList.remove('grabbing');
             }
-            //}
+            this._renderer.render(this.scene, this.camera);
         };
         Viewport.prototype._getRaycastObject = function () {
             var _this = this;
@@ -815,16 +790,7 @@ var Virtex;
             this._isVRMode = true;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
-            //(<any>this._renderer).vr.enabled = true;
-            //this._createControls();
             this._createRenderer();
-            // this._getVRDisplay().then((display) => {
-            //     if (display) {
-            //         this._vrEffect.setVRDisplay(display);
-            //         this._vrControls.setVRDisplay(display);
-            //         this._vrEffect.setFullScreen(true);
-            //     }
-            // });
         };
         Viewport.prototype.exitVR = function () {
             //if (!this._vrEnabled) return;            
@@ -832,7 +798,6 @@ var Virtex;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
             this._createRenderer();
-            this._renderer.vr.enabled = false;
         };
         Viewport.prototype.toggleVR = function () {
             //if (!this._vrEnabled) return;
@@ -919,11 +884,6 @@ var Virtex;
         Viewport.prototype.resize = function () {
             this._resize();
         };
-        // private _resize(): void {
-        //     this.camera.aspect = window.innerWidth / window.innerHeight;
-        //     this.camera.updateProjectionMatrix();
-        //     this._renderer.setSize( window.innerWidth, window.innerHeight );
-        // }
         Viewport.prototype._resize = function () {
             if (this._element && this._viewport) {
                 var width = String(this._getWidth() + "px");
