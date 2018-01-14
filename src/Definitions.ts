@@ -7,3 +7,5 @@ interface Document{
     msExitFullscreen: any;
     mozCancelFullScreen: any;
 }
+
+declare var WEBVR: any;

@@ -11,14 +11,14 @@
   "main": "gulpfile.js",
   "types": "./dist/virtex.d.ts",
   "dependencies": {
-    "@types/three": "^0.84.20",
+    "@types/three": "0.89.0",
     "@types/webvr-api": "0.0.31",
-    "key-codes": "edsilv/key-codes#v0.0.7",
-    "three": "^0.87.1"
+    "key-codes": "github:edsilv/key-codes#v0.0.7",
+    "three": "0.89.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-tasks": "iiif-commons/gulp-tasks#v1.0.7"
+    "gulp-tasks": "github:iiif-commons/gulp-tasks#v1.0.7"
   },
   "scripts": {},
   "repository": {

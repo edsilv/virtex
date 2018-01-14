@@ -7,6 +7,7 @@ interface Document {
     msExitFullscreen: any;
     mozCancelFullScreen: any;
 }
+declare var WEBVR: any;
 
 declare namespace Virtex {
     class StringValue {
@@ -99,6 +100,7 @@ declare namespace Virtex {
     class Viewport {
         private _element;
         options: IVirtexOptions;
+        private _clock;
         private _e;
         private _viewport;
         private _loading;
@@ -128,17 +130,16 @@ declare namespace Virtex {
         private _targetRotationOnMouseDown;
         private _targetRotation;
         private _targetZoom;
-        private _vrControls;
-        private _vrEffect;
-        private _vrEnabled;
         constructor(options: IVirtexOptions);
         protected _init(): boolean;
         data(): IVirtexData;
-        private _getVRDisplay();
+        private _createTestScene();
+        private _animate();
+        private _onPointerRestricted();
+        private _onPointerUnrestricted();
         private _createLights();
         createCamera(): void;
         private _createRenderer();
-        private _createControls();
         private _createEventListeners();
         private _loadObject(objectPath);
         private _loaded(obj);
@@ -157,9 +158,9 @@ declare namespace Virtex {
         private _onTouchStart(event);
         private _onTouchMove(event);
         private _onTouchEnd();
-        private _tick();
         rotateY(radians: number): void;
         private _update();
+        private _render();
         private _draw();
         private _getRaycastObject();
         private _getWidth();
@@ -180,7 +181,7 @@ declare namespace Virtex {
         on(name: string, callback: Function, ctx: any): void;
         fire(name: string, ...args: any[]): void;
         resize(): void;
-        protected _resize(): void;
+        private _resize();
     }
     class Events {
         static LOADED: string;

@@ -5,3 +5,4 @@ npm-debug.log
 Thumbs.db
 debug.log
 typings
+package-lock.json

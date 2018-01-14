@@ -18,6 +18,7 @@ namespace Virtex {
         private _element: HTMLElement;
         public options: IVirtexOptions;
         
+        private _clock: THREE.Clock;
         private _e: any;
         private _viewport: HTMLElement;
         private _loading: HTMLElement;
@@ -38,7 +39,7 @@ namespace Virtex {
 
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
-        private _isVRMode: boolean = false;
+        private _isVRMode: boolean = true;
         private _lastHeight: string;
         private _lastWidth: string;
         private _isMouseOver: boolean = false;
@@ -49,9 +50,9 @@ namespace Virtex {
         private _targetRotationOnMouseDown: THREE.Vector2 = new THREE.Vector2();
         private _targetRotation: THREE.Vector2 = new THREE.Vector2();
         private _targetZoom: number;
-        private _vrControls: THREE.VRControls;
-        private _vrEffect: THREE.VREffect;
-        private _vrEnabled: boolean = true;
+        //private _vrControls: THREE.VRControls;
+        //private _vrEffect: THREE.VREffect;
+        //private _vrEnabled: boolean = true;
 
         constructor(options: IVirtexOptions) {
             
@@ -62,9 +63,9 @@ namespace Virtex {
 
             this._resize();
 
-            if (success) {
-                this._tick();
-            }
+            // if (success) {
+            //     this._tick();
+            // }
         }
 
         protected _init(): boolean {
@@ -86,13 +87,21 @@ namespace Virtex {
             }
 
             this._viewport = document.createElement('div');
-            this._viewport.classList.add('viewport');
-            this._loading = document.createElement('div');
-            this._loading.classList.add('loading');
-            this._loadingBar = document.createElement('div');
-            this._loadingBar.classList.add('bar');
+            // this._viewport.classList.add('viewport');
+            // this._loading = document.createElement('div');
+            // this._loading.classList.add('loading');
+            // this._loadingBar = document.createElement('div');
+            // this._loadingBar.classList.add('bar');
             
             this._element.appendChild(this._viewport);
+
+            this._clock = new THREE.Clock();
+
+            this._createTestScene();
+
+            this._animate();
+
+            return true;
 
             this.scene = new THREE.Scene();
             this.objectGroup = new THREE.Object3D();
@@ -102,7 +111,7 @@ namespace Virtex {
 
             this._createLights();
             this.createCamera();
-            this._createControls();
+            //this._createControls();
             this._createRenderer();
             this._createEventListeners();
 
@@ -147,25 +156,100 @@ namespace Virtex {
                 showStats: false,
                 type: FileType.OBJ,
                 vrBackgroundColor: 0x000000,
+                vrEnabled: true,
                 zoomSpeed: 1
             }
         }
         
-        private _getVRDisplay(): Promise<VRDisplay> {
-            return new Promise((resolve) => {
-                navigator.getVRDisplays().then((devices) => {
-                    for (var i = 0; i < devices.length; i++) {
-                        if (devices[i] instanceof VRDisplay) {
-                            resolve(devices[i]);
-                            break;
-                        }
-                    }
-                    resolve(undefined);
-                }, () => {
-                    // No devices found
-                    resolve(undefined);
-                });
-            });
+        private _createTestScene(): void {
+
+            this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color( 0x505050 );
+
+            this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
+            this.scene.add(this.camera);
+
+            const crosshair = new THREE.Mesh(
+                new THREE.RingGeometry( 0.02, 0.04, 32 ),
+                new THREE.MeshBasicMaterial( {
+                    color: 0xffffff,
+                    opacity: 0.5,
+                    transparent: true
+                } )
+            );
+
+            crosshair.position.z = - 2;
+            this.camera.add( crosshair );
+
+            const room = new THREE.Mesh(
+                new THREE.BoxGeometry( 6, 6, 6, 8, 8, 8 ),
+                new THREE.MeshBasicMaterial( { color: 0x404040, wireframe: true } )
+            );
+            
+            this.scene.add( room );
+
+            this.scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+
+            const light = new THREE.DirectionalLight( 0xffffff );
+            light.position.set( 1, 1, 1 ).normalize();
+            this.scene.add( light );
+
+            const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
+
+            for ( var i = 0; i < 200; i ++ ) {
+
+                var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+
+                object.position.x = Math.random() * 4 - 2;
+                object.position.y = Math.random() * 4 - 2;
+                object.position.z = Math.random() * 4 - 2;
+
+                object.rotation.x = Math.random() * 2 * Math.PI;
+                object.rotation.y = Math.random() * 2 * Math.PI;
+                object.rotation.z = Math.random() * 2 * Math.PI;
+
+                object.scale.x = Math.random() + 0.5;
+                object.scale.y = Math.random() + 0.5;
+                object.scale.z = Math.random() + 0.5;
+
+                object.userData.velocity = new THREE.Vector3();
+                object.userData.velocity.x = Math.random() * 0.01 - 0.005;
+                object.userData.velocity.y = Math.random() * 0.01 - 0.005;
+                object.userData.velocity.z = Math.random() * 0.01 - 0.005;
+
+                room.add( object );
+
+            }
+
+            this._renderer = new THREE.WebGLRenderer( { antialias: true } );
+            this._renderer.setPixelRatio( window.devicePixelRatio );
+            this._renderer.setSize( window.innerWidth, window.innerHeight );
+            (<any>this._renderer).vr.enabled = true;
+            this._viewport.appendChild(this._renderer.domElement);
+
+            window.addEventListener( 'vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false );
+			window.addEventListener( 'vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false );
+
+            document.body.appendChild(WEBVR.createButton(this._renderer));
+        }
+
+        private _animate(): void {
+            (<any>this._renderer).animate(this._render.bind(this));
+        }
+
+        private _onPointerRestricted(): void {
+            var pointerLockElement = this._renderer.domElement;
+            if ( pointerLockElement && typeof(pointerLockElement.requestPointerLock) === 'function' ) {
+                pointerLockElement.requestPointerLock();
+            }
+        }
+
+        private _onPointerUnrestricted(): void {
+            var currentPointerLockElement = document.pointerLockElement;
+            var expectedPointerLockElement = this._renderer.domElement;
+            if ( currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof(document.exitPointerLock) === 'function' ) {
+                document.exitPointerLock();
+            }
         }
 
         private _createLights(): void {
@@ -193,31 +277,39 @@ namespace Virtex {
 
         private _createRenderer(): void {
 
-            this._renderer = new THREE.WebGLRenderer({
-                antialias: this.options.data.antialias,
-                alpha: this.options.data.alpha
-            });
+            // this._renderer = new THREE.WebGLRenderer({
+            //     antialias: this.options.data.antialias,
+            //     alpha: this.options.data.alpha
+            // });
 
-            if (this._isVRMode) {
-                this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor);
-                this._vrEffect = new THREE.VREffect(this._renderer);
-                this._vrEffect.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-            } else {
-                this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor, 0);
-                this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-            }
+            // if (this._isVRMode) {
+            //     this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor);
+            //     //this._vrEffect = new THREE.VREffect(this._renderer);
+            //     //this._vrEffect.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
+                
+            // } else {                
+            //     (<any>this._renderer).vr.enabled = false;
+            // }
+
+            //this._renderer.setPixelRatio(window.devicePixelRatio);
+            //this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor, 0);
+            //this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
+
+            this._renderer = new THREE.WebGLRenderer( { antialias: true } );
+            this._renderer.setPixelRatio( window.devicePixelRatio );
+            this._renderer.setSize( window.innerWidth, window.innerHeight );
+            (<any>this._renderer).vr.enabled = true;// this._isVRMode;
 
             this._viewport.innerHTML = '';
-            this._viewport.appendChild(this._renderer.domElement);
         }
         
-        private _createControls(): void {
+        // private _createControls(): void {
 
-            if (this._isVRMode) {
-                // Apply VR headset positional data to camera.
-                this._vrControls = new THREE.VRControls(this.camera);                
-            }
-        }
+        //     if (this._isVRMode) {
+        //         // Apply VR headset positional data to camera.
+        //         this._vrControls = new THREE.VRControls(this.camera);                
+        //     }
+        // }
 
         private _createEventListeners(): void {
             
@@ -544,14 +636,14 @@ namespace Virtex {
             this._isMouseDown = false;
         }
 
-        private _tick(): void {
-            requestAnimFrame(() => this._tick());
-            this._update();
-            this._draw();
-            if (this.options.data.showStats) {
-                this._stats.update();
-            }
-        }
+        // private _tick(): void {
+        //     requestAnimFrame(() => this._tick());
+        //     this._update();
+        //     this._draw();
+        //     if (this.options.data.showStats) {
+        //         this._stats.update();
+        //     }
+        // }
 
         public rotateY(radians: number): void {
             const rotation: number = this.objectGroup.rotation.y + radians;
@@ -588,7 +680,7 @@ namespace Virtex {
                 // }
 
                 // Update VR headset position and apply to camera.
-                this._vrControls.update();  
+                //this._vrControls.update();  
             } else {
                 // horizontal rotation
                 this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
@@ -637,10 +729,15 @@ namespace Virtex {
             }
         }
 
+        private _render(): void {
+            const delta: number = this._clock.getDelta() * 60;
+            this._renderer.render(this.scene, this.camera);
+        }
+
         private _draw(): void {
-            if (this._isVRMode) {
-                this._vrEffect.render(this.scene, this.camera);                
-            } else {
+            // if (this._isVRMode) {
+            //     this._vrEffect.render(this.scene, this.camera);                
+            // } else {
                 this._renderer.render(this.scene, this.camera);
 
                 if (this._isMouseOver) {
@@ -654,7 +751,7 @@ namespace Virtex {
                     this._element.classList.remove('grabbable');
                     this._element.classList.remove('grabbing');
                 }
-            }
+            //}
         }
 
         private _getRaycastObject(): THREE.Object3D | null {
@@ -717,35 +814,41 @@ namespace Virtex {
         }
         
         public enterVR(): void {            
-            if (!this._vrEnabled) return;
+            //if (!this._vrEnabled) return;
 
             this._isVRMode = true;
 
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
+     
+            //(<any>this._renderer).vr.enabled = true;
 
-            this._createControls();
+            //this._createControls();
             this._createRenderer();
 
-            this._getVRDisplay().then((display) => {
-                if (display) {
-                    this._vrEffect.setVRDisplay(display);
-                    this._vrControls.setVRDisplay(display);
-                    this._vrEffect.setFullScreen(true);
-                }
-            });
+            // this._getVRDisplay().then((display) => {
+            //     if (display) {
+            //         this._vrEffect.setVRDisplay(display);
+            //         this._vrControls.setVRDisplay(display);
+            //         this._vrEffect.setFullScreen(true);
+            //     }
+            // });
         }
         
         public exitVR(): void {            
-            if (!this._vrEnabled) return;            
-            this._isVRMode = false;            
+            //if (!this._vrEnabled) return;            
+            this._isVRMode = false;   
+
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
+            
             this._createRenderer();
+
+            (<any>this._renderer).vr.enabled = false;
         }
 
         public toggleVR(): void {
-            if (!this._vrEnabled) return;
+            //if (!this._vrEnabled) return;
 
             if (!this._isVRMode) {
                 this.enterVR();
@@ -801,7 +904,11 @@ namespace Virtex {
         }
 
         private _getAspectRatio(): number {
-            return this._viewport.offsetWidth / this._viewport.offsetHeight;
+            if (this._isVRMode) {
+                return window.innerWidth / window.innerHeight;
+            } else {
+                return this._viewport.offsetWidth / this._viewport.offsetHeight;
+            }
         }
 
         public on(name: string, callback: Function, ctx: any): void {
@@ -828,6 +935,14 @@ namespace Virtex {
             this._resize();
         }
 
+        private _resize(): void {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+
+            this._renderer.setSize( window.innerWidth, window.innerHeight );
+        }
+
+        /*
         protected _resize(): void {
 
             if (this._element && this._viewport) {
@@ -848,7 +963,7 @@ namespace Virtex {
                 this.camera.updateProjectionMatrix();
                 
                 if (this._isVRMode) {
-                    this._vrEffect.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);                    
+                     this._renderer.setSize(window.innerWidth, window.innerHeight);                    
                 } else {
                     this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
                 }
@@ -861,6 +976,7 @@ namespace Virtex {
                 this._oldie.style.top = String((this._element.offsetHeight / 2) - (this._oldie.offsetHeight / 2)) + "px";
             }
         }
+        */
     }
 
     export class Events {
