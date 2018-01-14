@@ -3,41 +3,39 @@ declare var Detector: any;
 namespace Virtex {
     export class Viewport {
         
-        private _element: HTMLElement;
-        public options: IVirtexOptions;
-        
         private _clock: THREE.Clock;
         private _e: any;
-        private _viewport: HTMLElement;
+        private _element: HTMLElement;
+        private _isFullscreen: boolean = false;
+        private _isMouseDown: boolean = false;
+        private _isMouseOver: boolean = false;
+        private _isVRMode: boolean = true;
+        private _lastHeight: string;
+        private _lastWidth: string;
+        private _lightGroup: THREE.Group;
         private _loading: HTMLElement;
         private _loadingBar: HTMLElement;
+        private _mousePos: THREE.Vector2 = new THREE.Vector2();
+        private _mousePosNorm: THREE.Vector2 = new THREE.Vector2(-1, -1);
+        private _mousePosOnMouseDown: THREE.Vector2 = new THREE.Vector2();
         private _oldie: HTMLElement;
-
-        private _lightGroup: THREE.Group;
+        private _pinchStart: THREE.Vector2 = new THREE.Vector2();
         private _prevCameraPosition: any;
         private _prevCameraRotation: any;
         private _raycaster: THREE.Raycaster;
         private _raycastObjectCache: THREE.Object3D | null = null;
-        private _renderer: THREE.WebGLRenderer;
         private _stats: any;
+        private _targetRotation: THREE.Vector2 = new THREE.Vector2();
+        private _targetRotationOnMouseDown: THREE.Vector2 = new THREE.Vector2();
+        private _targetZoom: number;
+        private _viewport: HTMLElement;
         private _viewportCenter: THREE.Vector2 = new THREE.Vector2();
+
         public camera: THREE.PerspectiveCamera;
         public objectGroup: THREE.Group;
+        public options: IVirtexOptions;
+        public renderer: THREE.WebGLRenderer;
         public scene: THREE.Scene;
-
-        private _isFullscreen: boolean = false;
-        private _isMouseDown: boolean = false;
-        private _isVRMode: boolean = true;
-        private _lastHeight: string;
-        private _lastWidth: string;
-        private _isMouseOver: boolean = false;
-        private _mousePos: THREE.Vector2 = new THREE.Vector2();
-        private _mousePosNorm: THREE.Vector2 = new THREE.Vector2(-1, -1);
-        private _mousePosOnMouseDown: THREE.Vector2 = new THREE.Vector2();
-        private _pinchStart: THREE.Vector2 = new THREE.Vector2();
-        private _targetRotationOnMouseDown: THREE.Vector2 = new THREE.Vector2();
-        private _targetRotation: THREE.Vector2 = new THREE.Vector2();
-        private _targetZoom: number;
 
         constructor(options: IVirtexOptions) {
             
@@ -92,7 +90,7 @@ namespace Virtex {
             this._loading.classList.add('beforeload');
 
             this._loadObject(this.options.data.file);
-            
+
             // STATS //
 
             if (this.options.data.showStats) {
@@ -131,11 +129,11 @@ namespace Virtex {
         }
 
         private _animate(): void {
-            (<any>this._renderer).animate(this._render.bind(this));
+            (<any>this.renderer).animate(this._render.bind(this));
         }
 
         private _onPointerRestricted(): void {
-            var pointerLockElement = this._renderer.domElement;
+            var pointerLockElement = this.renderer.domElement;
             if ( pointerLockElement && typeof(pointerLockElement.requestPointerLock) === 'function' ) {
                 pointerLockElement.requestPointerLock();
             }
@@ -143,7 +141,7 @@ namespace Virtex {
 
         private _onPointerUnrestricted(): void {
             var currentPointerLockElement = document.pointerLockElement;
-            var expectedPointerLockElement = this._renderer.domElement;
+            var expectedPointerLockElement = this.renderer.domElement;
             if ( currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof(document.exitPointerLock) === 'function' ) {
                 document.exitPointerLock();
             }
@@ -177,19 +175,17 @@ namespace Virtex {
 
             this._viewport.innerHTML = '';
 
-            this._renderer = new THREE.WebGLRenderer({
+            this.renderer = new THREE.WebGLRenderer({
                 antialias: this.options.data.antialias,
                 alpha: this.options.data.alpha
             });
 
-            this._renderer.setPixelRatio(window.devicePixelRatio);
-            this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
+            this.renderer.setPixelRatio(window.devicePixelRatio);
+            this.renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
 
-            (<any>this._renderer).vr.enabled = this._isVRMode;
+            (<any>this.renderer).vr.enabled = this._isVRMode;
 
-            document.body.appendChild(WEBVR.createButton(this._renderer));
-
-            this._viewport.appendChild(this._renderer.domElement);
+            this._viewport.appendChild(this.renderer.domElement);
         }
 
         private _createEventListeners(): void {
@@ -594,7 +590,7 @@ namespace Virtex {
                 this._element.classList.remove('grabbing');
             }
 
-            this._renderer.render(this.scene, this.camera);
+            this.renderer.render(this.scene, this.camera);
         }
 
         private _getRaycastObject(): THREE.Object3D | null {
@@ -748,6 +744,7 @@ namespace Virtex {
         }
 
         public fire(name: string, ...args: any[]): void {
+            console.log(name);
             var data = [].slice.call(args, 1);
             var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
             var i = 0;
@@ -781,7 +778,7 @@ namespace Virtex {
                 this.camera.aspect = this._getAspectRatio();
                 this.camera.updateProjectionMatrix();
                 
-                this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
+                this.renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
 
                 this._loading.style.left = String((this._viewportCenter.x) - (this._loading.offsetWidth / 2)) + "px";
                 this._loading.style.top = String((this._viewportCenter.y) - (this._loading.offsetHeight / 2)) + "px";

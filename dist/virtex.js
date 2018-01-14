@@ -251,18 +251,18 @@ var Virtex;
 (function (Virtex) {
     var Viewport = /** @class */ (function () {
         function Viewport(options) {
-            this._raycastObjectCache = null;
-            this._viewportCenter = new THREE.Vector2();
             this._isFullscreen = false;
             this._isMouseDown = false;
-            this._isVRMode = true;
             this._isMouseOver = false;
+            this._isVRMode = true;
             this._mousePos = new THREE.Vector2();
             this._mousePosNorm = new THREE.Vector2(-1, -1);
             this._mousePosOnMouseDown = new THREE.Vector2();
             this._pinchStart = new THREE.Vector2();
-            this._targetRotationOnMouseDown = new THREE.Vector2();
+            this._raycastObjectCache = null;
             this._targetRotation = new THREE.Vector2();
+            this._targetRotationOnMouseDown = new THREE.Vector2();
+            this._viewportCenter = new THREE.Vector2();
             this.options = options;
             this.options.data = Object.assign({}, this.data(), options.data);
             this._init();
@@ -334,22 +334,21 @@ var Virtex;
                 showStats: false,
                 type: Virtex.FileType.OBJ,
                 backgroundColor: 0x000000,
-                vrEnabled: true,
                 zoomSpeed: 1
             };
         };
         Viewport.prototype._animate = function () {
-            this._renderer.animate(this._render.bind(this));
+            this.renderer.animate(this._render.bind(this));
         };
         Viewport.prototype._onPointerRestricted = function () {
-            var pointerLockElement = this._renderer.domElement;
+            var pointerLockElement = this.renderer.domElement;
             if (pointerLockElement && typeof (pointerLockElement.requestPointerLock) === 'function') {
                 pointerLockElement.requestPointerLock();
             }
         };
         Viewport.prototype._onPointerUnrestricted = function () {
             var currentPointerLockElement = document.pointerLockElement;
-            var expectedPointerLockElement = this._renderer.domElement;
+            var expectedPointerLockElement = this.renderer.domElement;
             if (currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof (document.exitPointerLock) === 'function') {
                 document.exitPointerLock();
             }
@@ -374,20 +373,19 @@ var Virtex;
         };
         Viewport.prototype._createRenderer = function () {
             this._viewport.innerHTML = '';
-            this._renderer = new THREE.WebGLRenderer({
+            this.renderer = new THREE.WebGLRenderer({
                 antialias: this.options.data.antialias,
                 alpha: this.options.data.alpha
             });
-            this._renderer.setPixelRatio(window.devicePixelRatio);
-            this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-            this._renderer.vr.enabled = this._isVRMode;
-            window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
-            window.addEventListener('vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false);
-            document.body.appendChild(WEBVR.createButton(this._renderer));
-            this._viewport.appendChild(this._renderer.domElement);
+            this.renderer.setPixelRatio(window.devicePixelRatio);
+            this.renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
+            this.renderer.vr.enabled = this._isVRMode;
+            this._viewport.appendChild(this.renderer.domElement);
         };
         Viewport.prototype._createEventListeners = function () {
             var _this = this;
+            window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
+            window.addEventListener('vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false);
             if (this.options.data.fullscreenEnabled) {
                 document.addEventListener('webkitfullscreenchange', function () {
                     _this._fullscreenChanged();
@@ -646,7 +644,6 @@ var Virtex;
         // }
         Viewport.prototype._render = function () {
             //const delta: number = this._clock.getDelta() * 60;
-            //if (!this._isVRMode) {
             // horizontal rotation
             this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
             // vertical rotation
@@ -680,7 +677,6 @@ var Virtex;
                     }
                 }
             }
-            //}
             if (this._isMouseOver) {
                 this._element.classList.add('grabbable');
                 if (this._isMouseDown) {
@@ -694,7 +690,7 @@ var Virtex;
                 this._element.classList.remove('grabbable');
                 this._element.classList.remove('grabbing');
             }
-            this._renderer.render(this.scene, this.camera);
+            this.renderer.render(this.scene, this.camera);
         };
         Viewport.prototype._getRaycastObject = function () {
             var _this = this;
@@ -748,21 +744,18 @@ var Virtex;
             }
         };
         Viewport.prototype.enterVR = function () {
-            //if (!this._vrEnabled) return;
             this._isVRMode = true;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
             this._createRenderer();
         };
         Viewport.prototype.exitVR = function () {
-            //if (!this._vrEnabled) return;            
             this._isVRMode = false;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
             this._createRenderer();
         };
         Viewport.prototype.toggleVR = function () {
-            //if (!this._vrEnabled) return;
             if (!this._isVRMode) {
                 this.enterVR();
             }
@@ -834,6 +827,7 @@ var Virtex;
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
             }
+            console.log(name);
             var data = [].slice.call(args, 1);
             var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
             var i = 0;
@@ -857,7 +851,7 @@ var Virtex;
                 this._viewportCenter.y = this._viewport.offsetHeight / 2;
                 this.camera.aspect = this._getAspectRatio();
                 this.camera.updateProjectionMatrix();
-                this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
+                this.renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
                 this._loading.style.left = String((this._viewportCenter.x) - (this._loading.offsetWidth / 2)) + "px";
                 this._loading.style.top = String((this._viewportCenter.y) - (this._loading.offsetHeight / 2)) + "px";
             }
