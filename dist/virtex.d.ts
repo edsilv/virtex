@@ -133,14 +133,12 @@ declare namespace Virtex {
         constructor(options: IVirtexOptions);
         protected _init(): boolean;
         data(): IVirtexData;
-        private _createTestScene();
+        private _createTestCubes();
         private _animate();
         private _onPointerRestricted();
         private _onPointerUnrestricted();
         private _createLights();
         createCamera(): void;
-        private _createVRCamera();
-        private _createObjectCamera();
         private _createRenderer();
         private _createEventListeners();
         private _loadObject(objectPath);
