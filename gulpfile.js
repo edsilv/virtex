@@ -7,10 +7,7 @@ metadata.name = 'virtex';
 tasks.init({
     metadata: metadata,
     libs: [
-        'node_modules/base-component/dist/base-component.js',
         'node_modules/three/build/three.min.js',
-        'node_modules/three/examples/js/controls/VRControls.js',
-        'node_modules/three/examples/js/effects/VREffect.js',
         'node_modules/three/examples/js/libs/stats.min.js',
         'node_modules/three/examples/js/loaders/draco_decoder.js',
         'node_modules/three/examples/js/loaders/DRACOLoader.js',

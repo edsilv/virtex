@@ -360,15 +360,19 @@ var Virtex;
         Viewport.prototype._createTestScene = function () {
             this.scene = new THREE.Scene();
             this.scene.background = new THREE.Color(0x505050);
-            this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10);
-            this.scene.add(this.camera);
-            var crosshair = new THREE.Mesh(new THREE.RingGeometry(0.02, 0.04, 32), new THREE.MeshBasicMaterial({
-                color: 0xffffff,
-                opacity: 0.5,
-                transparent: true
-            }));
-            crosshair.position.z = -2;
-            this.camera.add(crosshair);
+            this.createCamera();
+            // this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
+            // this.scene.add(this.camera);
+            // const crosshair = new THREE.Mesh(
+            //     new THREE.RingGeometry( 0.02, 0.04, 32 ),
+            //     new THREE.MeshBasicMaterial( {
+            //         color: 0xffffff,
+            //         opacity: 0.5,
+            //         transparent: true
+            //     } )
+            // );
+            // crosshair.position.z = - 2;
+            // this.camera.add( crosshair );
             var room = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 6, 8, 8, 8), new THREE.MeshBasicMaterial({ color: 0x404040, wireframe: true }));
             this.scene.add(room);
             this.scene.add(new THREE.HemisphereLight(0x606060, 0x404040));
@@ -431,9 +435,28 @@ var Virtex;
             this._lightGroup.add(ambientLight);
         };
         Viewport.prototype.createCamera = function () {
+            if (this.camera) {
+                this.scene.remove(this.camera);
+            }
+            if (this._isVRMode) {
+                this._createVRCamera();
+            }
+            else {
+                this._createObjectCamera();
+            }
+        };
+        Viewport.prototype._createVRCamera = function () {
+            this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, this.options.data.near, this.options.data.far);
+            this.scene.add(this.camera);
+            // this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);
+            // const cameraZ: number = this._getCameraZ();
+            // this.camera.position.z = this._targetZoom = cameraZ;
+        };
+        Viewport.prototype._createObjectCamera = function () {
             this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);
             var cameraZ = this._getCameraZ();
             this.camera.position.z = this._targetZoom = cameraZ;
+            this.scene.add(this.camera);
         };
         Viewport.prototype._createRenderer = function () {
             // this._renderer = new THREE.WebGLRenderer({
@@ -586,7 +609,7 @@ var Virtex;
         };
         Viewport.prototype._getFov = function () {
             if (!this.camera)
-                return 1;
+                return 70;
             var width = this._getBoundingWidth();
             var height = this._getBoundingHeight(); // todo: use getSize and update definition
             var dist = this._getCameraZ() - width;

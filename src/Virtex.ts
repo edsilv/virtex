@@ -166,20 +166,22 @@ namespace Virtex {
             this.scene = new THREE.Scene();
             this.scene.background = new THREE.Color( 0x505050 );
 
-            this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
-            this.scene.add(this.camera);
+            this.createCamera();
 
-            const crosshair = new THREE.Mesh(
-                new THREE.RingGeometry( 0.02, 0.04, 32 ),
-                new THREE.MeshBasicMaterial( {
-                    color: 0xffffff,
-                    opacity: 0.5,
-                    transparent: true
-                } )
-            );
+            // this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
+            // this.scene.add(this.camera);
 
-            crosshair.position.z = - 2;
-            this.camera.add( crosshair );
+            // const crosshair = new THREE.Mesh(
+            //     new THREE.RingGeometry( 0.02, 0.04, 32 ),
+            //     new THREE.MeshBasicMaterial( {
+            //         color: 0xffffff,
+            //         opacity: 0.5,
+            //         transparent: true
+            //     } )
+            // );
+
+            // crosshair.position.z = - 2;
+            // this.camera.add( crosshair );
 
             const room = new THREE.Mesh(
                 new THREE.BoxGeometry( 6, 6, 6, 8, 8, 8 ),
@@ -270,9 +272,28 @@ namespace Virtex {
         }
 
         public createCamera(): void {
+
+            if (this.camera) {
+                this.scene.remove(this.camera);
+            }
+
+            if (this._isVRMode) {
+                this._createVRCamera();
+            } else {
+                this._createObjectCamera();
+            }
+        }
+
+        private _createVRCamera(): void {
+            this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, this.options.data.near, this.options.data.far);
+            this.scene.add(this.camera);
+        }
+
+        private _createObjectCamera(): void {
             this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);
             const cameraZ: number = this._getCameraZ();
             this.camera.position.z = this._targetZoom = cameraZ;
+            this.scene.add(this.camera);
         }
 
         private _createRenderer(): void {
@@ -469,7 +490,7 @@ namespace Virtex {
 
         private _getFov(): number {
 
-            if (!this.camera) return 1;
+            if (!this.camera) return 70;
 
             const width: number = this._getBoundingWidth();
             const height: number = this._getBoundingHeight(); // todo: use getSize and update definition

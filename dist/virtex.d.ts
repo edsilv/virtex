@@ -139,6 +139,8 @@ declare namespace Virtex {
         private _onPointerUnrestricted();
         private _createLights();
         createCamera(): void;
+        private _createVRCamera();
+        private _createObjectCamera();
         private _createRenderer();
         private _createEventListeners();
         private _loadObject(objectPath);
