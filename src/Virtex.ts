@@ -126,36 +126,9 @@ namespace Virtex {
                 showStats: false,
                 type: FileType.OBJ,
                 backgroundColor: 0x000000,
-                vrEnabled: true,
                 zoomSpeed: 1
             }
         }
-        
-        /*
-        private _createTestCubes(): void {
-
-            const geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
-
-            for ( var i = 0; i < 200; i ++ ) {
-
-                var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-
-                object.position.x = Math.random() * 4 - 2;
-                object.position.y = Math.random() * 4 - 2;
-                object.position.z = Math.random() * 4 - 2;
-
-                object.rotation.x = Math.random() * 2 * Math.PI;
-                object.rotation.y = Math.random() * 2 * Math.PI;
-                object.rotation.z = Math.random() * 2 * Math.PI;
-
-                object.scale.x = Math.random() + 0.5;
-                object.scale.y = Math.random() + 0.5;
-                object.scale.z = Math.random() + 0.5;
-
-                this.objectGroup.add( object );
-            }
-        }
-        */
 
         private _animate(): void {
             (<any>this._renderer).animate(this._render.bind(this));
@@ -194,18 +167,9 @@ namespace Virtex {
         }
 
         public createCamera(): void {
-
-            if (this.camera) {
-                this.scene.remove(this.camera);
-            }
-
-            this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);
-            
-            if (!this._isVRMode) {
-                const cameraZ: number = this._getCameraZ();
-                this.camera.position.z = this._targetZoom = cameraZ;
-            }
-
+            this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);    
+            const cameraZ: number = this._getCameraZ();
+            this.camera.position.z = this._targetZoom = cameraZ;
             this.scene.add(this.camera);
         }
 
@@ -220,23 +184,19 @@ namespace Virtex {
 
             this._renderer.setPixelRatio(window.devicePixelRatio);
             this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-            //this._renderer.setClearColor(<number>this.options.data.backgroundColor, 0);
 
-            if (this._isVRMode) {
+            (<any>this._renderer).vr.enabled = this._isVRMode;
 
-                (<any>this._renderer).vr.enabled = true;
-
-                window.addEventListener( 'vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false );
-                window.addEventListener( 'vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false );
-
-                document.body.appendChild(WEBVR.createButton(this._renderer));
-            }
+            document.body.appendChild(WEBVR.createButton(this._renderer));
 
             this._viewport.appendChild(this._renderer.domElement);
         }
 
         private _createEventListeners(): void {
             
+            window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
+            window.addEventListener('vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false);
+
             if (this.options.data.fullscreenEnabled) {
 
                 document.addEventListener('webkitfullscreenchange', () => {
@@ -292,10 +252,6 @@ namespace Virtex {
         }
         
         private _loadObject(objectPath: string): void {
-            
-            // this._createTestCubes();
-
-            // return;
 
             this._loading.classList.remove('beforeload');
             this._loading.classList.add('duringload');
@@ -396,10 +352,6 @@ namespace Virtex {
         }
 
         private _getFov(): number {
-
-            if (this._isVRMode) {
-                return 70;
-            }
 
             const width: number = this._getBoundingWidth();
             const height: number = this._getBoundingHeight(); // todo: use getSize and update definition
@@ -586,51 +538,48 @@ namespace Virtex {
             
             //const delta: number = this._clock.getDelta() * 60;
 
-            if (!this._isVRMode) {
-                // horizontal rotation
-                this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
+            // horizontal rotation
+            this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
 
-                // vertical rotation
-                const finalRotationY: number = (this._targetRotation.y - this.objectGroup.rotation.x);
+            // vertical rotation
+            const finalRotationY: number = (this._targetRotation.y - this.objectGroup.rotation.x);
 
-                if (this.objectGroup.rotation.x <= 1 && this.objectGroup.rotation.x >= -1) {
-                    this.objectGroup.rotation.x += finalRotationY * 0.1;
-                }
+            if (this.objectGroup.rotation.x <= 1 && this.objectGroup.rotation.x >= -1) {
+                this.objectGroup.rotation.x += finalRotationY * 0.1;
+            }
 
-                // limit vertical rotation 
-                if (this.objectGroup.rotation.x > 1) {
-                    this.objectGroup.rotation.x = 1
-                } else if (this.objectGroup.rotation.x < -1) {
-                    this.objectGroup.rotation.x = -1
-                }
+            // limit vertical rotation 
+            if (this.objectGroup.rotation.x > 1) {
+                this.objectGroup.rotation.x = 1
+            } else if (this.objectGroup.rotation.x < -1) {
+                this.objectGroup.rotation.x = -1
+            }
 
-                const zoomDelta: number = (this._targetZoom - this.camera.position.z) * 0.1;
-                this.camera.position.z += zoomDelta;
+            const zoomDelta: number = (this._targetZoom - this.camera.position.z) * 0.1;
+            this.camera.position.z += zoomDelta;
 
-                // cast a ray from the mouse position
+            // cast a ray from the mouse position
 
-                if (this.objectGroup.children.length) {
-                    
-                    this._raycaster.setFromCamera(this._mousePosNorm, this.camera);
-
-                    const obj: THREE.Object3D | null = this._getRaycastObject();
-
-                    if (obj) {
-
-                        const intersects: THREE.Intersection[] = this._raycaster.intersectObject(obj);
-
-                        if (intersects.length > 0) {
-                            this._isMouseOver = true;
-                            // var obj2 = intersects[0].object;
-                            // (<any>obj2).material.emissive.setHex( 0xff0000 );
-                            // console.log("hit");
-                        } else {
-                            this._isMouseOver = false;
-                        }
-
-                    }
-                }
+            if (this.objectGroup.children.length) {
                 
+                this._raycaster.setFromCamera(this._mousePosNorm, this.camera);
+
+                const obj: THREE.Object3D | null = this._getRaycastObject();
+
+                if (obj) {
+
+                    const intersects: THREE.Intersection[] = this._raycaster.intersectObject(obj);
+
+                    if (intersects.length > 0) {
+                        this._isMouseOver = true;
+                        // var obj2 = intersects[0].object;
+                        // (<any>obj2).material.emissive.setHex( 0xff0000 );
+                        // console.log("hit");
+                    } else {
+                        this._isMouseOver = false;
+                    }
+
+                }
             }
 
             if (this._isMouseOver) {
@@ -708,8 +657,6 @@ namespace Virtex {
         }
         
         public enterVR(): void {            
-            //if (!this._vrEnabled) return;
-
             this._isVRMode = true;
 
             this._prevCameraPosition = this.camera.position.clone();
@@ -719,7 +666,7 @@ namespace Virtex {
         }
         
         public exitVR(): void {            
-            //if (!this._vrEnabled) return;            
+          
             this._isVRMode = false;   
 
             this.camera.position.copy(this._prevCameraPosition);
@@ -729,7 +676,6 @@ namespace Virtex {
         }
 
         public toggleVR(): void {
-            //if (!this._vrEnabled) return;
 
             if (!this._isVRMode) {
                 this.enterVR();
@@ -785,11 +731,11 @@ namespace Virtex {
         }
 
         private _getAspectRatio(): number {
-            if (this._isVRMode) {
-                return window.innerWidth / window.innerHeight;
-            } else {
+            // if (this._isVRMode) {
+            //     return window.innerWidth / window.innerHeight;
+            // } else {
                 return this._viewport.offsetWidth / this._viewport.offsetHeight;
-            }
+            //}
         }
 
         public on(name: string, callback: Function, ctx: any): void {
