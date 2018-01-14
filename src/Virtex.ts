@@ -9,7 +9,6 @@ namespace Virtex {
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
         private _isMouseOver: boolean = false;
-        private _isVRMode: boolean = false;
         private _lastHeight: string;
         private _lastWidth: string;
         private _lightGroup: THREE.Group;
@@ -83,7 +82,7 @@ namespace Virtex {
             this._createLights();
             this.createCamera();
             this._createRenderer();
-            this._createEventListeners();
+            this._createDOMHandlers();
             this._animate();
 
             this._viewport.appendChild(this._loading);
@@ -189,11 +188,38 @@ namespace Virtex {
             this._viewport.appendChild(this.renderer.domElement);
         }
 
-        private _createEventListeners(): void {
+        private _setVRDisplay(vrDisplay: any): void {
+            this._vrDisplay = vrDisplay;
+            (<any>this.renderer).vr.setDevice(this._vrDisplay);
+            this.fire(Events.VR_AVAILABLE);
+        }
+
+        private _createDOMHandlers(): void {
             
-            window.addEventListener('vrdisplayconnect', (event: any) => {
-                this._vrDisplay = event.display;
-            }, false);
+            if ('getVRDisplays' in navigator) {
+
+                window.addEventListener('vrdisplayconnect', (event: any) => {
+                    this._setVRDisplay(event.display);
+                }, false);
+
+                window.addEventListener('vrdisplaydisconnect', () => {
+                    this.fire(Events.VR_UNAVAILABLE);
+                    (<any>this.renderer).vr.setDevice(null);
+                }, false);
+
+                window.addEventListener('vrdisplaypresentchange', function (event: any) {
+                    console.log(event.display.isPresenting ? 'ENTER VR' : 'EXIT VR');
+                }, false);
+
+                navigator.getVRDisplays()
+                    .then((displays) => {
+                        if (displays.length > 0) {
+                            this._setVRDisplay(displays[0]);
+                        } else {
+                            this.fire(Events.VR_UNAVAILABLE);
+                        }
+                });
+            }
 
             window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
             window.addEventListener('vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false);
@@ -382,8 +408,9 @@ namespace Virtex {
                 this._lastWidth = this._getWidth() + "px";
                 this._lastHeight = this._getHeight() + "px";
             }
-            
+   
             this._isFullscreen = !this._isFullscreen;
+            
             this._resize();
         }
 
@@ -614,14 +641,14 @@ namespace Virtex {
         }
 
         private _getWidth(): number {
-            if (this._isFullscreen){
+            if (this._isFullscreen) {
                 return window.innerWidth;
             }
             return this._element.offsetWidth;
         }
 
         private _getHeight(): number {
-            if (this._isFullscreen){
+            if (this._isFullscreen) {
                 return window.innerHeight;
             }
             return this._element.offsetHeight;
@@ -657,20 +684,27 @@ namespace Virtex {
             }
         }
         
-        public enterVR(): void {         
-            this.renderer.vr.enabled = true;
+        public enterVR(): void {
+            this._vrDisplay.requestPresent([{ source: this.renderer.domElement }]);     
+            (<any>this.renderer).vr.enabled = true;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
         }
         
-        public exitVR(): void {          
-            this.renderer.vr.enabled = false;
+        public exitVR(): void {
+            this._vrDisplay.exitPresent();      
+            (<any>this.renderer).vr.enabled = false;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
         }
 
         public toggleVR(): void {
-            if (this.renderer.vr.enabled) {
+
+            if (!this._vrDisplay) {
+                return;
+            }
+
+            if (this._vrDisplay.isPresenting) {
                 this.exitVR();
             } else {
                 this.enterVR();
@@ -788,6 +822,8 @@ namespace Virtex {
 
     export class Events {
         static LOADED: string = 'loaded';
+        static VR_AVAILABLE: string = 'vravailable';
+        static VR_UNAVAILABLE: string = 'vrunavailable';
     }
 }
 

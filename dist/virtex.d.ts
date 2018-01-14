@@ -103,7 +103,6 @@ declare namespace Virtex {
         private _isFullscreen;
         private _isMouseDown;
         private _isMouseOver;
-        private _isVRMode;
         private _lastHeight;
         private _lastWidth;
         private _lightGroup;
@@ -139,7 +138,8 @@ declare namespace Virtex {
         private _createLights();
         createCamera(): void;
         private _createRenderer();
-        private _createEventListeners();
+        private _setVRDisplay(vrDisplay);
+        private _createDOMHandlers();
         private _loadObject(objectPath);
         private _loaded(obj);
         private _getBoundingBox();
@@ -182,5 +182,7 @@ declare namespace Virtex {
     }
     class Events {
         static LOADED: string;
+        static VR_AVAILABLE: string;
+        static VR_UNAVAILABLE: string;
     }
 }

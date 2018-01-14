@@ -254,7 +254,6 @@ var Virtex;
             this._isFullscreen = false;
             this._isMouseDown = false;
             this._isMouseOver = false;
-            this._isVRMode = false;
             this._mousePos = new THREE.Vector2();
             this._mousePosNorm = new THREE.Vector2(-1, -1);
             this._mousePosOnMouseDown = new THREE.Vector2();
@@ -297,7 +296,7 @@ var Virtex;
             this._createLights();
             this.createCamera();
             this._createRenderer();
-            this._createEventListeners();
+            this._createDOMHandlers();
             this._animate();
             this._viewport.appendChild(this._loading);
             this._loading.appendChild(this._loadingBar);
@@ -382,11 +381,34 @@ var Virtex;
             //(<any>this.renderer).vr.enabled = this._isVRMode;
             this._viewport.appendChild(this.renderer.domElement);
         };
-        Viewport.prototype._createEventListeners = function () {
+        Viewport.prototype._setVRDisplay = function (vrDisplay) {
+            this._vrDisplay = vrDisplay;
+            this.renderer.vr.setDevice(this._vrDisplay);
+            this.fire(Events.VR_AVAILABLE);
+        };
+        Viewport.prototype._createDOMHandlers = function () {
             var _this = this;
-            window.addEventListener('vrdisplayconnect', function (event) {
-                _this._vrDisplay = event.display;
-            }, false);
+            if ('getVRDisplays' in navigator) {
+                window.addEventListener('vrdisplayconnect', function (event) {
+                    _this._setVRDisplay(event.display);
+                }, false);
+                window.addEventListener('vrdisplaydisconnect', function () {
+                    _this.fire(Events.VR_UNAVAILABLE);
+                    _this.renderer.vr.setDevice(null);
+                }, false);
+                window.addEventListener('vrdisplaypresentchange', function (event) {
+                    console.log(event.display.isPresenting ? 'ENTER VR' : 'EXIT VR');
+                }, false);
+                navigator.getVRDisplays()
+                    .then(function (displays) {
+                    if (displays.length > 0) {
+                        _this._setVRDisplay(displays[0]);
+                    }
+                    else {
+                        _this.fire(Events.VR_UNAVAILABLE);
+                    }
+                });
+            }
             window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
             window.addEventListener('vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false);
             if (this.options.data.fullscreenEnabled) {
@@ -747,17 +769,22 @@ var Virtex;
             }
         };
         Viewport.prototype.enterVR = function () {
+            this._vrDisplay.requestPresent([{ source: this.renderer.domElement }]);
             this.renderer.vr.enabled = true;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
         };
         Viewport.prototype.exitVR = function () {
+            this._vrDisplay.exitPresent();
             this.renderer.vr.enabled = false;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
         };
         Viewport.prototype.toggleVR = function () {
-            if (this.renderer.vr.enabled) {
+            if (!this._vrDisplay) {
+                return;
+            }
+            if (this._vrDisplay.isPresenting) {
                 this.exitVR();
             }
             else {
@@ -843,9 +870,9 @@ var Virtex;
             if (this._element && this._viewport) {
                 var width = String(this._getWidth() + "px");
                 var height = String(this._getHeight() + "px");
-                this._element.style.width = width;
-                this._element.style.height = height;
-                this._viewport.style.width = width;
+                // this._element.style.width = width;
+                // this._element.style.height = height;
+                //this._viewport.style.width = width;
                 this._viewport.style.height = height;
                 this._viewportCenter.x = this._viewport.offsetWidth / 2;
                 this._viewportCenter.y = this._viewport.offsetHeight / 2;
@@ -867,6 +894,8 @@ var Virtex;
         function Events() {
         }
         Events.LOADED = 'loaded';
+        Events.VR_AVAILABLE = 'vravailable';
+        Events.VR_UNAVAILABLE = 'vrunavailable';
         return Events;
     }());
     Virtex.Events = Events;

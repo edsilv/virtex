@@ -50,7 +50,9 @@
         <button id="vr">vr</button>
     </div>
 
-    <div id="viewer" class="virtex" style="width: 800px; height: 600px"></div>
+    <div style="border: 1px solid red; width: 800px; height: 600px">
+        <div id="viewer" class="virtex" style="width: 800px; height: 600px"></div>
+    </div>
 
     <script>
         
@@ -123,9 +125,33 @@
                     //directionalLight2Intensity: 2.5
                 }
             });
+
+            var vrbutton = document.querySelector('#vr');
+
+            vrbutton.onclick = function () {
+                viewport.toggleVR();
+            }
+
+            function showVRButton(display) {
+                vrbutton.style.display = '';
+            }
+
+            function hideVRButton() {
+                vrbutton.style.display = 'none';
+            }
+
+            hideVRButton();
+
+            viewport.on('vravailable', function() {
+                showVRButton();
+            });
+
+            viewport.on('vrunavailable', function() {
+                hideVRButton();
+            });
             
             viewport.on('loaded', function(args) {
-                createVRButton(viewport.renderer);
+ 
             });
 
             document.querySelector('#zoomIn').addEventListener('click', function(e) {
@@ -144,63 +170,6 @@
             });
 
         });
-
-        function createVRButton(renderer) {
-
-            var vrbutton = document.querySelector('#vr');
-
-            function showVRButton(display) {
-
-                vrbutton.style.display = '';
-
-                vrbutton.onclick = function () {
-
-                    if (display.isPresenting) {
-                        display.exitPresent();
-                        viewport.exitVR();
-                        //renderer.vr.enabled = false;
-                    } else {
-                        viewport.enterVR();
-                        display.requestPresent([{ source: renderer.domElement }]);
-                        //renderer.vr.enabled = true;
-                    }
-                }
-
-                renderer.vr.setDevice(display);
-            }
-
-            function hideVRButton() {
-                vrbutton.style.display = 'none';
-                renderer.vr.setDevice(null);
-            }
-
-            if ('getVRDisplays' in navigator) {
-
-                vrbutton.style.display = 'none';
-
-                window.addEventListener('vrdisplayconnect', function (event) {
-                    showVRButton(event.display);
-                }, false);
-
-                window.addEventListener('vrdisplaydisconnect', function (event) {
-                    hideVRButton();
-                }, false);
-
-                window.addEventListener('vrdisplaypresentchange', function (event) {
-                    //vrbutton.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
-                }, false);
-
-                navigator.getVRDisplays()
-                    .then(function (displays) {
-                        if (displays.length > 0) {
-                            showVRButton(displays[0]);
-                        } else {
-                            hideVRButton();
-                        }
-                });
-            }
-
-        }
 
     </script>
 
