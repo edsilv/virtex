@@ -254,7 +254,7 @@ var Virtex;
             this._isFullscreen = false;
             this._isMouseDown = false;
             this._isMouseOver = false;
-            this._isVRMode = true;
+            this._isVRMode = false;
             this._mousePos = new THREE.Vector2();
             this._mousePosNorm = new THREE.Vector2(-1, -1);
             this._mousePosOnMouseDown = new THREE.Vector2();
@@ -379,11 +379,14 @@ var Virtex;
             });
             this.renderer.setPixelRatio(window.devicePixelRatio);
             this.renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-            this.renderer.vr.enabled = this._isVRMode;
+            //(<any>this.renderer).vr.enabled = this._isVRMode;
             this._viewport.appendChild(this.renderer.domElement);
         };
         Viewport.prototype._createEventListeners = function () {
             var _this = this;
+            window.addEventListener('vrdisplayconnect', function (event) {
+                _this._vrDisplay = event.display;
+            }, false);
             window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
             window.addEventListener('vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false);
             if (this.options.data.fullscreenEnabled) {
@@ -744,23 +747,21 @@ var Virtex;
             }
         };
         Viewport.prototype.enterVR = function () {
-            this._isVRMode = true;
+            this.renderer.vr.enabled = true;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
-            this._createRenderer();
         };
         Viewport.prototype.exitVR = function () {
-            this._isVRMode = false;
+            this.renderer.vr.enabled = false;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
-            this._createRenderer();
         };
         Viewport.prototype.toggleVR = function () {
-            if (!this._isVRMode) {
-                this.enterVR();
+            if (this.renderer.vr.enabled) {
+                this.exitVR();
             }
             else {
-                this.exitVR();
+                this.enterVR();
             }
         };
         Viewport.prototype.enterFullscreen = function () {
@@ -827,7 +828,6 @@ var Virtex;
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
             }
-            console.log(name);
             var data = [].slice.call(args, 1);
             var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
             var i = 0;

@@ -9,7 +9,7 @@ namespace Virtex {
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
         private _isMouseOver: boolean = false;
-        private _isVRMode: boolean = true;
+        private _isVRMode: boolean = false;
         private _lastHeight: string;
         private _lastWidth: string;
         private _lightGroup: THREE.Group;
@@ -30,6 +30,7 @@ namespace Virtex {
         private _targetZoom: number;
         private _viewport: HTMLElement;
         private _viewportCenter: THREE.Vector2 = new THREE.Vector2();
+        private _vrDisplay: any;
 
         public camera: THREE.PerspectiveCamera;
         public objectGroup: THREE.Group;
@@ -183,13 +184,17 @@ namespace Virtex {
             this.renderer.setPixelRatio(window.devicePixelRatio);
             this.renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
 
-            (<any>this.renderer).vr.enabled = this._isVRMode;
+            //(<any>this.renderer).vr.enabled = this._isVRMode;
 
             this._viewport.appendChild(this.renderer.domElement);
         }
 
         private _createEventListeners(): void {
             
+            window.addEventListener('vrdisplayconnect', (event: any) => {
+                this._vrDisplay = event.display;
+            }, false);
+
             window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
             window.addEventListener('vrdisplaypointerunrestricted', this._onPointerUnrestricted.bind(this), false);
 
@@ -652,31 +657,23 @@ namespace Virtex {
             }
         }
         
-        public enterVR(): void {            
-            this._isVRMode = true;
-
+        public enterVR(): void {         
+            this.renderer.vr.enabled = true;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
-     
-            this._createRenderer();
         }
         
-        public exitVR(): void {            
-          
-            this._isVRMode = false;   
-
+        public exitVR(): void {          
+            this.renderer.vr.enabled = false;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
-            
-            this._createRenderer();
         }
 
         public toggleVR(): void {
-
-            if (!this._isVRMode) {
-                this.enterVR();
-            } else {
+            if (this.renderer.vr.enabled) {
                 this.exitVR();
+            } else {
+                this.enterVR();
             }
         }
         
@@ -744,7 +741,6 @@ namespace Virtex {
         }
 
         public fire(name: string, ...args: any[]): void {
-            console.log(name);
             var data = [].slice.call(args, 1);
             var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
             var i = 0;

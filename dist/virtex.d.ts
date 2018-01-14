@@ -124,6 +124,7 @@ declare namespace Virtex {
         private _targetZoom;
         private _viewport;
         private _viewportCenter;
+        private _vrDisplay;
         camera: THREE.PerspectiveCamera;
         objectGroup: THREE.Group;
         options: IVirtexOptions;
