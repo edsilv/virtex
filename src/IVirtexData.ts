@@ -19,7 +19,7 @@ namespace Virtex {
         shading?: THREE.Shading;
         showStats?: boolean;
         type?: FileType;
-        vrBackgroundColor?: number;
+        backgroundColor?: number;
         zoomSpeed?: number;
     }
 

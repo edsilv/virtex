@@ -67,7 +67,7 @@ declare namespace Virtex {
         shading?: THREE.Shading;
         showStats?: boolean;
         type?: FileType;
-        vrBackgroundColor?: number;
+        backgroundColor?: number;
         zoomSpeed?: number;
     }
     interface IVirtexOptions {
@@ -94,7 +94,6 @@ declare namespace Virtex {
     }
 }
 
-declare var requestAnimFrame: (callback: FrameRequestCallback) => number;
 declare var Detector: any;
 declare namespace Virtex {
     class Viewport {
@@ -181,7 +180,7 @@ declare namespace Virtex {
         on(name: string, callback: Function, ctx: any): void;
         fire(name: string, ...args: any[]): void;
         resize(): void;
-        private _resize();
+        protected _resize(): void;
     }
     class Events {
         static LOADED: string;

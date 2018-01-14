@@ -247,28 +247,15 @@ var Virtex;
     Virtex.ThreeJSFileTypeHandler = ThreeJSFileTypeHandler;
 })(Virtex || (Virtex = {}));
 
-var requestAnimFrame = (function () {
-    return window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (callback) {
-            window.setTimeout(callback, 1000 / 200);
-        };
-})();
 var Virtex;
 (function (Virtex) {
     var Viewport = /** @class */ (function () {
-        //private _vrControls: THREE.VRControls;
-        //private _vrEffect: THREE.VREffect;
-        //private _vrEnabled: boolean = true;
         function Viewport(options) {
             this._raycastObjectCache = null;
             this._viewportCenter = new THREE.Vector2();
             this._isFullscreen = false;
             this._isMouseDown = false;
-            this._isVRMode = true;
+            this._isVRMode = false;
             this._isMouseOver = false;
             this._mousePos = new THREE.Vector2();
             this._mousePosNorm = new THREE.Vector2(-1, -1);
@@ -278,11 +265,8 @@ var Virtex;
             this._targetRotation = new THREE.Vector2();
             this.options = options;
             this.options.data = Object.assign({}, this.data(), options.data);
-            var success = this._init();
+            this._init();
             this._resize();
-            // if (success) {
-            //     this._tick();
-            // }
         }
         Viewport.prototype._init = function () {
             this._element = this.options.target;
@@ -307,6 +291,7 @@ var Virtex;
             this._clock = new THREE.Clock();
             this._raycaster = new THREE.Raycaster();
             this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color(this.options.data.backgroundColor);
             this.objectGroup = new THREE.Object3D();
             this.scene.add(this.objectGroup);
             this._createLights();
@@ -325,7 +310,6 @@ var Virtex;
                 this._stats.domElement.style.top = '0px';
                 this._viewport.appendChild(this._stats.domElement);
             }
-            return true;
         };
         Viewport.prototype.data = function () {
             return {
@@ -349,7 +333,7 @@ var Virtex;
                 shading: THREE.SmoothShading,
                 showStats: false,
                 type: Virtex.FileType.OBJ,
-                vrBackgroundColor: 0x000000,
+                backgroundColor: 0x000000,
                 vrEnabled: true,
                 zoomSpeed: 1
             };
@@ -417,7 +401,7 @@ var Virtex;
             });
             this._renderer.setPixelRatio(window.devicePixelRatio);
             this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-            //this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor, 0);
+            //this._renderer.setClearColor(<number>this.options.data.backgroundColor, 0);
             if (this._isVRMode) {
                 this._renderer.vr.enabled = true;
                 window.addEventListener('vrdisplaypointerrestricted', this._onPointerRestricted.bind(this), false);
@@ -469,9 +453,9 @@ var Virtex;
             window.addEventListener('resize', function () { return _this._resize(); }, false);
         };
         Viewport.prototype._loadObject = function (objectPath) {
+            // this._createTestCubes();
             var _this = this;
-            this._createTestCubes();
-            return;
+            // return;
             this._loading.classList.remove('beforeload');
             this._loading.classList.add('duringload');
             var loader;
@@ -935,10 +919,31 @@ var Virtex;
         Viewport.prototype.resize = function () {
             this._resize();
         };
+        // private _resize(): void {
+        //     this.camera.aspect = window.innerWidth / window.innerHeight;
+        //     this.camera.updateProjectionMatrix();
+        //     this._renderer.setSize( window.innerWidth, window.innerHeight );
+        // }
         Viewport.prototype._resize = function () {
-            this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.updateProjectionMatrix();
-            this._renderer.setSize(window.innerWidth, window.innerHeight);
+            if (this._element && this._viewport) {
+                var width = String(this._getWidth() + "px");
+                var height = String(this._getHeight() + "px");
+                this._element.style.width = width;
+                this._element.style.height = height;
+                this._viewport.style.width = width;
+                this._viewport.style.height = height;
+                this._viewportCenter.x = this._viewport.offsetWidth / 2;
+                this._viewportCenter.y = this._viewport.offsetHeight / 2;
+                this.camera.aspect = this._getAspectRatio();
+                this.camera.updateProjectionMatrix();
+                this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
+                this._loading.style.left = String((this._viewportCenter.x) - (this._loading.offsetWidth / 2)) + "px";
+                this._loading.style.top = String((this._viewportCenter.y) - (this._loading.offsetHeight / 2)) + "px";
+            }
+            else if (this._oldie) {
+                this._oldie.style.left = String((this._element.offsetWidth / 2) - (this._oldie.offsetWidth / 2)) + "px";
+                this._oldie.style.top = String((this._element.offsetHeight / 2) - (this._oldie.offsetHeight / 2)) + "px";
+            }
         };
         return Viewport;
     }());

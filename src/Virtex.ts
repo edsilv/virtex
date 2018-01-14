@@ -1,15 +1,3 @@
-
-var requestAnimFrame = (function () {
-    return window.requestAnimationFrame ||
-        (<any>window).webkitRequestAnimationFrame ||
-        (<any>window).mozRequestAnimationFrame ||
-        (<any>window).oRequestAnimationFrame ||
-        (<any>window).msRequestAnimationFrame ||
-        function (callback: Function) {
-            window.setTimeout(callback, 1000 / 200);
-        };
-})();
-
 declare var Detector: any;
 
 namespace Virtex {
@@ -39,7 +27,7 @@ namespace Virtex {
 
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
-        private _isVRMode: boolean = true;
+        private _isVRMode: boolean = false;
         private _lastHeight: string;
         private _lastWidth: string;
         private _isMouseOver: boolean = false;
@@ -50,22 +38,14 @@ namespace Virtex {
         private _targetRotationOnMouseDown: THREE.Vector2 = new THREE.Vector2();
         private _targetRotation: THREE.Vector2 = new THREE.Vector2();
         private _targetZoom: number;
-        //private _vrControls: THREE.VRControls;
-        //private _vrEffect: THREE.VREffect;
-        //private _vrEnabled: boolean = true;
 
         constructor(options: IVirtexOptions) {
             
             this.options = options;
             this.options.data = Object.assign({}, this.data(), options.data);
 
-            const success: boolean = this._init();
-
+            this._init();
             this._resize();
-
-            // if (success) {
-            //     this._tick();
-            // }
         }
 
         protected _init(): boolean {
@@ -98,6 +78,7 @@ namespace Virtex {
             this._clock = new THREE.Clock();
             this._raycaster = new THREE.Raycaster();
             this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color(this.options.data.backgroundColor);
             this.objectGroup = new THREE.Object3D();
             this.scene.add(this.objectGroup);
             this._createLights();
@@ -120,8 +101,6 @@ namespace Virtex {
                 this._stats.domElement.style.top = '0px';
                 this._viewport.appendChild(this._stats.domElement);
             }
-
-            return true;
         }
         
         public data(): IVirtexData {
@@ -146,7 +125,7 @@ namespace Virtex {
                 shading: THREE.SmoothShading,
                 showStats: false,
                 type: FileType.OBJ,
-                vrBackgroundColor: 0x000000,
+                backgroundColor: 0x000000,
                 vrEnabled: true,
                 zoomSpeed: 1
             }
@@ -239,7 +218,7 @@ namespace Virtex {
 
             this._renderer.setPixelRatio(window.devicePixelRatio);
             this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-            //this._renderer.setClearColor(<number>this.options.data.vrBackgroundColor, 0);
+            //this._renderer.setClearColor(<number>this.options.data.backgroundColor, 0);
 
             if (this._isVRMode) {
 
@@ -312,9 +291,9 @@ namespace Virtex {
         
         private _loadObject(objectPath: string): void {
             
-            this._createTestCubes();
+            // this._createTestCubes();
 
-            return;
+            // return;
 
             this._loading.classList.remove('beforeload');
             this._loading.classList.add('duringload');
@@ -884,14 +863,13 @@ namespace Virtex {
             this._resize();
         }
 
-        private _resize(): void {
-            this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.updateProjectionMatrix();
+        // private _resize(): void {
+        //     this.camera.aspect = window.innerWidth / window.innerHeight;
+        //     this.camera.updateProjectionMatrix();
 
-            this._renderer.setSize( window.innerWidth, window.innerHeight );
-        }
+        //     this._renderer.setSize( window.innerWidth, window.innerHeight );
+        // }
 
-        /*
         protected _resize(): void {
 
             if (this._element && this._viewport) {
@@ -911,11 +889,7 @@ namespace Virtex {
                 this.camera.aspect = this._getAspectRatio();
                 this.camera.updateProjectionMatrix();
                 
-                if (this._isVRMode) {
-                     this._renderer.setSize(window.innerWidth, window.innerHeight);                    
-                } else {
-                    this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
-                }
+                this._renderer.setSize(this._viewport.offsetWidth, this._viewport.offsetHeight);
 
                 this._loading.style.left = String((this._viewportCenter.x) - (this._loading.offsetWidth / 2)) + "px";
                 this._loading.style.top = String((this._viewportCenter.y) - (this._loading.offsetHeight / 2)) + "px";
@@ -925,7 +899,6 @@ namespace Virtex {
                 this._oldie.style.top = String((this._element.offsetHeight / 2) - (this._oldie.offsetHeight / 2)) + "px";
             }
         }
-        */
     }
 
     export class Events {
