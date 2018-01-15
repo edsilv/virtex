@@ -19,6 +19,8 @@ namespace Virtex {
         private _pinchStart: THREE.Vector2 = new THREE.Vector2();
         private _prevCameraPosition: any;
         private _prevCameraRotation: any;
+        private _prevObjectPosition: any;
+        private _prevObjectRotation: any;
         private _raycaster: THREE.Raycaster;
         private _raycastObjectCache: THREE.Object3D | null = null;
         private _stats: any;
@@ -670,6 +672,10 @@ namespace Virtex {
             (<any>this.renderer).vr.enabled = true;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
+            this._prevObjectPosition = this.objectGroup.position.clone();
+            this._prevObjectRotation = this.objectGroup.rotation.clone();
+
+            this.objectGroup.position.z -= 1;
         }
         
         public exitVR(): void {
@@ -677,6 +683,8 @@ namespace Virtex {
             (<any>this.renderer).vr.enabled = false;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
+            this.objectGroup.position.copy(this._prevObjectPosition);
+            this.objectGroup.rotation.copy(this._prevObjectRotation);
         }
 
         public toggleVR(): void {
