@@ -103,8 +103,6 @@ declare namespace Virtex {
         private _isFullscreen;
         private _isMouseDown;
         private _isMouseOver;
-        private _lastHeight;
-        private _lastWidth;
         private _lightGroup;
         private _loading;
         private _loadingBar;
@@ -148,7 +146,6 @@ declare namespace Virtex {
         private _getCameraZ();
         private _getFov();
         private _loadProgress(progress);
-        private _fullscreenChanged();
         private _onMouseDown(event);
         private _onMouseMove(event);
         private _onMouseUp();
@@ -170,15 +167,15 @@ declare namespace Virtex {
         enterVR(): void;
         exitVR(): void;
         toggleVR(): void;
+        private _getAspectRatio();
+        on(name: string, callback: Function, ctx: any): void;
+        fire(name: string, ...args: any[]): void;
         enterFullscreen(): void;
         exitFullscreen(): void;
         private _getRequestFullScreen(elem);
         private _getExitFullScreen();
-        private _getAspectRatio();
-        on(name: string, callback: Function, ctx: any): void;
-        fire(name: string, ...args: any[]): void;
+        private _fullscreenChanged();
         resize(): void;
-        protected _resize(): void;
     }
     class Events {
         static LOADED: string;

@@ -9,8 +9,6 @@ namespace Virtex {
         private _isFullscreen: boolean = false;
         private _isMouseDown: boolean = false;
         private _isMouseOver: boolean = false;
-        private _lastHeight: string;
-        private _lastWidth: string;
         private _lightGroup: THREE.Group;
         private _loading: HTMLElement;
         private _loadingBar: HTMLElement;
@@ -43,7 +41,7 @@ namespace Virtex {
             this.options.data = Object.assign({}, this.data(), options.data);
 
             this._init();
-            this._resize();
+            this.resize();
         }
 
         protected _init(): void {
@@ -275,7 +273,9 @@ namespace Virtex {
                 this._onTouchEnd();
             });
 
-            window.addEventListener('resize', () => this._resize(), false);
+            window.addEventListener('resize', () => {
+                this.resize()
+            }, false);
         }
         
         private _loadObject(objectPath: string): void {
@@ -397,23 +397,6 @@ namespace Virtex {
             this._loadingBar.style.width = String(width) + "px";
         }
 
-        private _fullscreenChanged(): void {
-            if (this._isFullscreen) { 
-                // exiting fullscreen
-                this.exitFullscreen();
-                this._element.style.width = this._lastWidth;
-                this._element.style.height = this._lastHeight;
-            } else { 
-                // entering fullscreen
-                this._lastWidth = this._getWidth() + "px";
-                this._lastHeight = this._getHeight() + "px";
-            }
-   
-            this._isFullscreen = !this._isFullscreen;
-            
-            this._resize();
-        }
-
         private _onMouseDown(event: MouseEvent): void {
             event.preventDefault();
 
@@ -433,8 +416,6 @@ namespace Virtex {
 
             this._mousePosNorm.x = (event.clientX / this._getWidth()) * 2 - 1;
 		    this._mousePosNorm.y = - (event.clientY / this._getHeight()) * 2 + 1;
-            
-            //console.log(this._mousePosNorm);
 
             if (this._isMouseDown) {
                 this._targetRotation.y = this._targetRotationOnMouseDown.y + (this._mousePos.y - this._mousePosOnMouseDown.y) * 0.02;
@@ -711,9 +692,37 @@ namespace Virtex {
             }
         }
         
+        private _getAspectRatio(): number {
+            // if (this._isFullscreen) {
+            //     return window.innerWidth / window.innerHeight;
+            // } else {
+                return this._viewport.offsetWidth / this._viewport.offsetHeight;
+            //}
+        }
+
+        public on(name: string, callback: Function, ctx: any): void {
+            var e = this._e || (this._e = {});
+
+            (e[name] || (e[name] = [])).push({
+                fn: callback,
+                ctx: ctx
+            });
+        }
+
+        public fire(name: string, ...args: any[]): void {
+            var data = [].slice.call(args, 1);
+            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
+            var i = 0;
+            var len = evtArr.length;
+
+            for (i; i < len; i++) {
+                evtArr[i].fn.apply(evtArr[i].ctx, data);
+            }
+        }
+
         public enterFullscreen(): void {            
             if (!this.options.data.fullscreenEnabled) return;            
-            const elem: HTMLElement = this._element;
+            const elem: HTMLElement = this._viewport;
             const requestFullScreen: any = this._getRequestFullScreen(elem);
 
             if (requestFullScreen) {
@@ -757,47 +766,17 @@ namespace Virtex {
             return false;
         }
 
-        private _getAspectRatio(): number {
-            // if (this._isVRMode) {
-            //     return window.innerWidth / window.innerHeight;
-            // } else {
-                return this._viewport.offsetWidth / this._viewport.offsetHeight;
-            //}
-        }
-
-        public on(name: string, callback: Function, ctx: any): void {
-            var e = this._e || (this._e = {});
-
-            (e[name] || (e[name] = [])).push({
-                fn: callback,
-                ctx: ctx
-            });
-        }
-
-        public fire(name: string, ...args: any[]): void {
-            var data = [].slice.call(args, 1);
-            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
-            var i = 0;
-            var len = evtArr.length;
-
-            for (i; i < len; i++) {
-                evtArr[i].fn.apply(evtArr[i].ctx, data);
-            }
+        private _fullscreenChanged(): void {
+            this._isFullscreen = !this._isFullscreen; 
+            this.resize();
         }
 
         public resize(): void {
-            this._resize();
-        }
-
-        protected _resize(): void {
 
             if (this._element && this._viewport) {
                 
-                const width: string = String(this._getWidth() + "px");
-                const height: string = String(this._getHeight() + "px");
-
-                this._element.style.width = width;
-                this._element.style.height = height;
+                const width: string = this._getWidth() + "px";
+                const height: string = this._getHeight() + "px";
 
                 this._viewport.style.width = width;
                 this._viewport.style.height = height;

@@ -265,7 +265,7 @@ var Virtex;
             this.options = options;
             this.options.data = Object.assign({}, this.data(), options.data);
             this._init();
-            this._resize();
+            this.resize();
         }
         Viewport.prototype._init = function () {
             this._element = this.options.target;
@@ -449,7 +449,9 @@ var Virtex;
             this._element.addEventListener('touchend', function () {
                 _this._onTouchEnd();
             });
-            window.addEventListener('resize', function () { return _this._resize(); }, false);
+            window.addEventListener('resize', function () {
+                _this.resize();
+            }, false);
         };
         Viewport.prototype._loadObject = function (objectPath) {
             var _this = this;
@@ -545,21 +547,6 @@ var Virtex;
             var width = Math.floor(fullWidth * progress);
             this._loadingBar.style.width = String(width) + "px";
         };
-        Viewport.prototype._fullscreenChanged = function () {
-            if (this._isFullscreen) {
-                // exiting fullscreen
-                this.exitFullscreen();
-                this._element.style.width = this._lastWidth;
-                this._element.style.height = this._lastHeight;
-            }
-            else {
-                // entering fullscreen
-                this._lastWidth = this._getWidth() + "px";
-                this._lastHeight = this._getHeight() + "px";
-            }
-            this._isFullscreen = !this._isFullscreen;
-            this._resize();
-        };
         Viewport.prototype._onMouseDown = function (event) {
             event.preventDefault();
             this._isMouseDown = true;
@@ -573,7 +560,6 @@ var Virtex;
             this._mousePos.y = event.clientY - this._viewportCenter.y;
             this._mousePosNorm.x = (event.clientX / this._getWidth()) * 2 - 1;
             this._mousePosNorm.y = -(event.clientY / this._getHeight()) * 2 + 1;
-            //console.log(this._mousePosNorm);
             if (this._isMouseDown) {
                 this._targetRotation.y = this._targetRotationOnMouseDown.y + (this._mousePos.y - this._mousePosOnMouseDown.y) * 0.02;
                 this._targetRotation.x = this._targetRotationOnMouseDown.x + (this._mousePos.x - this._mousePosOnMouseDown.x) * 0.02;
@@ -791,10 +777,37 @@ var Virtex;
                 this.enterVR();
             }
         };
+        Viewport.prototype._getAspectRatio = function () {
+            // if (this._isFullscreen) {
+            //     return window.innerWidth / window.innerHeight;
+            // } else {
+            return this._viewport.offsetWidth / this._viewport.offsetHeight;
+            //}
+        };
+        Viewport.prototype.on = function (name, callback, ctx) {
+            var e = this._e || (this._e = {});
+            (e[name] || (e[name] = [])).push({
+                fn: callback,
+                ctx: ctx
+            });
+        };
+        Viewport.prototype.fire = function (name) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            var data = [].slice.call(args, 1);
+            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
+            var i = 0;
+            var len = evtArr.length;
+            for (i; i < len; i++) {
+                evtArr[i].fn.apply(evtArr[i].ctx, data);
+            }
+        };
         Viewport.prototype.enterFullscreen = function () {
             if (!this.options.data.fullscreenEnabled)
                 return;
-            var elem = this._element;
+            var elem = this._viewport;
             var requestFullScreen = this._getRequestFullScreen(elem);
             if (requestFullScreen) {
                 requestFullScreen.call(elem);
@@ -836,43 +849,15 @@ var Virtex;
             }
             return false;
         };
-        Viewport.prototype._getAspectRatio = function () {
-            // if (this._isVRMode) {
-            //     return window.innerWidth / window.innerHeight;
-            // } else {
-            return this._viewport.offsetWidth / this._viewport.offsetHeight;
-            //}
-        };
-        Viewport.prototype.on = function (name, callback, ctx) {
-            var e = this._e || (this._e = {});
-            (e[name] || (e[name] = [])).push({
-                fn: callback,
-                ctx: ctx
-            });
-        };
-        Viewport.prototype.fire = function (name) {
-            var args = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args[_i - 1] = arguments[_i];
-            }
-            var data = [].slice.call(args, 1);
-            var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
-            var i = 0;
-            var len = evtArr.length;
-            for (i; i < len; i++) {
-                evtArr[i].fn.apply(evtArr[i].ctx, data);
-            }
+        Viewport.prototype._fullscreenChanged = function () {
+            this._isFullscreen = !this._isFullscreen;
+            this.resize();
         };
         Viewport.prototype.resize = function () {
-            this._resize();
-        };
-        Viewport.prototype._resize = function () {
             if (this._element && this._viewport) {
-                var width = String(this._getWidth() + "px");
-                var height = String(this._getHeight() + "px");
-                // this._element.style.width = width;
-                // this._element.style.height = height;
-                //this._viewport.style.width = width;
+                var width = this._getWidth() + "px";
+                var height = this._getHeight() + "px";
+                this._viewport.style.width = width;
                 this._viewport.style.height = height;
                 this._viewportCenter.x = this._viewport.offsetWidth / 2;
                 this._viewportCenter.y = this._viewport.offsetHeight / 2;
