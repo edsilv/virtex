@@ -760,8 +760,7 @@ var Virtex;
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
             this._prevObjectPosition = this.objectGroup.position.clone();
-            this._prevObjectRotation = this.objectGroup.rotation.clone();
-            this.objectGroup.position.z -= 1;
+            this.objectGroup.position.z -= this._getBoundingWidth();
         };
         Viewport.prototype.exitVR = function () {
             this._vrDisplay.exitPresent();
@@ -769,7 +768,6 @@ var Virtex;
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
             this.objectGroup.position.copy(this._prevObjectPosition);
-            this.objectGroup.rotation.copy(this._prevObjectRotation);
         };
         Viewport.prototype.toggleVR = function () {
             if (!this._vrDisplay) {

@@ -114,7 +114,6 @@ declare namespace Virtex {
         private _prevCameraPosition;
         private _prevCameraRotation;
         private _prevObjectPosition;
-        private _prevObjectRotation;
         private _raycaster;
         private _raycastObjectCache;
         private _stats;

@@ -20,7 +20,6 @@ namespace Virtex {
         private _prevCameraPosition: any;
         private _prevCameraRotation: any;
         private _prevObjectPosition: any;
-        private _prevObjectRotation: any;
         private _raycaster: THREE.Raycaster;
         private _raycastObjectCache: THREE.Object3D | null = null;
         private _stats: any;
@@ -134,7 +133,7 @@ namespace Virtex {
 
         private _onPointerRestricted(): void {
             var pointerLockElement = this.renderer.domElement;
-            if ( pointerLockElement && typeof(pointerLockElement.requestPointerLock) === 'function' ) {
+            if (pointerLockElement && typeof(pointerLockElement.requestPointerLock) === 'function') {
                 pointerLockElement.requestPointerLock();
             }
         }
@@ -142,7 +141,7 @@ namespace Virtex {
         private _onPointerUnrestricted(): void {
             var currentPointerLockElement = document.pointerLockElement;
             var expectedPointerLockElement = this.renderer.domElement;
-            if ( currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof(document.exitPointerLock) === 'function' ) {
+            if (currentPointerLockElement && currentPointerLockElement === expectedPointerLockElement && typeof(document.exitPointerLock) === 'function') {
                 document.exitPointerLock();
             }
         }
@@ -673,9 +672,8 @@ namespace Virtex {
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
             this._prevObjectPosition = this.objectGroup.position.clone();
-            this._prevObjectRotation = this.objectGroup.rotation.clone();
 
-            this.objectGroup.position.z -= 1;
+            this.objectGroup.position.z -= this._getBoundingWidth();
         }
         
         public exitVR(): void {
@@ -684,7 +682,6 @@ namespace Virtex {
             this.camera.position.copy(this._prevCameraPosition);
             this.camera.rotation.copy(this._prevCameraRotation);
             this.objectGroup.position.copy(this._prevObjectPosition);
-            this.objectGroup.rotation.copy(this._prevObjectRotation);
         }
 
         public toggleVR(): void {

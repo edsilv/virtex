@@ -94,12 +94,12 @@
                 type: new Virtex.FileType("model/gltf+json")
             },
             pub: {
-                file: "models/ply/pub.ply",
+                file: "https://files.blokdust.io/manifests/demo/lidar/pub/_pub/pub.ply",
                 type: new Virtex.FileType("application/ply")
             },
             woody: {
                 file: 'https://sophiedixon.github.io/3d-portfolio/collection/woody/_woody/woody.obj',
-
+                type: new Virtex.FileType("text/plain")
             }
         };
         
@@ -111,8 +111,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.woody.file,
-                    type: objects.bone5.type, // defaults to obj
+                    file: objects.pub.file,
+                    type: objects.pub.type, // defaults to obj
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
