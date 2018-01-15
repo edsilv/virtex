@@ -467,72 +467,80 @@ var Virtex;
         };
         Viewport.prototype._loadObject = function (objectPath) {
             var _this = this;
-            this._loading.classList.remove('beforeload');
-            this._loading.classList.add('duringload');
-            var loader;
-            switch (this.options.data.type.toString()) {
-                case Virtex.FileType.DRACO.toString():
-                    loader = new THREE.DRACOLoader();
-                    break;
-                case Virtex.FileType.CORTO.toString():
-                    loader = new THREE.CORTOLoader();
-                    break;
-                case Virtex.FileType.GLTF.toString():
-                    loader = new THREE.GLTFLoader();
-                    break;
-                case Virtex.FileType.OBJ.toString():
-                    loader = new THREE.OBJLoader();
-                    break;
-                case Virtex.FileType.THREEJS.toString():
-                    loader = new THREE.ObjectLoader();
-                    break;
-                case Virtex.FileType.PLY.toString():
-                    loader = new THREE.PLYLoader();
-                    break;
-            }
-            if (loader.setCrossOrigin) {
-                loader.setCrossOrigin('anonymous');
-            }
-            loader.load(objectPath, function (obj) {
+            return new Promise(function (resolve) {
+                _this._loading.classList.remove('beforeload');
+                _this._loading.classList.add('duringload');
+                var loader;
                 switch (_this.options.data.type.toString()) {
                     case Virtex.FileType.DRACO.toString():
-                        Virtex.DRACOFileTypeHandler.setup(_this, obj).then(function (obj) {
-                            _this._loaded(obj);
-                        });
+                        loader = new THREE.DRACOLoader();
                         break;
                     case Virtex.FileType.CORTO.toString():
-                        Virtex.CORTOFileTypeHandler.setup(_this, obj).then(function (obj) {
-                            _this._loaded(obj);
-                        });
+                        loader = new THREE.CORTOLoader();
                         break;
                     case Virtex.FileType.GLTF.toString():
-                        Virtex.glTFFileTypeHandler.setup(_this, obj).then(function (obj) {
-                            _this._loaded(obj);
-                        });
-                        break;
-                    case Virtex.FileType.THREEJS.toString():
-                        Virtex.ThreeJSFileTypeHandler.setup(_this, obj).then(function (obj) {
-                            _this._loaded(obj);
-                        });
+                        loader = new THREE.GLTFLoader();
                         break;
                     case Virtex.FileType.OBJ.toString():
-                        Virtex.ObjFileTypeHandler.setup(_this, objectPath, obj).then(function (obj) {
-                            _this._loaded(obj);
-                        });
+                        loader = new THREE.OBJLoader();
+                        break;
+                    case Virtex.FileType.THREEJS.toString():
+                        loader = new THREE.ObjectLoader();
                         break;
                     case Virtex.FileType.PLY.toString():
-                        Virtex.PLYFileTypeHandler.setup(_this, obj).then(function (obj) {
-                            _this._loaded(obj);
-                        });
+                        loader = new THREE.PLYLoader();
                         break;
                 }
-            }, function (e) {
-                if (e.lengthComputable) {
-                    _this._loadProgress(e.loaded / e.total);
+                if (loader.setCrossOrigin) {
+                    loader.setCrossOrigin('anonymous');
                 }
-            }, function (e) {
-                // error
-                console.error(e);
+                loader.load(objectPath, function (obj) {
+                    switch (_this.options.data.type.toString()) {
+                        case Virtex.FileType.DRACO.toString():
+                            Virtex.DRACOFileTypeHandler.setup(_this, obj).then(function (obj) {
+                                _this._loaded(obj);
+                                resolve();
+                            });
+                            break;
+                        case Virtex.FileType.CORTO.toString():
+                            Virtex.CORTOFileTypeHandler.setup(_this, obj).then(function (obj) {
+                                _this._loaded(obj);
+                                resolve();
+                            });
+                            break;
+                        case Virtex.FileType.GLTF.toString():
+                            Virtex.glTFFileTypeHandler.setup(_this, obj).then(function (obj) {
+                                _this._loaded(obj);
+                                resolve();
+                            });
+                            break;
+                        case Virtex.FileType.THREEJS.toString():
+                            Virtex.ThreeJSFileTypeHandler.setup(_this, obj).then(function (obj) {
+                                _this._loaded(obj);
+                                resolve();
+                            });
+                            break;
+                        case Virtex.FileType.OBJ.toString():
+                            Virtex.ObjFileTypeHandler.setup(_this, objectPath, obj).then(function (obj) {
+                                _this._loaded(obj);
+                                resolve();
+                            });
+                            break;
+                        case Virtex.FileType.PLY.toString():
+                            Virtex.PLYFileTypeHandler.setup(_this, obj).then(function (obj) {
+                                _this._loaded(obj);
+                                resolve();
+                            });
+                            break;
+                    }
+                }, function (e) {
+                    if (e.lengthComputable) {
+                        _this._loadProgress(e.loaded / e.total);
+                    }
+                }, function (e) {
+                    // error
+                    console.error(e);
+                });
             });
         };
         Viewport.prototype._loaded = function (obj) {

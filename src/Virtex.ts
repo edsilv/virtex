@@ -279,85 +279,94 @@ namespace Virtex {
             }, false);
         }
         
-        private _loadObject(objectPath: string): void {
+        private _loadObject(objectPath: string): Promise<void> {
 
-            this._loading.classList.remove('beforeload');
-            this._loading.classList.add('duringload');
+            return new Promise<any>((resolve) => {
 
-            let loader: any;
-            
-            switch ((<FileType>this.options.data.type).toString()) {
-                case FileType.DRACO.toString() :
-                    loader = new (<any>THREE).DRACOLoader();
-                    break;
-                case FileType.CORTO.toString() :
-                    loader = new (<any>THREE).CORTOLoader();
-                    break;
-                case FileType.GLTF.toString() :
-                    loader = new (<any>THREE).GLTFLoader();
-                    break;
-                case FileType.OBJ.toString() :
-                    loader = new THREE.OBJLoader();
-                    break;
-                case FileType.THREEJS.toString() :
-                    loader = new THREE.ObjectLoader();
-                    break;
-                case FileType.PLY.toString() :
-                    loader = new (<any>THREE).PLYLoader();
-                    break;
-            }
-            
-            if (loader.setCrossOrigin) {
-                loader.setCrossOrigin('anonymous');
-            }
+                this._loading.classList.remove('beforeload');
+                this._loading.classList.add('duringload');
 
-            loader.load(objectPath,
-                (obj: any) => {
-
-                    switch ((<FileType>this.options.data.type).toString()) {
-                        case FileType.DRACO.toString() :
-                            DRACOFileTypeHandler.setup(this, obj).then((obj) => {
-                                this._loaded(obj);
-                            });
-                            break;
-                        case FileType.CORTO.toString() :
-                            CORTOFileTypeHandler.setup(this, obj).then((obj) => {
-                                this._loaded(obj);
-                            });
-                            break;
-                        case FileType.GLTF.toString() :
-                            glTFFileTypeHandler.setup(this, obj).then((obj) => {
-                                this._loaded(obj);
-                            });
-                            break;
-                        case FileType.THREEJS.toString() :
-                            ThreeJSFileTypeHandler.setup(this, obj).then((obj) => {
-                                this._loaded(obj);
-                            });
-                            break;
-                        case FileType.OBJ.toString() :
-                            ObjFileTypeHandler.setup(this, objectPath, obj).then((obj) => {
-                                this._loaded(obj);
-                            });
-                            break;
-                        case FileType.PLY.toString() :
-                            PLYFileTypeHandler.setup(this, obj).then((obj) => {
-                                this._loaded(obj);
-                            });
-                            break;
-                    }
-
-                },
-                (e: ProgressEvent) => {
-                    if (e.lengthComputable) {
-                        this._loadProgress(e.loaded / e.total);
-                    }
-                },
-                (e: ErrorEvent) => {
-                    // error
-                    console.error(e);
+                let loader: any;
+                
+                switch ((<FileType>this.options.data.type).toString()) {
+                    case FileType.DRACO.toString() :
+                        loader = new (<any>THREE).DRACOLoader();
+                        break;
+                    case FileType.CORTO.toString() :
+                        loader = new (<any>THREE).CORTOLoader();
+                        break;
+                    case FileType.GLTF.toString() :
+                        loader = new (<any>THREE).GLTFLoader();
+                        break;
+                    case FileType.OBJ.toString() :
+                        loader = new THREE.OBJLoader();
+                        break;
+                    case FileType.THREEJS.toString() :
+                        loader = new THREE.ObjectLoader();
+                        break;
+                    case FileType.PLY.toString() :
+                        loader = new (<any>THREE).PLYLoader();
+                        break;
                 }
-            );
+                
+                if (loader.setCrossOrigin) {
+                    loader.setCrossOrigin('anonymous');
+                }
+
+                loader.load(objectPath,
+                    (obj: any) => {
+
+                        switch ((<FileType>this.options.data.type).toString()) {
+                            case FileType.DRACO.toString() :
+                                DRACOFileTypeHandler.setup(this, obj).then((obj) => {
+                                    this._loaded(obj);
+                                    resolve();
+                                });
+                                break;
+                            case FileType.CORTO.toString() :
+                                CORTOFileTypeHandler.setup(this, obj).then((obj) => {
+                                    this._loaded(obj);
+                                    resolve();
+                                });
+                                break;
+                            case FileType.GLTF.toString() :
+                                glTFFileTypeHandler.setup(this, obj).then((obj) => {
+                                    this._loaded(obj);
+                                    resolve();
+                                });
+                                break;
+                            case FileType.THREEJS.toString() :
+                                ThreeJSFileTypeHandler.setup(this, obj).then((obj) => {
+                                    this._loaded(obj);
+                                    resolve();
+                                });
+                                break;
+                            case FileType.OBJ.toString() :
+                                ObjFileTypeHandler.setup(this, objectPath, obj).then((obj) => {
+                                    this._loaded(obj);
+                                    resolve();
+                                });
+                                break;
+                            case FileType.PLY.toString() :
+                                PLYFileTypeHandler.setup(this, obj).then((obj) => {
+                                    this._loaded(obj);
+                                    resolve();
+                                });
+                                break;
+                        }
+
+                    },
+                    (e: ProgressEvent) => {
+                        if (e.lengthComputable) {
+                            this._loadProgress(e.loaded / e.total);
+                        }
+                    },
+                    (e: ErrorEvent) => {
+                        // error
+                        console.error(e);
+                    }
+                );
+            });
         }
 
         private _loaded(obj: any): void {
@@ -681,6 +690,7 @@ namespace Virtex {
         public enterVR(): void {
             this._vrDisplay.requestPresent([{ source: this.renderer.domElement }]);     
             (<any>this.renderer).vr.enabled = true;
+
             this._prevCameraPosition = this.camera.position.clone();
             this._prevCameraRotation = this.camera.rotation.clone();
             this._prevObjectPosition = this.objectGroup.position.clone();
