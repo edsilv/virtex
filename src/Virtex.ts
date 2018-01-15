@@ -316,22 +316,34 @@ namespace Virtex {
 
                     switch ((<FileType>this.options.data.type).toString()) {
                         case FileType.DRACO.toString() :
-                            DRACOFileTypeHandler.setup(this, obj, this._loaded.bind(this));
+                            DRACOFileTypeHandler.setup(this, obj).then((obj) => {
+                                this._loaded(obj);
+                            });
                             break;
                         case FileType.CORTO.toString() :
-                            CORTOFileTypeHandler.setup(this, obj, this._loaded.bind(this));
+                            CORTOFileTypeHandler.setup(this, obj).then((obj) => {
+                                this._loaded(obj);
+                            });
                             break;
                         case FileType.GLTF.toString() :
-                            glTFFileTypeHandler.setup(this, obj, this._loaded.bind(this));
+                            glTFFileTypeHandler.setup(this, obj).then((obj) => {
+                                this._loaded(obj);
+                            });
                             break;
                         case FileType.THREEJS.toString() :
-                            ThreeJSFileTypeHandler.setup(this, obj, this._loaded.bind(this));
+                            ThreeJSFileTypeHandler.setup(this, obj).then((obj) => {
+                                this._loaded(obj);
+                            });
                             break;
                         case FileType.OBJ.toString() :
-                            ObjFileTypeHandler.setup(this, objectPath, obj, this._loaded.bind(this));
+                            ObjFileTypeHandler.setup(this, objectPath, obj).then((obj) => {
+                                this._loaded(obj);
+                            });
                             break;
                         case FileType.PLY.toString() :
-                            PLYFileTypeHandler.setup(this, obj, this._loaded.bind(this));
+                            PLYFileTypeHandler.setup(this, obj).then((obj) => {
+                                this._loaded(obj);
+                            });
                             break;
                     }
 

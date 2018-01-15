@@ -1,27 +1,30 @@
 namespace Virtex {
     export class glTFFileTypeHandler {
 
-        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void {
+        static setup(viewport: Viewport, obj: any): Promise<any> {
 
-            viewport.objectGroup.add(obj.scene);
+            return new Promise<any>((resolve) => {
+                
+                viewport.objectGroup.add(obj.scene);
 
-            if (obj.animations) {
-                const animations = obj.animations;
+                if (obj.animations) {
+                    const animations = obj.animations;
 
-                for (var i = 0, l = animations.length; i < l; i++) {
-                    //const animation = animations[i];
-                    //animation.loop = true;
-                    //animation.play();
+                    for (var i = 0, l = animations.length; i < l; i++) {
+                        //const animation = animations[i];
+                        //animation.loop = true;
+                        //animation.play();
+                    }
                 }
-            }
 
-            viewport.scene = obj.scene;
+                viewport.scene = obj.scene;
 
-            if (obj.cameras && obj.cameras.length) {
-                viewport.camera = obj.cameras[0];
-            }
+                if (obj.cameras && obj.cameras.length) {
+                    viewport.camera = obj.cameras[0];
+                }
 
-            cb(obj);
+                resolve(obj);
+            });
         }
     }
 }

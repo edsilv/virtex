@@ -30,19 +30,19 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class CORTOFileTypeHandler {
-        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
+        static setup(viewport: Viewport, obj: any): Promise<any>;
     }
 }
 
 declare namespace Virtex {
     class DRACOFileTypeHandler {
-        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
+        static setup(viewport: Viewport, obj: any): Promise<any>;
     }
 }
 
 declare namespace Virtex {
     class glTFFileTypeHandler {
-        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
+        static setup(viewport: Viewport, obj: any): Promise<any>;
     }
 }
 
@@ -78,19 +78,19 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class ObjFileTypeHandler {
-        static setup(viewport: Viewport, objpath: string, obj: any, cb: (object: any) => void): void;
+        static setup(viewport: Viewport, objpath: string, obj: any): Promise<any>;
     }
 }
 
 declare namespace Virtex {
     class PLYFileTypeHandler {
-        static setup(viewport: Viewport, geometry: any, cb: (object: any) => void): void;
+        static setup(viewport: Viewport, geometry: any): Promise<any>;
     }
 }
 
 declare namespace Virtex {
     class ThreeJSFileTypeHandler {
-        static setup(viewport: Viewport, obj: any, cb: (object: any) => void): void;
+        static setup(viewport: Viewport, obj: any): Promise<any>;
     }
 }
 

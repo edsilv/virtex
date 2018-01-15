@@ -52,38 +52,40 @@ var Virtex;
     var CORTOFileTypeHandler = /** @class */ (function () {
         function CORTOFileTypeHandler() {
         }
-        CORTOFileTypeHandler.setup = function (viewport, obj, cb) {
-            var bufferGeometry = obj.geometry;
-            /*            const material = new THREE.MeshStandardMaterial({vertexColors: THREE.VertexColors});
-                        let geometry;
-                        // Point cloud does not have face indices.
-                        if (bufferGeometry.index == null) {
-                            geometry = new THREE.Points(bufferGeometry, material);
-                        } else {
-                            bufferGeometry.computeVertexNormals();
-                            geometry = new THREE.Mesh(bufferGeometry, material);
-                        }
-            */
-            // Compute range of the geometry coordinates for proper rendering.
-            bufferGeometry.computeBoundingBox();
-            var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
-            var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
-            var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
-            var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
-            var scale = 1.0 / diagonalSize;
-            var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
-            var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
-            var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
-            obj.scale.multiplyScalar(scale);
-            obj.position.x = -midX * scale;
-            obj.position.y = -midY * scale;
-            obj.position.z = -midZ * scale;
-            obj.castShadow = true;
-            obj.receiveShadow = true;
-            //            obj = geometry;
-            viewport.objectGroup.add(obj);
-            viewport.createCamera();
-            cb(obj);
+        CORTOFileTypeHandler.setup = function (viewport, obj) {
+            return new Promise(function (resolve) {
+                var bufferGeometry = obj.geometry;
+                /*            const material = new THREE.MeshStandardMaterial({vertexColors: THREE.VertexColors});
+                            let geometry;
+                            // Point cloud does not have face indices.
+                            if (bufferGeometry.index == null) {
+                                geometry = new THREE.Points(bufferGeometry, material);
+                            } else {
+                                bufferGeometry.computeVertexNormals();
+                                geometry = new THREE.Mesh(bufferGeometry, material);
+                            }
+                */
+                // Compute range of the geometry coordinates for proper rendering.
+                bufferGeometry.computeBoundingBox();
+                var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
+                var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
+                var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
+                var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
+                var scale = 1.0 / diagonalSize;
+                var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
+                var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
+                var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
+                obj.scale.multiplyScalar(scale);
+                obj.position.x = -midX * scale;
+                obj.position.y = -midY * scale;
+                obj.position.z = -midZ * scale;
+                obj.castShadow = true;
+                obj.receiveShadow = true;
+                //            obj = geometry;
+                viewport.objectGroup.add(obj);
+                viewport.createCamera();
+                resolve(obj);
+            });
         };
         return CORTOFileTypeHandler;
     }());
@@ -95,38 +97,40 @@ var Virtex;
     var DRACOFileTypeHandler = /** @class */ (function () {
         function DRACOFileTypeHandler() {
         }
-        DRACOFileTypeHandler.setup = function (viewport, obj, cb) {
-            var bufferGeometry = obj;
-            var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.VertexColors });
-            var geometry;
-            // Point cloud does not have face indices.
-            if (bufferGeometry.index == null) {
-                geometry = new THREE.Points(bufferGeometry, material);
-            }
-            else {
-                bufferGeometry.computeVertexNormals();
-                geometry = new THREE.Mesh(bufferGeometry, material);
-            }
-            // Compute range of the geometry coordinates for proper rendering.
-            bufferGeometry.computeBoundingBox();
-            var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
-            var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
-            var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
-            var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
-            var scale = 1.0 / diagonalSize;
-            var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
-            var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
-            var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
-            geometry.scale.multiplyScalar(scale);
-            geometry.position.x = -midX * scale;
-            geometry.position.y = -midY * scale;
-            geometry.position.z = -midZ * scale;
-            geometry.castShadow = true;
-            geometry.receiveShadow = true;
-            obj = geometry;
-            viewport.objectGroup.add(obj);
-            viewport.createCamera();
-            cb(obj);
+        DRACOFileTypeHandler.setup = function (viewport, obj) {
+            return new Promise(function (resolve) {
+                var bufferGeometry = obj;
+                var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.VertexColors });
+                var geometry;
+                // Point cloud does not have face indices.
+                if (bufferGeometry.index == null) {
+                    geometry = new THREE.Points(bufferGeometry, material);
+                }
+                else {
+                    bufferGeometry.computeVertexNormals();
+                    geometry = new THREE.Mesh(bufferGeometry, material);
+                }
+                // Compute range of the geometry coordinates for proper rendering.
+                bufferGeometry.computeBoundingBox();
+                var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
+                var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
+                var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
+                var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
+                var scale = 1.0 / diagonalSize;
+                var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
+                var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
+                var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
+                geometry.scale.multiplyScalar(scale);
+                geometry.position.x = -midX * scale;
+                geometry.position.y = -midY * scale;
+                geometry.position.z = -midZ * scale;
+                geometry.castShadow = true;
+                geometry.receiveShadow = true;
+                obj = geometry;
+                viewport.objectGroup.add(obj);
+                viewport.createCamera();
+                resolve(obj);
+            });
         };
         return DRACOFileTypeHandler;
     }());
@@ -138,21 +142,23 @@ var Virtex;
     var glTFFileTypeHandler = /** @class */ (function () {
         function glTFFileTypeHandler() {
         }
-        glTFFileTypeHandler.setup = function (viewport, obj, cb) {
-            viewport.objectGroup.add(obj.scene);
-            if (obj.animations) {
-                var animations = obj.animations;
-                for (var i = 0, l = animations.length; i < l; i++) {
-                    //const animation = animations[i];
-                    //animation.loop = true;
-                    //animation.play();
+        glTFFileTypeHandler.setup = function (viewport, obj) {
+            return new Promise(function (resolve) {
+                viewport.objectGroup.add(obj.scene);
+                if (obj.animations) {
+                    var animations = obj.animations;
+                    for (var i = 0, l = animations.length; i < l; i++) {
+                        //const animation = animations[i];
+                        //animation.loop = true;
+                        //animation.play();
+                    }
                 }
-            }
-            viewport.scene = obj.scene;
-            if (obj.cameras && obj.cameras.length) {
-                viewport.camera = obj.cameras[0];
-            }
-            cb(obj);
+                viewport.scene = obj.scene;
+                if (obj.cameras && obj.cameras.length) {
+                    viewport.camera = obj.cameras[0];
+                }
+                resolve(obj);
+            });
         };
         return glTFFileTypeHandler;
     }());
@@ -165,43 +171,45 @@ var Virtex;
     var ObjFileTypeHandler = /** @class */ (function () {
         function ObjFileTypeHandler() {
         }
-        ObjFileTypeHandler.setup = function (viewport, objpath, obj, cb) {
-            var imgloader = new THREE.MTLLoader();
-            imgloader.setCrossOrigin(true);
-            imgloader.setPath(objpath.substring(0, objpath.lastIndexOf("/") + 1));
-            imgloader.load(obj.materialLibraries[0], function (materials) {
-                var objLoader = new THREE.OBJLoader();
-                objLoader.setMaterials(materials);
-                objLoader.load(objpath, function (obj) {
-                    // Compute range of the geometry coordinates for proper rendering.
-                    var bufferGeometry = obj.children[0].geometry;
-                    bufferGeometry.computeBoundingBox();
-                    var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
-                    var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
-                    var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
-                    var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
-                    var scale = 1.0 / diagonalSize;
-                    var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
-                    var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
-                    var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
-                    obj.scale.multiplyScalar(scale);
-                    obj.position.x = -midX * scale;
-                    obj.position.y = -midY * scale;
-                    obj.position.z = -midZ * scale;
-                    obj.castShadow = true;
-                    obj.receiveShadow = true;
-                    viewport.objectGroup.add(obj);
-                    viewport.createCamera();
-                    cb(obj);
+        ObjFileTypeHandler.setup = function (viewport, objpath, obj) {
+            return new Promise(function (resolve) {
+                var imgloader = new THREE.MTLLoader();
+                imgloader.setCrossOrigin(true);
+                imgloader.setPath(objpath.substring(0, objpath.lastIndexOf("/") + 1));
+                imgloader.load(obj.materialLibraries[0], function (materials) {
+                    var objLoader = new THREE.OBJLoader();
+                    objLoader.setMaterials(materials);
+                    objLoader.load(objpath, function (obj) {
+                        // Compute range of the geometry coordinates for proper rendering.
+                        var bufferGeometry = obj.children[0].geometry;
+                        bufferGeometry.computeBoundingBox();
+                        var sizeX = bufferGeometry.boundingBox.max.x - bufferGeometry.boundingBox.min.x;
+                        var sizeY = bufferGeometry.boundingBox.max.y - bufferGeometry.boundingBox.min.y;
+                        var sizeZ = bufferGeometry.boundingBox.max.z - bufferGeometry.boundingBox.min.z;
+                        var diagonalSize = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ);
+                        var scale = 1.0 / diagonalSize;
+                        var midX = (bufferGeometry.boundingBox.min.x + bufferGeometry.boundingBox.max.x) / 2;
+                        var midY = (bufferGeometry.boundingBox.min.y + bufferGeometry.boundingBox.max.y) / 2;
+                        var midZ = (bufferGeometry.boundingBox.min.z + bufferGeometry.boundingBox.max.z) / 2;
+                        obj.scale.multiplyScalar(scale);
+                        obj.position.x = -midX * scale;
+                        obj.position.y = -midY * scale;
+                        obj.position.z = -midZ * scale;
+                        obj.castShadow = true;
+                        obj.receiveShadow = true;
+                        viewport.objectGroup.add(obj);
+                        viewport.createCamera();
+                        resolve(obj);
+                    }, function () {
+                        //console.log("obj progress", e);
+                    }, function () {
+                        //console.log("obj error", e);
+                    });
                 }, function () {
-                    //console.log("obj progress", e);
+                    //console.log("mtl progress", e);
                 }, function () {
-                    //console.log("obj error", e);
+                    //console.log("mtl error", e);
                 });
-            }, function () {
-                //console.log("mtl progress", e);
-            }, function () {
-                //console.log("mtl error", e);
             });
         };
         return ObjFileTypeHandler;
@@ -214,12 +222,14 @@ var Virtex;
     var PLYFileTypeHandler = /** @class */ (function () {
         function PLYFileTypeHandler() {
         }
-        PLYFileTypeHandler.setup = function (viewport, geometry, cb) {
-            var material = new THREE.PointsMaterial({ vertexColors: THREE.VertexColors });
-            var mesh = new THREE.Points(geometry, material);
-            viewport.objectGroup.add(mesh);
-            viewport.createCamera();
-            cb(mesh);
+        PLYFileTypeHandler.setup = function (viewport, geometry) {
+            return new Promise(function (resolve) {
+                var material = new THREE.PointsMaterial({ vertexColors: THREE.VertexColors });
+                var mesh = new THREE.Points(geometry, material);
+                viewport.objectGroup.add(mesh);
+                viewport.createCamera();
+                resolve(mesh);
+            });
         };
         return PLYFileTypeHandler;
     }());
@@ -231,16 +241,18 @@ var Virtex;
     var ThreeJSFileTypeHandler = /** @class */ (function () {
         function ThreeJSFileTypeHandler() {
         }
-        ThreeJSFileTypeHandler.setup = function (viewport, obj, cb) {
-            // use the three.js setting in Blender's material tab
-            // if (this.options.doubleSided) {
-            //     obj.traverse((child: any) => {
-            //         if (child.material) child.material.side = THREE.DoubleSide;
-            //     });
-            // }
-            viewport.objectGroup.add(obj);
-            viewport.createCamera();
-            cb(obj);
+        ThreeJSFileTypeHandler.setup = function (viewport, obj) {
+            return new Promise(function (resolve) {
+                // use the three.js setting in Blender's material tab
+                // if (this.options.doubleSided) {
+                //     obj.traverse((child: any) => {
+                //         if (child.material) child.material.side = THREE.DoubleSide;
+                //     });
+                // }
+                viewport.objectGroup.add(obj);
+                viewport.createCamera();
+                resolve(obj);
+            });
         };
         return ThreeJSFileTypeHandler;
     }());
@@ -484,22 +496,34 @@ var Virtex;
             loader.load(objectPath, function (obj) {
                 switch (_this.options.data.type.toString()) {
                     case Virtex.FileType.DRACO.toString():
-                        Virtex.DRACOFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
+                        Virtex.DRACOFileTypeHandler.setup(_this, obj).then(function (obj) {
+                            _this._loaded(obj);
+                        });
                         break;
                     case Virtex.FileType.CORTO.toString():
-                        Virtex.CORTOFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
+                        Virtex.CORTOFileTypeHandler.setup(_this, obj).then(function (obj) {
+                            _this._loaded(obj);
+                        });
                         break;
                     case Virtex.FileType.GLTF.toString():
-                        Virtex.glTFFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
+                        Virtex.glTFFileTypeHandler.setup(_this, obj).then(function (obj) {
+                            _this._loaded(obj);
+                        });
                         break;
                     case Virtex.FileType.THREEJS.toString():
-                        Virtex.ThreeJSFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
+                        Virtex.ThreeJSFileTypeHandler.setup(_this, obj).then(function (obj) {
+                            _this._loaded(obj);
+                        });
                         break;
                     case Virtex.FileType.OBJ.toString():
-                        Virtex.ObjFileTypeHandler.setup(_this, objectPath, obj, _this._loaded.bind(_this));
+                        Virtex.ObjFileTypeHandler.setup(_this, objectPath, obj).then(function (obj) {
+                            _this._loaded(obj);
+                        });
                         break;
                     case Virtex.FileType.PLY.toString():
-                        Virtex.PLYFileTypeHandler.setup(_this, obj, _this._loaded.bind(_this));
+                        Virtex.PLYFileTypeHandler.setup(_this, obj).then(function (obj) {
+                            _this._loaded(obj);
+                        });
                         break;
                 }
             }, function (e) {
