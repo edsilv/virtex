@@ -98,6 +98,9 @@ namespace Virtex {
                 this._stats.domElement.style.top = '0px';
                 this._viewport.appendChild(this._stats.domElement);
             }
+
+            const canvas: HTMLCanvasElement = <HTMLCanvasElement>this._element.querySelector('canvas');
+            canvas.oncontextmenu = () => { return false; }
         }
         
         public data(): IVirtexData {
@@ -385,7 +388,23 @@ namespace Virtex {
             const intersects: THREE.Intersection[] = this._getObjectsIntersectingWithMouse();
             
             if (intersects.length) {
-                this.fire(Events.ANNOTATION_TARGET, intersects[0]);
+
+                const intersection: THREE.Intersection = intersects[0];
+
+                // create a sphere
+                const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.02);
+                const sphereMaterial: THREE.MeshLambertMaterial = new THREE.MeshLambertMaterial({
+                    color: 0xff0000
+                });
+                const sphere: THREE.Mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+                sphere.position.copy(intersection.point);
+
+                //this.objectGroup.updateMatrixWorld(true); // important! 
+                //sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+                this.objectGroup.add(sphere);
+
+                this.fire(Events.ANNOTATION_TARGET, intersection);
             }
         }
 

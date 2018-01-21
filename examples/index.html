@@ -105,7 +105,7 @@
         
         window.addEventListener('DOMContentLoaded', function() {
 
-            var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+            var isAndroid = navigator.userAgent.toLowerCase().indexOf('android') > -1;
 
             viewport = new Virtex.Viewport({
                 target: document.querySelector('#viewer'),
@@ -124,7 +124,7 @@
                 }
             });
 
-            viewer.addEventListener("dblclick", function() {
+            viewer.addEventListener('dblclick', function() {
                 viewport.annotate();
             });
 

@@ -321,6 +321,8 @@ var Virtex;
                 this._stats.domElement.style.top = '0px';
                 this._viewport.appendChild(this._stats.domElement);
             }
+            var canvas = this._element.querySelector('canvas');
+            canvas.oncontextmenu = function () { return false; };
         };
         Viewport.prototype.data = function () {
             return {
@@ -553,7 +555,18 @@ var Virtex;
         Viewport.prototype.annotate = function () {
             var intersects = this._getObjectsIntersectingWithMouse();
             if (intersects.length) {
-                this.fire(Events.ANNOTATION_TARGET, intersects[0]);
+                var intersection = intersects[0];
+                // create a sphere
+                var sphereGeometry = new THREE.SphereGeometry(.02);
+                var sphereMaterial = new THREE.MeshLambertMaterial({
+                    color: 0xff0000
+                });
+                var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.copy(intersection.point);
+                //this.objectGroup.updateMatrixWorld(true); // important! 
+                //sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+                this.objectGroup.add(sphere);
+                this.fire(Events.ANNOTATION_TARGET, intersection);
             }
         };
         Viewport.prototype._getBoundingBox = function () {
