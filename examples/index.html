@@ -124,6 +124,14 @@
                 }
             });
 
+            viewer.addEventListener("dblclick", function(event) {
+                viewport.annotate(event.clientX, event.clientY);
+            });
+
+            viewport.on('annotationtarget', function(args) {
+                console.log(args);
+            });
+
             var vrbutton = document.querySelector('#vr');
 
             vrbutton.onclick = function () {

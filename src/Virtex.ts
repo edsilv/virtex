@@ -380,20 +380,20 @@ namespace Virtex {
             this.fire(Events.LOADED, obj);
         }
 
-        // public annotate(x: number, y: number): void {
-        //     x = (x / this._getWidth()) * 2 - 1;
-        //     y = -(y / this._getHeight()) * 2 + 1;
-        //     const vector: Vector3 = new Vector3(x, y, -1);
-        //     vector.unproject(this.camera)
+        public annotate(x: number, y: number): void {
+            x = (x / this._getWidth()) * 2 - 1;
+            y = -(y / this._getHeight()) * 2 + 1;
+            const vector: THREE.Vector3 = new THREE.Vector3(x, y, -1);
+            vector.unproject(this.camera)
 
-        //     const raycaster: Raycaster = new Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
-        //     const intersects: Intersection[] = raycaster.intersectObject(this.objectGroup);
+            const raycaster: THREE.Raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
+            const intersects: THREE.Intersection[] = raycaster.intersectObject(this.objectGroup);
             
-        //     if ( intersects.length > 0 )
-        //     {
-        //         this.fire(Events.ANNOTATION_TARGET, intersects[0]);
-        //     }
-        // }
+            if ( intersects.length > 0 )
+            {
+                this.fire(Events.ANNOTATION_TARGET, intersects[0]);
+            }
+        }
 
         private _getBoundingBox(): THREE.Box3 {
             return new THREE.Box3().setFromObject(this.objectGroup);
@@ -842,6 +842,7 @@ namespace Virtex {
     }
 
     export class Events {
+        static ANNOTATION_TARGET: string = 'annotationtarget';
         static LOADED: string = 'loaded';
         static VR_AVAILABLE: string = 'vravailable';
         static VR_UNAVAILABLE: string = 'vrunavailable';

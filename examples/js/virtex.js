@@ -550,18 +550,17 @@ var Virtex;
             this._loading.classList.add('afterload');
             this.fire(Events.LOADED, obj);
         };
-        // public annotate(x: number, y: number): void {
-        //     x = (x / this._getWidth()) * 2 - 1;
-        //     y = -(y / this._getHeight()) * 2 + 1;
-        //     const vector: Vector3 = new Vector3(x, y, -1);
-        //     vector.unproject(this.camera)
-        //     const raycaster: Raycaster = new Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
-        //     const intersects: Intersection[] = raycaster.intersectObject(this.objectGroup);
-        //     if ( intersects.length > 0 )
-        //     {
-        //         this.fire(Events.ANNOTATION_TARGET, intersects[0]);
-        //     }
-        // }
+        Viewport.prototype.annotate = function (x, y) {
+            x = (x / this._getWidth()) * 2 - 1;
+            y = -(y / this._getHeight()) * 2 + 1;
+            var vector = new THREE.Vector3(x, y, -1);
+            vector.unproject(this.camera);
+            var raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
+            var intersects = raycaster.intersectObject(this.objectGroup);
+            if (intersects.length > 0) {
+                this.fire(Events.ANNOTATION_TARGET, intersects[0]);
+            }
+        };
         Viewport.prototype._getBoundingBox = function () {
             return new THREE.Box3().setFromObject(this.objectGroup);
         };
@@ -925,6 +924,7 @@ var Virtex;
     var Events = /** @class */ (function () {
         function Events() {
         }
+        Events.ANNOTATION_TARGET = 'annotationtarget';
         Events.LOADED = 'loaded';
         Events.VR_AVAILABLE = 'vravailable';
         Events.VR_UNAVAILABLE = 'vrunavailable';

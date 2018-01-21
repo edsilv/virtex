@@ -141,6 +141,7 @@ declare namespace Virtex {
         private _createDOMHandlers();
         private _loadObject(objectPath);
         private _loaded(obj);
+        annotate(x: number, y: number): void;
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();
@@ -179,6 +180,7 @@ declare namespace Virtex {
         resize(): void;
     }
     class Events {
+        static ANNOTATION_TARGET: string;
         static LOADED: string;
         static VR_AVAILABLE: string;
         static VR_UNAVAILABLE: string;
