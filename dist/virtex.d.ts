@@ -1,4 +1,4 @@
-// virtex v0.3.6 https://github.com/edsilv/virtex#readme
+// virtex v0.3.7 https://github.com/edsilv/virtex#readme
 declare var global: any;
 declare var Stats: any;
 interface Document {
