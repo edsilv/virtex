@@ -557,13 +557,14 @@ var Virtex;
             if (intersects.length) {
                 var intersection = intersects[0];
                 // create a sphere
-                var sphereGeometry = new THREE.SphereGeometry(.02);
+                var sphereGeometry = new THREE.SphereGeometry(.015);
                 var sphereMaterial = new THREE.MeshLambertMaterial({
-                    color: 0xff0000
+                    color: 0x0000ff
                 });
                 var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
                 sphere.position.copy(intersection.point);
-                //this.objectGroup.updateMatrixWorld(true); // important! 
+                // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
+                //this.objectGroup.updateMatrixWorld(true); 
                 //sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
                 this.objectGroup.add(sphere);
                 this.fire(Events.ANNOTATION_TARGET, intersection);

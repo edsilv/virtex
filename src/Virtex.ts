@@ -392,15 +392,16 @@ namespace Virtex {
                 const intersection: THREE.Intersection = intersects[0];
 
                 // create a sphere
-                const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.02);
+                const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.015);
                 const sphereMaterial: THREE.MeshLambertMaterial = new THREE.MeshLambertMaterial({
-                    color: 0xff0000
+                    color: 0x0000ff
                 });
                 const sphere: THREE.Mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
                 sphere.position.copy(intersection.point);
 
-                //this.objectGroup.updateMatrixWorld(true); // important! 
+                // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
+                //this.objectGroup.updateMatrixWorld(true); 
                 //sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
                 this.objectGroup.add(sphere);
 

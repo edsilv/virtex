@@ -35,8 +35,17 @@
             overflow: hidden;
         }
 
-        #buttons button{
+        #buttons button {
             font-size: 30px;
+        }
+
+        #debug {
+            width: 790px;
+            padding: 5px;
+            margin: 0;
+            border: none;
+            background-color: #fdfdfd0f;
+            color: #fff;
         }
     </style>
 
@@ -51,6 +60,8 @@
     </div>
 
     <div id="viewer" class="virtex" style="width: 800px; height: 600px"></div>
+
+    <textarea id="debug"></textarea>
 
     <script>
         
@@ -124,12 +135,14 @@
                 }
             });
 
+            var debug = document.querySelector('#debug');
+
             viewer.addEventListener('dblclick', function() {
                 viewport.annotate();
             });
 
             viewport.on('annotationtarget', function(args) {
-                console.log(args);
+                debug.textContent = 'x: ' + args.point.x + ', y: ' + args.point.y;
             });
 
             var vrbutton = document.querySelector('#vr');
