@@ -377,20 +377,14 @@ namespace Virtex {
             this._loading.classList.remove('duringload');
             this._loading.classList.add('afterload');
             
-            this.fire(Events.LOADED, obj);
+            this.fire(Events.LOADED, [obj]);
         }
 
-        public annotate(x: number, y: number): void {
-            x = (x / this._getWidth()) * 2 - 1;
-            y = -(y / this._getHeight()) * 2 + 1;
-            const vector: THREE.Vector3 = new THREE.Vector3(x, y, -1);
-            vector.unproject(this.camera)
-
-            const raycaster: THREE.Raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
-            const intersects: THREE.Intersection[] = raycaster.intersectObject(this.objectGroup);
+        public annotate(): void {
             
-            if ( intersects.length > 0 )
-            {
+            const intersects: THREE.Intersection[] = this._getObjectsIntersectingWithMouse();
+            
+            if (intersects.length) {
                 this.fire(Events.ANNOTATION_TARGET, intersects[0]);
             }
         }
@@ -604,29 +598,7 @@ namespace Virtex {
             const zoomDelta: number = (this._targetZoom - this.camera.position.z) * 0.1;
             this.camera.position.z += zoomDelta;
 
-            // cast a ray from the mouse position
-
-            if (this.objectGroup.children.length) {
-                
-                this._raycaster.setFromCamera(this._mousePosNorm, this.camera);
-
-                const obj: THREE.Object3D | null = this._getRaycastObject();
-
-                if (obj) {
-
-                    const intersects: THREE.Intersection[] = this._raycaster.intersectObject(obj);
-
-                    if (intersects.length > 0) {
-                        this._isMouseOver = true;
-                        // var obj2 = intersects[0].object;
-                        // (<any>obj2).material.emissive.setHex( 0xff0000 );
-                        // console.log("hit");
-                    } else {
-                        this._isMouseOver = false;
-                    }
-
-                }
-            }
+            this._isMouseOver === !!this._getObjectsIntersectingWithMouse().length;
 
             if (this._isMouseOver) {
                 this._element.classList.add('grabbable');
@@ -641,6 +613,25 @@ namespace Virtex {
             }
 
             this.renderer.render(this.scene, this.camera);
+        }
+
+        private _getObjectsIntersectingWithMouse(): any {
+
+            let intersects: THREE.Intersection[] = [];
+
+            if (this.objectGroup.children.length) {
+
+                // cast a ray from the mouse position
+                this._raycaster.setFromCamera(this._mousePosNorm, this.camera);
+
+                const obj: THREE.Object3D | null = this._getRaycastObject();
+
+                if (obj) {
+                    intersects = this._raycaster.intersectObject(obj);
+                }
+            }
+
+            return intersects;
         }
 
         private _getRaycastObject(): THREE.Object3D | null {
@@ -752,7 +743,7 @@ namespace Virtex {
         }
 
         public fire(name: string, ...args: any[]): void {
-            var data = [].slice.call(args, 1);
+            var data = [].slice.call(arguments, 1);
             var evtArr = ((this._e || (this._e = {}))[name] || []).slice();
             var i = 0;
             var len = evtArr.length;

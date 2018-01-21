@@ -141,7 +141,7 @@ declare namespace Virtex {
         private _createDOMHandlers();
         private _loadObject(objectPath);
         private _loaded(obj);
-        annotate(x: number, y: number): void;
+        annotate(): void;
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();
@@ -158,6 +158,7 @@ declare namespace Virtex {
         private _onTouchEnd();
         rotateY(radians: number): void;
         private _render();
+        private _getObjectsIntersectingWithMouse();
         private _getRaycastObject();
         private _getWidth();
         private _getHeight();

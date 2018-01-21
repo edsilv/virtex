@@ -124,8 +124,8 @@
                 }
             });
 
-            viewer.addEventListener("dblclick", function(event) {
-                viewport.annotate(event.clientX, event.clientY);
+            viewer.addEventListener("dblclick", function() {
+                viewport.annotate();
             });
 
             viewport.on('annotationtarget', function(args) {
@@ -134,7 +134,7 @@
 
             var vrbutton = document.querySelector('#vr');
 
-            vrbutton.onclick = function () {
+            vrbutton.onclick = function() {
                 viewport.toggleVR();
             }
 
@@ -157,7 +157,7 @@
             });
             
             viewport.on('loaded', function(args) {
- 
+                console.log(args);
             });
 
             document.querySelector('#zoomIn').addEventListener('click', function(e) {
