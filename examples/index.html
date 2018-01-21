@@ -142,7 +142,7 @@
             });
 
             viewport.on('annotationtarget', function(args) {
-                debug.textContent = 'x: ' + args.point.x + ', y: ' + args.point.y;
+                debug.textContent = 'x: ' + args.point.x + ', y: ' + args.point.y + ', z: ' + args.point.z;
             });
 
             var vrbutton = document.querySelector('#vr');
