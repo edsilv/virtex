@@ -598,17 +598,19 @@ namespace Virtex {
             const zoomDelta: number = (this._targetZoom - this.camera.position.z) * 0.1;
             this.camera.position.z += zoomDelta;
 
-            this._isMouseOver === !!this._getObjectsIntersectingWithMouse().length;
+            this._isMouseOver = this._getObjectsIntersectingWithMouse().length > 0;
+
+            // update mouse cursor
 
             if (this._isMouseOver) {
                 this._element.classList.add('grabbable');
-                if (this._isMouseDown) {
-                    this._element.classList.add('grabbing');
-                } else {
-                    this._element.classList.remove('grabbing');
-                }
             } else {
                 this._element.classList.remove('grabbable');
+            }
+
+            if (this._isMouseDown) {
+                this._element.classList.add('grabbing');
+            } else {
                 this._element.classList.remove('grabbing');
             }
 
