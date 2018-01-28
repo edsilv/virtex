@@ -377,6 +377,9 @@ namespace Virtex {
             //const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
             //this.scene.add(boundingBox);
 
+            // obj.children[0].transparent = true;
+            // obj.children[0].material.opacity = 0.01;
+
             this._loading.classList.remove('duringload');
             this._loading.classList.add('afterload');
             
@@ -392,7 +395,7 @@ namespace Virtex {
                 const intersection: THREE.Intersection = intersects[0];
 
                 // create a sphere
-                const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.015);
+                const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.1);
                 const sphereMaterial: THREE.MeshLambertMaterial = new THREE.MeshLambertMaterial({
                     color: 0x0000ff
                 });
@@ -401,8 +404,9 @@ namespace Virtex {
                 sphere.position.copy(intersection.point);
 
                 // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
-                //this.objectGroup.updateMatrixWorld(true); 
-                //sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+                this.objectGroup.updateMatrixWorld(false); 
+                sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+                //this.scene.add(sphere);
                 this.objectGroup.add(sphere);
 
                 this.fire(Events.ANNOTATION_TARGET, intersection);

@@ -548,6 +548,8 @@ var Virtex;
         Viewport.prototype._loaded = function (obj) {
             //const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
             //this.scene.add(boundingBox);
+            // obj.children[0].transparent = true;
+            // obj.children[0].material.opacity = 0.01;
             this._loading.classList.remove('duringload');
             this._loading.classList.add('afterload');
             this.fire(Events.LOADED, [obj]);
@@ -557,15 +559,16 @@ var Virtex;
             if (intersects.length) {
                 var intersection = intersects[0];
                 // create a sphere
-                var sphereGeometry = new THREE.SphereGeometry(.015);
+                var sphereGeometry = new THREE.SphereGeometry(.1);
                 var sphereMaterial = new THREE.MeshLambertMaterial({
                     color: 0x0000ff
                 });
                 var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
                 sphere.position.copy(intersection.point);
                 // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
-                //this.objectGroup.updateMatrixWorld(true); 
-                //sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+                this.objectGroup.updateMatrixWorld(false);
+                sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+                //this.scene.add(sphere);
                 this.objectGroup.add(sphere);
                 this.fire(Events.ANNOTATION_TARGET, intersection);
             }
@@ -752,10 +755,10 @@ var Virtex;
             return intersects;
         };
         Viewport.prototype._getRaycastObject = function () {
+            // if (this._raycastObjectCache) {
+            //     return this._raycastObjectCache;
+            // }
             var _this = this;
-            if (this._raycastObjectCache) {
-                return this._raycastObjectCache;
-            }
             this.objectGroup.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
                     _this._raycastObjectCache = child;
