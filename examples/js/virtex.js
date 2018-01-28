@@ -225,6 +225,7 @@ var Virtex;
         PLYFileTypeHandler.setup = function (viewport, geometry) {
             return new Promise(function (resolve) {
                 var material = new THREE.PointsMaterial({ vertexColors: THREE.VertexColors });
+                material.sizeAttenuation = false;
                 var mesh = new THREE.Points(geometry, material);
                 viewport.objectGroup.add(mesh);
                 viewport.createCamera();
@@ -755,10 +756,10 @@ var Virtex;
             return intersects;
         };
         Viewport.prototype._getRaycastObject = function () {
-            // if (this._raycastObjectCache) {
-            //     return this._raycastObjectCache;
-            // }
             var _this = this;
+            if (this._raycastObjectCache) {
+                return this._raycastObjectCache;
+            }
             this.objectGroup.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
                     _this._raycastObjectCache = child;

@@ -386,6 +386,7 @@ namespace Virtex {
             this.fire(Events.LOADED, [obj]);
         }
 
+        /*
         public annotate(): void {
             
             const intersects: THREE.Intersection[] = this._getObjectsIntersectingWithMouse();
@@ -412,6 +413,7 @@ namespace Virtex {
                 this.fire(Events.ANNOTATION_TARGET, intersection);
             }
         }
+        */
 
         private _getBoundingBox(): THREE.Box3 {
             return new THREE.Box3().setFromObject(this.objectGroup);
@@ -859,7 +861,7 @@ namespace Virtex {
     }
 
     export class Events {
-        static ANNOTATION_TARGET: string = 'annotationtarget';
+        //static ANNOTATION_TARGET: string = 'annotationtarget';
         static LOADED: string = 'loaded';
         static VR_AVAILABLE: string = 'vravailable';
         static VR_UNAVAILABLE: string = 'vrunavailable';

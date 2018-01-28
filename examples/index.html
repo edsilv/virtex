@@ -105,7 +105,7 @@
                 type: new Virtex.FileType("model/gltf+json")
             },
             pub: {
-                file: "https://files.blokdust.io/manifests/demo/lidar/pub/_pub/pub.ply",
+                file: "https://davemcwilliams.github.io/3d-portfolio/collection/pub/_pub/pub.ply",
                 type: new Virtex.FileType("application/ply")
             },
             woody: {
@@ -122,8 +122,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.woody.file,
-                    type: objects.woody.type, // defaults to obj
+                    file: objects.pub.file,
+                    type: objects.pub.type, // defaults to obj
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,
@@ -137,9 +137,11 @@
 
             var debug = document.querySelector('#debug');
 
+            /*
             viewer.addEventListener('dblclick', function() {
                 viewport.annotate();
             });
+            */
 
             viewport.on('annotationtarget', function(args) {
                 debug.textContent = 'x: ' + args.point.x + ', y: ' + args.point.y + ', z: ' + args.point.z;
