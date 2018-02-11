@@ -1,6 +1,6 @@
 {
   "name": "virtex3d",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "3D object viewer built with three.js",
   "keywords": [
     "3D",

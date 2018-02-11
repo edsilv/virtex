@@ -1,4 +1,4 @@
-// virtex v0.3.7 https://github.com/edsilv/virtex#readme
+// virtex v0.3.9 https://github.com/edsilv/virtex#readme
 declare var global: any;
 declare var Stats: any;
 interface Document {
@@ -141,7 +141,6 @@ declare namespace Virtex {
         private _createDOMHandlers();
         private _loadObject(objectPath);
         private _loaded(obj);
-        annotate(): void;
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();
@@ -181,7 +180,6 @@ declare namespace Virtex {
         resize(): void;
     }
     class Events {
-        static ANNOTATION_TARGET: string;
         static LOADED: string;
         static VR_AVAILABLE: string;
         static VR_UNAVAILABLE: string;
