@@ -755,10 +755,10 @@ var Virtex;
             return intersects;
         };
         Viewport.prototype._getRaycastObject = function () {
-            // if (this._raycastObjectCache) {
-            //     return this._raycastObjectCache;
-            // }
             var _this = this;
+            if (this._raycastObjectCache) {
+                return this._raycastObjectCache;
+            }
             this.objectGroup.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
                     _this._raycastObjectCache = child;
