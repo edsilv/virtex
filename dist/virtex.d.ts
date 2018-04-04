@@ -42,7 +42,8 @@ declare namespace Virtex {
 
 declare namespace Virtex {
     class glTFFileTypeHandler {
-        static setup(viewport: Viewport, obj: any): Promise<any>;
+        static setup(viewport: Viewport, gltf: any): Promise<any>;
+        static setContent(object: any, clips: any): void;
     }
 }
 
@@ -141,7 +142,6 @@ declare namespace Virtex {
         private _createDOMHandlers();
         private _loadObject(objectPath);
         private _loaded(obj);
-        annotate(): void;
         private _getBoundingBox();
         private _getBoundingWidth();
         private _getBoundingHeight();

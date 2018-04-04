@@ -100,8 +100,8 @@
                 file: "models/gltf/vc.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             },
-            monster: {
-                file: "models/gltf/monster.gltf",
+            woodygltf: {
+                file: "models/gltf/woody.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             },
             pub: {
@@ -122,8 +122,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.woody.file,
-                    type: objects.woody.type, // defaults to obj
+                    file: objects.woodygltf.file,
+                    type: objects.woodygltf.type, // defaults to obj
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,

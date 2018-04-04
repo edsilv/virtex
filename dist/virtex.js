@@ -1,5 +1,5 @@
 // virtex v0.3.7 https://github.com/edsilv/virtex#readme
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.virtex = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.virtex = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (global){
 
 var Virtex;
@@ -142,23 +142,70 @@ var Virtex;
     var glTFFileTypeHandler = /** @class */ (function () {
         function glTFFileTypeHandler() {
         }
-        glTFFileTypeHandler.setup = function (viewport, obj) {
+        glTFFileTypeHandler.setup = function (viewport, gltf) {
             return new Promise(function (resolve) {
-                viewport.objectGroup.add(obj.scene);
-                if (obj.animations) {
-                    var animations = obj.animations;
-                    for (var i = 0, l = animations.length; i < l; i++) {
-                        //const animation = animations[i];
-                        //animation.loop = true;
-                        //animation.play();
-                    }
+                var scene = gltf.scene || gltf.scenes[0];
+                var clips = gltf.animations || [];
+                //glTFFileTypeHandler.setContent(scene, clips);
+                viewport.objectGroup.add(scene);
+                // if (obj.animations) {
+                //     const animations = obj.animations;
+                //     for (var i = 0, l = animations.length; i < l; i++) {
+                //         //const animation = animations[i];
+                //         //animation.loop = true;
+                //         //animation.play();
+                //     }
+                // }
+                viewport.scene = gltf.scene;
+                if (gltf.cameras && gltf.cameras.length) {
+                    viewport.camera = gltf.cameras[0];
                 }
-                viewport.scene = obj.scene;
-                if (obj.cameras && obj.cameras.length) {
-                    viewport.camera = obj.cameras[0];
-                }
-                resolve(obj);
+                resolve(gltf);
             });
+        };
+        glTFFileTypeHandler.setContent = function (object, clips) {
+            //this.clear();
+            object.updateMatrixWorld();
+            var box = new THREE.Box3().setFromObject(object);
+            //const size = box.getSize().length();
+            var center = box.getCenter();
+            //this.controls.reset();
+            object.position.x += (object.position.x - center.x);
+            object.position.y += (object.position.y - center.y);
+            object.position.z += (object.position.z - center.z);
+            // this.controls.maxDistance = size * 10;
+            // this.defaultCamera.near = size / 100;
+            // this.defaultCamera.far = size * 100;
+            // this.defaultCamera.updateProjectionMatrix();
+            // if (this.options.cameraPosition) {
+            //     this.defaultCamera.position.fromArray(this.options.cameraPosition);
+            //     this.defaultCamera.lookAt(new THREE.Vector3());
+            // } else {
+            //     this.defaultCamera.position.copy(center);
+            //     this.defaultCamera.position.x += size / 2.0;
+            //     this.defaultCamera.position.y += size / 5.0;
+            //     this.defaultCamera.position.z += size / 2.0;
+            //     this.defaultCamera.lookAt(center);
+            // }
+            // this.setCamera(DEFAULT_CAMERA);
+            //this.controls.saveState();
+            //this.scene.add(object);
+            // this.content = object;
+            // this.state.addLights = true;
+            // this.content.traverse((node) => {
+            //     if (node.isLight) {
+            //         this.state.addLights = false;
+            //     }
+            // });
+            // this.setClips(clips);
+            // this.updateLights();
+            // this.updateGUI();
+            // this.updateEnvironment();
+            // this.updateTextureEncoding();
+            // this.updateDisplay();
+            // window.content = this.content;
+            // console.info('[glTF Viewer] THREE.Scene exported as `window.content`.');
+            // this.printGraph(this.content);
         };
         return glTFFileTypeHandler;
     }());
@@ -554,33 +601,37 @@ var Virtex;
             this._loading.classList.add('afterload');
             this.fire(Events.LOADED, [obj]);
         };
-        Viewport.prototype.annotate = function () {
-            var intersects = this._getObjectsIntersectingWithMouse();
-            if (intersects.length) {
-                var intersection = intersects[0];
-                // create a sphere
-                var sphereGeometry = new THREE.SphereGeometry(.1);
-                var sphereMaterial = new THREE.MeshLambertMaterial({
-                    color: 0x0000ff
-                });
-                var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                sphere.position.copy(intersection.point);
-                // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
-                this.objectGroup.updateMatrixWorld(false);
-                sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
-                //this.scene.add(sphere);
-                this.objectGroup.add(sphere);
-                this.fire(Events.ANNOTATION_TARGET, intersection);
-            }
-        };
+        // public annotate(): void {
+        //     const intersects: THREE.Intersection[] = this._getObjectsIntersectingWithMouse();
+        //     if (intersects.length) {
+        //         const intersection: THREE.Intersection = intersects[0];
+        //         // create a sphere
+        //         const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.1);
+        //         const sphereMaterial: THREE.MeshLambertMaterial = new THREE.MeshLambertMaterial({
+        //             color: 0x0000ff
+        //         });
+        //         const sphere: THREE.Mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        //         sphere.position.copy(intersection.point);
+        //         // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
+        //         this.objectGroup.updateMatrixWorld(false); 
+        //         sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+        //         //this.scene.add(sphere);
+        //         this.objectGroup.add(sphere);
+        //         this.fire(Events.ANNOTATION_TARGET, intersection);
+        //     }
+        // }
         Viewport.prototype._getBoundingBox = function () {
             return new THREE.Box3().setFromObject(this.objectGroup);
         };
         Viewport.prototype._getBoundingWidth = function () {
-            return this._getBoundingBox().getSize().x;
+            var target = new THREE.Vector3();
+            this._getBoundingBox().getSize(target);
+            return target.x;
         };
         Viewport.prototype._getBoundingHeight = function () {
-            return this._getBoundingBox().getSize().y;
+            var target = new THREE.Vector3();
+            this._getBoundingBox().getSize(target);
+            return target.y;
         };
         // private _getDistanceToObject(): number {
         //     return this.camera.position.distanceTo(this.objectGroup.position);
