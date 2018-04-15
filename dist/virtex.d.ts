@@ -43,7 +43,6 @@ declare namespace Virtex {
 declare namespace Virtex {
     class glTFFileTypeHandler {
         static setup(viewport: Viewport, gltf: any): Promise<any>;
-        static setContent(object: any, clips: any): void;
     }
 }
 
