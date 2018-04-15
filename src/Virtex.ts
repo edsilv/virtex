@@ -386,44 +386,34 @@ namespace Virtex {
             this.fire(Events.LOADED, [obj]);
         }
 
-<<<<<<< HEAD
         /*
         public annotate(): void {
-=======
-        // public annotate(): void {
->>>>>>> gltf
             
-        //     const intersects: THREE.Intersection[] = this._getObjectsIntersectingWithMouse();
+            const intersects: THREE.Intersection[] = this._getObjectsIntersectingWithMouse();
             
-        //     if (intersects.length) {
+            if (intersects.length) {
 
-        //         const intersection: THREE.Intersection = intersects[0];
+                const intersection: THREE.Intersection = intersects[0];
 
-        //         // create a sphere
-        //         const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.1);
-        //         const sphereMaterial: THREE.MeshLambertMaterial = new THREE.MeshLambertMaterial({
-        //             color: 0x0000ff
-        //         });
-        //         const sphere: THREE.Mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                // create a sphere
+                const sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(.1);
+                const sphereMaterial: THREE.MeshLambertMaterial = new THREE.MeshLambertMaterial({
+                    color: 0x0000ff
+                });
+                const sphere: THREE.Mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
 
-        //         sphere.position.copy(intersection.point);
+                sphere.position.copy(intersection.point);
 
-        //         // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
-        //         this.objectGroup.updateMatrixWorld(false); 
-        //         sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
-        //         //this.scene.add(sphere);
-        //         this.objectGroup.add(sphere);
+                // https://stackoverflow.com/questions/26400570/translate-a-vector-from-global-space-to-local-vector-in-three-js
+                this.objectGroup.updateMatrixWorld(false); 
+                sphere.applyMatrix(new THREE.Matrix4().getInverse(this.objectGroup.matrixWorld));
+                //this.scene.add(sphere);
+                this.objectGroup.add(sphere);
 
-<<<<<<< HEAD
                 this.fire(Events.ANNOTATION_TARGET, intersection);
             }
         }
         */
-=======
-        //         this.fire(Events.ANNOTATION_TARGET, intersection);
-        //     }
-        // }
->>>>>>> gltf
 
         private _getBoundingBox(): THREE.Box3 {
             return new THREE.Box3().setFromObject(this.objectGroup);
