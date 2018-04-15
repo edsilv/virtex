@@ -96,24 +96,20 @@
                 file: "models/threejs/harbour.json",
                 type: new Virtex.FileType("application/vnd.threejs+json")
             },
-            vc: {
-                file: "models/gltf/vc.gltf",
-                type: new Virtex.FileType("model/gltf+json")
-            },
             woodygltf: {
-                file: "models/gltf/woody.gltf",
+                file: "https://edsilv.github.io/iiif-3d-manifests/collection/gltf/woody/_woody/woody.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             },
-            damagedhelmet: {
-                file: "models/gltf/DamagedHelmet.gltf",
+            bowl: {
+                file: "https://edsilv.github.io/iiif-3d-manifests/collection/gltf/bowl/_bowl/bowl.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             },
             pub: {
-                file: "https://davemcwilliams.github.io/3d-portfolio/collection/pub/_pub/pub.ply",
+                file: "https://edsilv.github.io/iiif-3d-manifests/collection/ply/pub/_pub/pub.ply",
                 type: new Virtex.FileType("application/ply")
             },
-            woody: {
-                file: 'https://sophiedixon.github.io/3d-portfolio/collection/woody/_woody/woody.obj',
+            woodyobj: {
+                file: "https://sophiedixon.github.io/3d-portfolio/collection/woody/_woody/woody.obj",
                 type: new Virtex.FileType("text/plain")
             }
         };
@@ -138,6 +134,8 @@
                     //directionalLight2Intensity: 2.5
                 }
             });
+
+            //viewport.resize();
 
             var debug = document.querySelector('#debug');
 

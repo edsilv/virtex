@@ -109,7 +109,7 @@ namespace Virtex {
                 ambientLightColor: 0xd0d0d0,
                 ambientLightIntensity: 1,
                 antialias: true,
-                cameraZ: 4.5, // multiply the width of the object by this number
+                cameraZ: 6, // multiply the magnitude of the object bounding vector by this number
                 directionalLight1Color: 0xffffff,
                 directionalLight1Intensity: 0.75,
                 directionalLight2Color: 0x002958,
@@ -166,11 +166,17 @@ namespace Virtex {
             this._lightGroup.add(ambientLight);
         }
 
-        public createCamera(): void {
-            this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);    
-            const cameraZ: number = this._getCameraZ();
-            this.camera.position.z = this._targetZoom = cameraZ;
+        public createCamera(camera?: THREE.PerspectiveCamera): void {
+            if (camera) {
+                this.camera = camera;
+            } else {
+                this.camera = new THREE.PerspectiveCamera(this._getFov(), this._getAspectRatio(), this.options.data.near, this.options.data.far);    
+                const cameraZ: number = this._getCameraZ();
+                this.camera.position.z = this._targetZoom = cameraZ;
+            }
+            
             this.scene.add(this.camera);
+            //this.camera.updateProjectionMatrix();
         }
 
         private _createRenderer(): void {
@@ -374,8 +380,8 @@ namespace Virtex {
 
         private _loaded(obj: any): void {
 
-            //const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
-            //this.scene.add(boundingBox);
+            // const boundingBox = new THREE.BoxHelper(this.objectGroup, new THREE.Color(0xffffff));
+            // this.scene.add(boundingBox);
 
             // obj.children[0].transparent = true;
             // obj.children[0].material.opacity = 0.01;
@@ -419,16 +425,22 @@ namespace Virtex {
             return new THREE.Box3().setFromObject(this.objectGroup);
         }
 
-        private _getBoundingWidth(): number {
-            const target: THREE.Vector3 = new THREE.Vector3();
-            this._getBoundingBox().getSize(target);
-            return target.x;
-        }
+        // private _getBoundingWidth(): number {
+        //     const target: THREE.Vector3 = new THREE.Vector3();
+        //     this._getBoundingBox().getSize(target);
+        //     return target.x;
+        // }
 
-        private _getBoundingHeight(): number {
-            const target: THREE.Vector3 = new THREE.Vector3();
-            this._getBoundingBox().getSize(target);
-            return target.y;
+        // private _getBoundingHeight(): number {
+        //     const target: THREE.Vector3 = new THREE.Vector3();
+        //     this._getBoundingBox().getSize(target);
+        //     return target.y;
+        // }
+
+        private _getBoundingMag(): number {
+            const size: THREE.Vector3 = new THREE.Vector3();
+            this._getBoundingBox().getSize(size).length();
+            return size.length();
         }
 
         // private _getDistanceToObject(): number {
@@ -436,17 +448,18 @@ namespace Virtex {
         // }
 
         private _getCameraZ(): number {
-            return this._getBoundingWidth() * <number>this.options.data.cameraZ;
+            return this._getBoundingMag() * <number>this.options.data.cameraZ;
         }
 
         private _getFov(): number {
 
-            const width: number = this._getBoundingWidth();
-            const height: number = this._getBoundingHeight(); // todo: use getSize and update definition
-            const dist: number = this._getCameraZ() - width;
+            // const width: number = this._getBoundingWidth();
+            // const height: number = this._getBoundingHeight(); // todo: use getSize and update definition
+            const dist: number = this._getCameraZ();
+            const mag: number = this._getBoundingMag();
 
             //http://stackoverflow.com/questions/14614252/how-to-fit-camera-to-object
-            let fov: number = 2 * Math.atan(height / (2 * dist)) * (180 / Math.PI);
+            let fov: number = 2 * Math.atan(mag / (2 * dist)) * (180 / Math.PI);
             //let fov: number = 2 * Math.atan((width / this._getAspectRatio()) / (2 * dist)) * (180 / Math.PI);
 
             return fov;
@@ -696,15 +709,15 @@ namespace Virtex {
         }
 
         private _getZoomSpeed(): number {
-            return this._getBoundingWidth() * <number>this.options.data.zoomSpeed;
+            return this._getBoundingMag() * <number>this.options.data.zoomSpeed;
         }
 
         private _getMaxZoom(): number {
-            return this._getBoundingWidth() * <number>this.options.data.maxZoom;
+            return this._getBoundingMag() * <number>this.options.data.maxZoom;
         }
 
         private _getMinZoom(): number {
-            return this._getBoundingWidth() * <number>this.options.data.minZoom;
+            return this._getBoundingMag() * <number>this.options.data.minZoom;
         }
 
         public zoomIn(): void {
@@ -733,7 +746,7 @@ namespace Virtex {
             this._prevCameraRotation = this.camera.rotation.clone();
             this._prevObjectPosition = this.objectGroup.position.clone();
 
-            this.objectGroup.position.z -= this._getBoundingWidth();
+            this.objectGroup.position.z -= this._getBoundingMag();
         }
         
         public exitVR(): void {
