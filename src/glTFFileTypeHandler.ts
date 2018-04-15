@@ -1,31 +1,19 @@
 namespace Virtex {
     export class glTFFileTypeHandler {
 
-        static setup(viewport: Viewport, obj: any): Promise<any> {
+        static setup(viewport: Viewport, gltf: any): Promise<any> {
 
             return new Promise<any>((resolve) => {
-                
-                viewport.objectGroup.add(obj.scene);
-
-                if (obj.animations) {
-                    const animations = obj.animations;
-
-                    for (var i = 0, l = animations.length; i < l; i++) {
-                        //const animation = animations[i];
-                        //animation.loop = true;
-                        //animation.play();
-                    }
-                }
-
-                viewport.scene = obj.scene;
-
-                if (obj.cameras && obj.cameras.length) {
-                    viewport.camera = obj.cameras[0];
-                }
-
-                resolve(obj);
+                // todo: add animation, gltf camera support e.g.
+                // https://github.com/donmccurdy/three-gltf-viewer/blob/master/src/viewer.js#L183
+                // allow specifying envmap? https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_gltf.html#L92
+                const scene = gltf.scene || gltf.scenes[0];
+                viewport.objectGroup.add(scene);
+                viewport.createCamera();
+                resolve(gltf);
             });
         }
+
     }
 }
 

@@ -11,10 +11,10 @@
   "main": "gulpfile.js",
   "types": "./dist/virtex.d.ts",
   "dependencies": {
-    "@types/three": "0.89.0",
+    "@types/three": "0.91.0",
     "@types/webvr-api": "0.0.31",
     "key-codes": "github:edsilv/key-codes#v0.0.7",
-    "three": "0.89.0"
+    "three": "0.91.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
