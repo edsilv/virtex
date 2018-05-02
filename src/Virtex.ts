@@ -366,6 +366,8 @@ namespace Virtex {
 
                     },
                     (e: ProgressEvent) => {
+                        // e.lengthComputable is false when content is gzipped. show a spinner instead when false?
+                        // https://stackoverflow.com/questions/11127654/why-is-progressevent-lengthcomputable-false/11848934?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
                         if (e.lengthComputable) {
                             this._loadProgress(e.loaded / e.total);
                         }
