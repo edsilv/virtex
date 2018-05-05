@@ -78,7 +78,7 @@ namespace Virtex {
             this.scene.background = new THREE.Color(this.options.data.backgroundColor);
             this.objectGroup = new THREE.Object3D();
             this.scene.add(this.objectGroup);
-            this._createLights();
+            this.createLights();
             this.createCamera();
             this._createRenderer();
             this._createDOMHandlers();
@@ -149,9 +149,17 @@ namespace Virtex {
             }
         }
 
-        private _createLights(): void {
+        public createLights(): void {
             
+            // remove any existing lights
+            const existingLights: THREE.Object3D | null = this.scene.getObjectByName('lights');
+
+            if (existingLights) {
+                this.scene.remove(existingLights);
+            }
+
             this._lightGroup = new THREE.Object3D();
+            this._lightGroup.name = "lights";
             this.scene.add(this._lightGroup);
             
             const light1: THREE.DirectionalLight = new THREE.DirectionalLight(this.options.data.directionalLight1Color, this.options.data.directionalLight1Intensity);
