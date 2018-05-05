@@ -9,8 +9,10 @@ namespace Virtex {
                 // allow specifying envmap? https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_gltf.html#L92
                 const obj = gltf.scene || gltf.scenes[0];
 
-                viewport.options.data.ambientLightIntensity = 0.1;
-                // https://github.com/mrdoob/three.js/pull/12766
+                viewport.options.data.ambientLightIntensity = 0.05;
+                viewport.options.data.directionalLight1Intensity = 0.5;
+                viewport.options.data.directionalLight2Intensity = 0.1;
+                // https://github.com/mrdoob/three.js/issues/12554
                 viewport.renderer.gammaOutput = true;
                 viewport.objectGroup.add(obj);
                 viewport.createLights();
