@@ -22,7 +22,7 @@
     <script src="js/virtex.js"></script>
     <script src="js/stats.min.js"></script>
     <script src="js/Detector.js"></script>
-    <script src="js/key-codes.js"></script>
+    <script src="js/KeyCodes.js"></script>
 
     <style>
         body {
@@ -109,15 +109,19 @@
                 type: new Virtex.FileType("text/plain")
             },
             bowl: {
-                file: "https://nomadproject.github.io/objects/collection/bowl/_bowl/bowl.gltf",
+                file: "https://nomad-project.co.uk/objects/collection/bowl/_bowl/bowl.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             },
             headrest: {
-                file: "https://nomadproject.github.io/objects/collection/headrest/_headrest/headrest.gltf",
+                file: "https://nomad-project.co.uk/objects/collection/headrest/_headrest/headrest.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             },
             gourd: {
-                file: "https://nomadproject.github.io/objects/collection/gourd/_gourd/gourd.gltf",
+                file: "https://nomad-project.co.uk/objects/collection/gourd/_gourd/gourd.gltf",
+                type: new Virtex.FileType("model/gltf+json")
+            },
+            incenseburner: {
+                file: "https://nomad-project.co.uk/objects/collection/incense-burner/_incense-burner/incense-burner.gltf",
                 type: new Virtex.FileType("model/gltf+json")
             }
         };
@@ -130,8 +134,8 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.headrest.file,
-                    type: objects.headrest.type, // defaults to obj
+                    file: objects.woodygltf.file,
+                    type: objects.woodygltf.type, // defaults to obj
                     fullscreenEnabled: true,
                     showStats: false
                     //ambientLightColor: 0xd0d0d0,

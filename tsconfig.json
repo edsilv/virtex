@@ -11,18 +11,16 @@
         "strictNullChecks": true,
         "lib": ["es6", "dom"],
         "types": [
-            "key-codes",
+            "@edsilv/key-codes",
             "three",
             "webvr-api"
         ]
     },
     "files": [
-        "src/Definitions.ts",
         "src/StringValue.ts",
         "src/FileType.ts"
     ],
     "include": [
-        "src/**/*",
-        "typings/**/*"
+        "src/**/*"
     ]
 }

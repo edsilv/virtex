@@ -1,6 +1,6 @@
 {
   "name": "virtex3d",
-  "version": "0.3.12",
+  "version": "0.3.15",
   "description": "3D object viewer built with three.js",
   "files": [
     "dist"
@@ -16,7 +16,7 @@
   "dependencies": {
     "@types/three": "0.91.0",
     "@types/webvr-api": "0.0.31",
-    "key-codes": "github:edsilv/key-codes#v0.0.7",
+    "@edsilv/key-codes": "0.0.9",
     "three": "0.91.0"
   },
   "devDependencies": {

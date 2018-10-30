@@ -17,6 +17,6 @@ tasks.init({
         'node_modules/three/examples/js/loaders/PLYLoader.js',
         'node_modules/three/examples/js/Detector.js',
         'node_modules/three/examples/js/vr/WebVR.js',
-        'node_modules/key-codes/dist/key-codes.js'
+        'node_modules/@edsilv/key-codes/dist/KeyCodes.js'
     ]
 });
