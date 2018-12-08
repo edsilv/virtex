@@ -3,7 +3,6 @@ declare var Detector: any;
 namespace Virtex {
     export class Viewport {
         
-        private _clock: THREE.Clock;
         private _e: any;
         private _element: HTMLElement;
         private _isFullscreen: boolean = false;
@@ -22,6 +21,7 @@ namespace Virtex {
         private _prevObjectPosition: any;
         private _raycaster: THREE.Raycaster;
         private _raycastObjectCache: THREE.Object3D | null = null;
+        private _spinner: HTMLElement;
         private _stats: any;
         private _targetRotation: THREE.Vector2 = new THREE.Vector2();
         private _targetRotationOnMouseDown: THREE.Vector2 = new THREE.Vector2();
@@ -67,12 +67,16 @@ namespace Virtex {
             this._viewport.classList.add('viewport');
             this._loading = document.createElement('div');
             this._loading.classList.add('loading');
+            this._spinner = document.createElement('div');
+            this._spinner.classList.add('spinner');
             this._loadingBar = document.createElement('div');
             this._loadingBar.classList.add('bar');
+
+            this._loading.style.visibility = "hidden";
+            this._spinner.style.visibility = "hidden";
             
             this._element.appendChild(this._viewport);
 
-            this._clock = new THREE.Clock();
             this._raycaster = new THREE.Raycaster();
             this.scene = new THREE.Scene();
             this.scene.background = new THREE.Color(this.options.data.backgroundColor);
@@ -86,6 +90,7 @@ namespace Virtex {
 
             this._viewport.appendChild(this._loading);
             this._loading.appendChild(this._loadingBar);
+            this._loading.appendChild(this._spinner);
             this._loading.classList.add('beforeload');
 
             this._loadObject(this.options.data.file);
@@ -374,10 +379,14 @@ namespace Virtex {
 
                     },
                     (e: ProgressEvent) => {
-                        // e.lengthComputable is false when content is gzipped. show a spinner instead when false?
+                        // e.lengthComputable is false when content is gzipped.
                         // https://stackoverflow.com/questions/11127654/why-is-progressevent-lengthcomputable-false/11848934?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
                         if (e.lengthComputable) {
+                            this._loading.style.visibility = "visible";
                             this._loadProgress(e.loaded / e.total);
+                        } else {
+                            // show a spinner
+                            this._spinner.style.visibility = "visible";
                         }
                     },
                     (e: ErrorEvent) => {
@@ -628,8 +637,6 @@ namespace Virtex {
         // }
 
         private _render(): void {
-            
-            //const delta: number = this._clock.getDelta() * 60;
 
             // horizontal rotation
             this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);

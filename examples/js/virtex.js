@@ -296,10 +296,13 @@ var Virtex;
             this._viewport.classList.add('viewport');
             this._loading = document.createElement('div');
             this._loading.classList.add('loading');
+            this._spinner = document.createElement('div');
+            this._spinner.classList.add('spinner');
             this._loadingBar = document.createElement('div');
             this._loadingBar.classList.add('bar');
+            this._loading.style.visibility = "hidden";
+            this._spinner.style.visibility = "hidden";
             this._element.appendChild(this._viewport);
-            this._clock = new THREE.Clock();
             this._raycaster = new THREE.Raycaster();
             this.scene = new THREE.Scene();
             this.scene.background = new THREE.Color(this.options.data.backgroundColor);
@@ -312,6 +315,7 @@ var Virtex;
             this._animate();
             this._viewport.appendChild(this._loading);
             this._loading.appendChild(this._loadingBar);
+            this._loading.appendChild(this._spinner);
             this._loading.classList.add('beforeload');
             this._loadObject(this.options.data.file);
             // STATS //
@@ -548,10 +552,15 @@ var Virtex;
                             break;
                     }
                 }, function (e) {
-                    // e.lengthComputable is false when content is gzipped. show a spinner instead when false?
+                    // e.lengthComputable is false when content is gzipped.
                     // https://stackoverflow.com/questions/11127654/why-is-progressevent-lengthcomputable-false/11848934?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
                     if (e.lengthComputable) {
+                        _this._loading.style.visibility = "visible";
                         _this._loadProgress(e.loaded / e.total);
+                    }
+                    else {
+                        // show a spinner
+                        _this._spinner.style.visibility = "visible";
                     }
                 }, function (e) {
                     // error
@@ -742,7 +751,6 @@ var Virtex;
         //     this.objectGroup.updateMatrix();
         // }
         Viewport.prototype._render = function () {
-            //const delta: number = this._clock.getDelta() * 60;
             // horizontal rotation
             this.rotateY((this._targetRotation.x - this.objectGroup.rotation.y) * 0.1);
             // vertical rotation
