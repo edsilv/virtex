@@ -11,6 +11,7 @@ namespace Virtex {
         private _lightGroup: THREE.Group;
         private _loading: HTMLElement;
         private _loadingBar: HTMLElement;
+        private _loadingBarProgress: HTMLElement;
         private _mousePos: THREE.Vector2 = new THREE.Vector2();
         private _mousePosNorm: THREE.Vector2 = new THREE.Vector2(-1, -1);
         private _mousePosOnMouseDown: THREE.Vector2 = new THREE.Vector2();
@@ -67,13 +68,17 @@ namespace Virtex {
             this._viewport.classList.add('viewport');
             this._loading = document.createElement('div');
             this._loading.classList.add('loading');
+            this._loadingBar = document.createElement('div');
+            this._loadingBar.classList.add('loadingBar');
+            this._loadingBarProgress = document.createElement('div');
+            this._loadingBarProgress.classList.add('loadingBarProgress');
+
             this._spinner = document.createElement('div');
             this._spinner.classList.add('spinner');
-            this._loadingBar = document.createElement('div');
-            this._loadingBar.classList.add('bar');
 
-            this._loading.style.visibility = "hidden";
-            this._spinner.style.visibility = "hidden";
+            this._loadingBar.style.display = 'none';
+            this._loadingBarProgress.style.display = 'none';
+            this._spinner.style.display = 'none';
             
             this._element.appendChild(this._viewport);
 
@@ -90,6 +95,7 @@ namespace Virtex {
 
             this._viewport.appendChild(this._loading);
             this._loading.appendChild(this._loadingBar);
+            this._loading.appendChild(this._loadingBarProgress);
             this._loading.appendChild(this._spinner);
             this._loading.classList.add('beforeload');
 
@@ -382,11 +388,13 @@ namespace Virtex {
                         // e.lengthComputable is false when content is gzipped.
                         // https://stackoverflow.com/questions/11127654/why-is-progressevent-lengthcomputable-false/11848934?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
                         if (e.lengthComputable) {
-                            this._loading.style.visibility = "visible";
+                            this._loadingBarVisible(true);
+                            this._spinnerVisible(false);
                             this._loadProgress(e.loaded / e.total);
                         } else {
                             // show a spinner
-                            this._spinner.style.visibility = "visible";
+                            this._loadingBarVisible(false);
+                            this._spinnerVisible(true);
                         }
                     },
                     (e: ErrorEvent) => {
@@ -395,6 +403,24 @@ namespace Virtex {
                     }
                 );
             });
+        }
+
+        private _loadingBarVisible(visible: boolean): void {
+            if (visible) {
+                this._loadingBar.style.display = 'block';
+                this._loadingBarProgress.style.display = 'block';
+            } else {
+                this._loadingBar.style.display = 'none';
+                this._loadingBarProgress.style.display = 'none';
+            }
+        }
+
+        private _spinnerVisible(visible: boolean): void {
+            if (visible) {
+                this._spinner.style.display = 'block';
+            } else {
+                this._spinner.style.display = 'none';
+            }
         }
 
         private _loaded(obj: any): void {
@@ -487,7 +513,7 @@ namespace Virtex {
         private _loadProgress(progress: number): void {
             const fullWidth: number = this._loading.offsetWidth;
             const width: number = Math.floor(fullWidth * progress);
-            this._loadingBar.style.width = String(width) + "px";
+            this._loadingBarProgress.style.width = String(width) + "px";
         }
 
         private _onMouseDown(event: MouseEvent): void {
