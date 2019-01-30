@@ -21,6 +21,7 @@ namespace Virtex {
         type?: FileType;
         backgroundColor?: number;
         zoomSpeed?: number;
+        dracoDecoderPath?: string;
     }
 
     export interface IVirtexOptions {

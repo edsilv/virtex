@@ -15,8 +15,8 @@
     <script src="js/three.min.js"></script>
     <script src="js/GLTFLoader.js"></script>
     <script src="js/OBJLoader.js"></script>
-    <!-- <script src="js/draco_decoder.js"></script>
-    <script src="js/DRACOLoader.js"></script> -->
+    <!-- <script src="js/draco_decoder.js"></script> -->
+    <script src="js/DRACOLoader.js"></script>
     <!-- <script src="js/corto.js"></script>
     <script src="js/CORTOLoader.js"></script> -->
     <script src="js/MTLLoader.js"></script>
@@ -129,6 +129,10 @@
             milkvessel: {
                 file: "https://nomadproject.netlify.com/collection/milk-vessel/_milk-vessel/milk-vessel.gltf",
                 type: new Virtex.FileType("model/gltf+json")
+            },
+            bowldraco: {
+                file: "https://iiif-3d-manifests-fork.netlify.com/collection/gltfdraco/bowl/_bowl/assets/bowlDraco.gltf",
+                type: new Virtex.FileType("model/gltf+json")
             }
         };
         
@@ -140,10 +144,11 @@
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.milkvessel.file,
-                    type: objects.milkvessel.type, // defaults to obj
+                    file: objects.bowldraco.file,
+                    type: objects.bowldraco.type, // defaults to obj
                     fullscreenEnabled: true,
-                    showStats: false
+                    showStats: false,
+                    dracoDecoderPath: './js/'
                     //ambientLightColor: 0xd0d0d0,
                     //ambientLightIntensity: 1,
                     //directionalLight1Color: 0xff0000,

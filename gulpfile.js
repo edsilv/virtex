@@ -9,7 +9,9 @@ tasks.init({
     libs: [
         'node_modules/three/build/three.min.js',
         'node_modules/three/examples/js/libs/stats.min.js',
-        'node_modules/three/examples/js/loaders/draco_decoder.js',
+        'node_modules/three/examples/js/libs/draco/gltf/draco_decoder.js',
+        'node_modules/three/examples/js/libs/draco/gltf/draco_decoder.wasm',
+        'node_modules/three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js',
         'node_modules/three/examples/js/loaders/DRACOLoader.js',
         'node_modules/three/examples/js/loaders/GLTFLoader.js',
         'node_modules/three/examples/js/loaders/MTLLoader.js',
