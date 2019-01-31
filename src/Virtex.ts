@@ -137,7 +137,8 @@ namespace Virtex {
                 showStats: false,
                 type: FileType.OBJ,
                 backgroundColor: 0x000000,
-                zoomSpeed: 1
+                zoomSpeed: 1,
+                dracoDecoderPath: './'
             }
         }
 
@@ -325,6 +326,10 @@ namespace Virtex {
                         break;
                     case FileType.GLTF.toString() :
                         loader = new (<any>THREE).GLTFLoader();
+                        let dracoDecoderPath = <string>this.options.data.dracoDecoderPath;
+                        (<any>THREE).DRACOLoader.setDecoderPath(dracoDecoderPath);
+                        let dracoLoader = new (<any>THREE).DRACOLoader();
+                        loader.setDRACOLoader(dracoLoader);
                         break;
                     case FileType.OBJ.toString() :
                         loader = new THREE.OBJLoader();
