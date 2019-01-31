@@ -1,9 +1,10 @@
-.idea
-.vscode
+coverage
+debug.log
+dist-commonjs
+dist-css
+dist-esmodule
+dist-umd
+dist-var
 node_modules
 npm-debug.log
-Thumbs.db
-debug.log
-typings
-package-lock.json
-dist
+types

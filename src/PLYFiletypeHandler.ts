@@ -1,18 +1,18 @@
-namespace Virtex {
-    export class PLYFileTypeHandler {
+import { Viewport } from ".";
 
-        static setup(viewport: Viewport, geometry: any): Promise<any> {
+export class PLYFileTypeHandler {
 
-            return new Promise<any>((resolve) => {
+    static setup(viewport: Viewport, geometry: any): Promise<any> {
 
-                const material = new THREE.PointsMaterial( { vertexColors: THREE.VertexColors } );
-                material.sizeAttenuation = false;
-                const mesh = new THREE.Points(geometry, material);
-                viewport.objectGroup.add(mesh);
-                viewport.createCamera();
-                resolve(mesh);
+        return new Promise<any>((resolve) => {
 
-            });
-        }
+            const material = new THREE.PointsMaterial( { vertexColors: THREE.VertexColors } );
+            material.sizeAttenuation = false;
+            const mesh = new THREE.Points(geometry, material);
+            viewport.objectGroup.add(mesh);
+            viewport.createCamera();
+            resolve(mesh);
+
+        });
     }
 }

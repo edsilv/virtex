@@ -1,7 +1,5 @@
-.idea
-.vscode
+.*
+**/tsconfig.json
+**/webpack.config.js
 node_modules
 src
-gulpfile.js
-npm-debug.log
-examples

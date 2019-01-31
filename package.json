@@ -2,28 +2,38 @@
   "name": "virtex3d",
   "version": "0.3.18",
   "description": "3D object viewer built with three.js",
-  "files": [
-    "dist"
-  ],
+  "main": "./dist-esmodule/index.js",
+  "types": "./types/index.d.ts",
+  "scripts": {
+    "clean": "npx rimraf -rf dist-css dist-umd dist-commonjs dist-esmodule dist-var types",
+    "build-ts": "tsc && tsc -m es6 --outDir dist-esmodule && webpack && npx dts-bundle-generator --umd-module-name virtex -o types/index.d.ts dist-esmodule/index.d.ts",
+    "build-css": "npx mkdirp ./dist-css && npx lessc ./src/css/styles.less > ./dist-css/styles.css",
+    "build": "npm run clean && npm run build-ts && npm run build-css",
+    "start": "npx serve"
+  },
   "keywords": [
     "3D",
     "three.js",
     "webgl",
     "viewer"
   ],
-  "main": "gulpfile.js",
-  "types": "./dist/virtex.d.ts",
   "dependencies": {
     "@types/three": "0.91.0",
-    "@types/webvr-api": "0.0.31",
     "@edsilv/key-codes": "0.0.9",
     "three": "0.91.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-tasks": "github:iiif-commons/gulp-tasks#v1.0.7"
+    "awesome-typescript-loader": "5.2.1",
+    "dts-bundle-generator": "2.0.0",
+    "less": "3.8.1",
+    "mkdirp": "^0.5.1",
+    "rimraf": "2.6.2",
+    "serve": "10.0.2",
+    "typescript": "3.1.6",
+    "uglify-js": "3.4.9",
+    "webpack": "4.28.3",
+    "webpack-cli": "3.1.2"
   },
-  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edsilv/virtex.git"

@@ -4,22 +4,19 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "module": "es6",
+        "module": "commonjs",
         "moduleResolution": "node",
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "strictNullChecks": true,
-        "lib": ["es6", "dom"],
+        "lib": ["es2015", "dom"],
+        "target": "es5",
         "types": [
             "@edsilv/key-codes",
-            "three",
-            "webvr-api"
-        ]
+            "three"
+        ],
+        "outDir": "dist-commonjs"
     },
-    "files": [
-        "src/StringValue.ts",
-        "src/FileType.ts"
-    ],
     "include": [
         "src/**/*"
     ]

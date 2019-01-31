@@ -1,6 +1,0 @@
-newmtl material_0
-map_bump material0_normal.jpg
-norm material0_normal.jpg
-map_Kd material0_basecolor.jpg
-Pr 0
-Pm 0.86

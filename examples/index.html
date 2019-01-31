@@ -3,28 +3,28 @@
 <head>
     <title>virtex</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="css/virtex.css" />
+    <link rel="stylesheet" type="text/css" href="../dist-css/styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <script src="https://unpkg.com/core-js@0.4.1"></script>
-
-    <!--<script src="js/three.js"></script>-->
-    <script src="js/three.min.js"></script>
-    <script src="js/GLTFLoader.js"></script>
-    <script src="js/OBJLoader.js"></script>
-    <!-- <script src="js/draco_decoder.js"></script> -->
-    <script src="js/DRACOLoader.js"></script>
-    <!-- <script src="js/corto.js"></script>
-    <script src="js/CORTOLoader.js"></script> -->
-    <script src="js/MTLLoader.js"></script>
-    <script src="js/PLYLoader.js"></script>
-    <script src="js/virtex.js"></script>
-    <script src="js/stats.min.js"></script>
-    <script src="js/Detector.js"></script>
-    <script src="js/KeyCodes.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/libs/stats.min.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/loaders/DRACOLoader.js"></script>
+    <!-- <script src="https://unpkg.com/three@0.91.0/examples/js/loaders/GLTFLoader.js"></script> -->
+    <script src="/examples/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/loaders/MTLLoader.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/loaders/PLYLoader.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/Detector.js"></script>
+    <script src="https://unpkg.com/three@0.91.0/examples/js/vr/WebVR.js"></script>
+    <script src="https://unpkg.com/@edsilv/key-codes@0.0.9/dist/KeyCodes.js"></script>
+    <script src="/examples/draco_decoder.js"></script>
+    <script src="/examples/draco_decoder.wasm"></script>
+    <script src="/examples/draco_wasm_wrapper.js"></script>
+    <script src="../dist-umd/virtex.js"></script>
 
     <style>
         body {
@@ -70,69 +70,33 @@
         var viewport;
         
         var objects = {
-            bone: {
-                file: "models/threejs/hc941fm6529.json",
-                type: new Virtex.FileType("application/vnd.threejs+json")
-            },
-            bone2: {
-                file: "models/draco/hc941fm6529.drc",
-                type: new Virtex.FileType("application/draco")
-            },
-            bone3: {
-                file: "models/obj/hc941fm6529.obj",
-                type: new Virtex.FileType("text/plain")
-            },
-            bone4: {
-                file: "models/corto/hc941fm6529.crt",
-                type: new Virtex.FileType("application/corto")
-            },
-            bone5: {
-                file: "https://files.blokdust.io/manifests/stanford/vertebra/hc941fm6529.obj",
-                type: new Virtex.FileType("text/plain")
-            },
-            bone6: {
-                file: "models/obj/vertebra-compact.obj",
-                type: new Virtex.FileType("text/plain")
-            },
             harbour: {
-                file: "models/threejs/harbour.json",
-                type: new Virtex.FileType("application/vnd.threejs+json")
-            },
-            woodygltf: {
-                file: "https://edsilv.github.io/iiif-3d-manifests/collection/gltf/woody/_woody/assets/woody.gltf",
-                type: new Virtex.FileType("model/gltf+json")
+                file: "https://iiif-3d-manifests.netlify.com/collection/json/harbour/_harbour/assets/harbour.json",
+                type: virtex.FileType.THREEJS
             },
             pub: {
                 file: "https://edsilv.github.io/iiif-3d-manifests/collection/ply/pub/_pub/pub.ply",
-                type: new Virtex.FileType("application/ply")
+                type: virtex.FileType.PLY
             },
-            woodyobj: {
-                file: "https://sophiedixon.github.io/3d-portfolio/collection/woody/_woody/woody.obj",
-                type: new Virtex.FileType("text/plain")
+            fishermanobj: {
+                file: "https://sophiedixon.github.io/3d-portfolio/collection/woody/_woody/assets/woody.obj",
+                type: virtex.FileType.OBJ
             },
-            bowl: {
-                file: "https://nomad-project.co.uk/objects/collection/bowl/_bowl/bowl.gltf",
-                type: new Virtex.FileType("model/gltf+json")
-            },
-            headrest: {
-                file: "https://nomad-project.co.uk/objects/collection/headrest/_headrest/headrest.gltf",
-                type: new Virtex.FileType("model/gltf+json")
+            fishermangltf: {
+                file: "https://iiif-3d-manifests.netlify.com/collection/gltf/woody/_woody/assets/woody.gltf",
+                type: virtex.FileType.GLTF
             },
             gourd: {
                 file: "https://nomad-project.co.uk/objects/collection/gourd/_gourd/gourd.gltf",
-                type: new Virtex.FileType("model/gltf+json")
-            },
-            incenseburner: {
-                file: "https://nomad-project.co.uk/objects/collection/incense-burner/_incense-burner/incense-burner.gltf",
-                type: new Virtex.FileType("model/gltf+json")
+                type: virtex.FileType.GLTF
             },
             milkvessel: {
-                file: "https://nomadproject.netlify.com/collection/milk-vessel/_milk-vessel/milk-vessel.gltf",
-                type: new Virtex.FileType("model/gltf+json")
+                file: "https://nomad-project.co.uk/objects/collection/woven-milk-vessel/_woven-milk-vessel/woven-milk-vessel.gltf",
+                type: virtex.FileType.GLTF
             },
             bowldraco: {
                 file: "https://iiif-3d-manifests-fork.netlify.com/collection/gltfdraco/bowl/_bowl/assets/bowlDraco.gltf",
-                type: new Virtex.FileType("model/gltf+json")
+                type: virtex.FileType.GLTF
             }
         };
         
@@ -140,15 +104,15 @@
 
             var isAndroid = navigator.userAgent.toLowerCase().indexOf('android') > -1;
 
-            viewport = new Virtex.Viewport({
+            viewport = new virtex.Viewport({
                 target: document.querySelector('#viewer'),
                 data: {
                     antialias: !isAndroid,
-                    file: objects.bowldraco.file,
-                    type: objects.bowldraco.type, // defaults to obj
+                    file: objects.milkvessel.file,
+                    type: objects.milkvessel.type, // defaults to obj
                     fullscreenEnabled: true,
                     showStats: false,
-                    dracoDecoderPath: './js/'
+                    dracoDecoderPath: '/examples/js/'
                     //ambientLightColor: 0xd0d0d0,
                     //ambientLightIntensity: 1,
                     //directionalLight1Color: 0xff0000,
