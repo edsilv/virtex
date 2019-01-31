@@ -9,12 +9,11 @@ three.js object viewer.
 Clone the repo then run:
 
     npm install
-    gulp
-    gulp examples
+    npm start
 
 ## Examples
 
-- http://edsilv.github.io/virtex/examples/
+- https://virtex.netlify.com/examples/
 - [Universal Viewer 3D Extension](http://universalviewer.io/examples/#?c=0&m=0&s=0&cv=0&manifest=https%3A%2F%2Fedsilv.github.io%2Ftest-manifests%2Fpres3-3d.json)
  
 ## Guides
